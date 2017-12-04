@@ -109,6 +109,7 @@
 						<exclude>images.adoc</exclude>
 						<exclude>todo.adoc</exclude>
 						<exclude>LICENSE</exclude>
+						<exclude>**/Dockerfile</exclude>
 					</excludes>
 				</configuration>
 				<executions>
