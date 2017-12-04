@@ -1,0 +1,62 @@
+= Images
+
+== Beagles
+
+|===
+|File name | License | Source
+
+|beagle1.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/1282909
+
+|beagle2.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/1084433
+
+|beagle3.jpg
+|CC0 Public Domain
+|https://www.pexels.com/photo/animal-beagle-canine-close-up-460823/
+
+|beagle4.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/485637
+
+|beagle5.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/1080474
+
+|beagle6.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/990024
+
+|beagle7.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/828938
+
+|beagle8.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/1163998
+
+|===
+
+== Avatars
+|===
+|File name | License | Source
+
+|avatar1.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/19038
+
+|avatar2.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/485637
+
+|avatar3.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/10662
+
+|avatar4.jpg
+|CC0 Public Domain
+|https://pxhere.com/en/photo/701852
+
+|===

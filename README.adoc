@@ -1,0 +1,42 @@
+= Project Beagle
+
+Einfaches Tool zum Suchen von Dateien.
+
+== Architektur
+
+ * Spring (Boot) im Backend
+ * Angular JS 1 als Frontend
+ * RDBMS als konsistente Datenbasis
+ * Elasticsearch zur Indizierung der PDF-Dokumente (Profile)
+
+== Aktueller Stand
+
+Proof-of-Concept-Phase.
+
+== TODOs
+
+* Durchsuche Code nach "TODO" bzw. "TODO MVR".
+
+* link:todo.adoc[todo.adoc]
+
+== Build
+
+`mvn clean install`
+
+`mvn test` (es gibt noch keine)
+
+== Ausführen
+
+ * `java -jar target/beagle-version.jar`
+
+ * Elastic Search (Cluster).
+ Kann konfiguriert werden, siehe application.properties.
+ Standard ist `http://localhost:9200`
+
+== Lizenz
+
+Copyright (c) 2017 Markus von Rüden
+
+GPL v3. Siehe link:LICENSE[LICENSE].
+
+Die verwendeten Bilder, benutzen ggf. eine andere Lizenz: link:images.adoc[images.adoc]

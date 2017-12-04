@@ -1,0 +1,37 @@
+<div ng-include="'partials/navbar.html'"></div>
+<div ng-include="'partials/sidebar.html'"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2">
+            <h2>Imports</h2>
+            <hr/>
+            <div ng-if="imports.length == 0">No data available</div>
+
+            <table class="table" ng-if="imports.length > 0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">File Name</th>
+                        <th scope="col">Checksum</th>
+                        <th scope="col">Page Count</th>
+                        <th scope="col">State</th>
+                        <th scope="col">Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="import in imports">
+                        <th scope="row">{{import.id}}</th>
+                        <td>{{import.filename}}</td>
+                        <td>{{import.checksum}}</td>
+                        <td>{{import.pageCount}}</td>
+                        <td>{{import.state}}</td>
+                        <td>{{import.error}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+
+<div ng-include="'partials/footer.html'"></div>

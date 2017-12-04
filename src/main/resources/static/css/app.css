@@ -1,0 +1,118 @@
+body {
+    padding-top: 70px;
+    padding-bottom: 20px;
+}
+
+/**
+ * Search Result
+ */
+.result-item {
+    width: 50%;
+    float: left;
+    padding: 10px;
+}
+
+.result-item:hover {
+    cursor: pointer;
+}
+
+/*
+ * Main Navigation
+ */
+.beagle-header .nav-link .indicator {
+    position: relative;
+    top: -27px;
+    left: 12px;
+    font-size: 10px;
+}
+
+.beagle-header .img-avatar {
+    height: 35px;
+    width: 35px;
+    border-radius: 50em;
+}
+
+.beagle-header {
+    height: 55px;
+}
+
+/*
+ * Sidebar
+ */
+nav.sidebar {
+    position: fixed;
+    top: 55px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    border-right: 1px solid #eee;
+}
+
+nav.sidebar .nav-item {
+    width: 100%;
+}
+
+
+/**
+ * Login
+ */
+.login-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /*overflow: auto;*/
+    background-image: url('/img/beagle3.jpg');
+    background-size: cover;
+}
+
+.login-page .login-form {
+    margin: 0 auto;
+    padding: 15px;
+    max-width: 330px;
+}
+
+
+/**
+ * Footer
+ */
+.footer {
+    font-size: 0.8rem;
+}
+
+/**
+ * Modals
+ */
+.fade.in {
+    opacity: 1;
+}
+
+.modal.in .modal-dialog {
+    -webkit-transform: translate(0, 0);
+    -o-transform: translate(0, 0);
+    transform: translate(0, 0);
+}
+
+.modal-backdrop.in {
+    filter: alpha(opacity=50);
+    opacity: .5;
+}
+.modal-dialog {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/**
+ * Forms
+ */
+.form-control.ng-invalid {
+    border-color: #dc3545
+}
+
+.form-control.ng-valid {
+    border-color: #28a745;
+}

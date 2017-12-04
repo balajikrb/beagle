@@ -1,0 +1,73 @@
+<div id="new-user-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="modal-title">Add New User</h5>
+                <button type="button" ng-click="$close()" class="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form name="userForm" ng-submit="submitForm(userForm.$valid)" novalidate>
+                <div class="modal-body" id="modal-body">
+                        <div class="form-group">
+                            <label for="name" class="form-control-label">Name</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user fa" aria-hidden="true"></i></span>
+                                <input type="text" class="form-control"
+                                       name="name" id="name"
+                                       placeholder="Enter Name"
+                                       ng-model="user.name"
+                                       required />
+                            </div>
+                            <p ng-show="userForm.name.$invalid && !userForm.name.$pristine" class="text-form text-danger">Name is required</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-control-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-envelope fa" aria-hidden="true"></i></span>
+                                <input type="email" class="form-control"
+                                       name="email" id="email"
+                                       placeholder="Enter Email"
+                                       ng-model="user.email"
+                                        required/>
+                            </div>
+                            <p ng-show="userForm.email.$invalid && !userForm.email.$pristine" class="text-form text-danger">Enter a valid email</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="cols-sm-2 form-control-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-lock fa-lg" aria-hidden="true"></i></span>
+                                <input type="password" class="form-control"
+                                       name="password" id="password"
+                                       placeholder="Enter Password"
+                                       ng-model="user.password"
+                                       ng-minlength="6"
+                                       required />
+                            </div>
+                            <p ng-show="userForm.password.$error.required && !userForm.password.$pristine" class="text-form">Password is required</p>
+                            <p ng-show="userForm.password.$error.minLength" class="text-form text-danger">Password is too short</p>
+                            <p ng-show="passwordsDontMatch" class="text-form text-danger">Passwords do not match</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm" class="cols-sm-2 form-control-label">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-lock fa-lg" aria-hidden="true"></i></span>
+                                <input type="password" class="form-control"
+                                       name="confirm" id="confirm"
+                                       ng-model="user.confirm"
+                                       placeholder="Confirm Password"/>
+                            </div>
+                            <p ng-show="userForm.confirm.$error.required && !userForm.confirm.$pristine" class="text-form text-danger">Please confirm the password</p>
+                            <p ng-show="passwordsDontMatch" class="text-form text-danger">Passwords do not match</p>
+
+                        </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" ng-click="$close()">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

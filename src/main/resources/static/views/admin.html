@@ -1,0 +1,68 @@
+<div ng-include="'partials/navbar.html'"></div>
+<div ng-include="'partials/sidebar.html'"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2">
+            <h2>Admin</h2>
+            <hr/>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa fa-align-justify"></i> Users
+                </div>
+                <div class="card-body">
+                    <div ng-if="users.length == 0">No users defined</div>
+                    <div ng-if="users.length > 0">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Date registered</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="user in users">
+                                <td>{{user.name}}</td>
+                                <td><a href="mailto:{{user.email}}">{{user.email}}</a></td>
+                                <td>{{user.registerDate | date}}</td>
+                                <td>{{user.role}}</td> <!-- user, admin -->
+                                <td>
+                                    <span class="badge badge-success">{{user.state}}</span> <!-- active, pending, inactive, banned -->
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary" title="Edit user details"><i class="fa fa-edit"/></button>
+                                    <button type="button" class="btn btn-sm btn-warning" title="Disable user"><i class="fa fa-lock"/></button>
+                                    <button type="button" class="btn btn-sm btn-danger" title="Delete User"><i class="fa fa-remove"/></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <!-- TODO MVR implement -->
+                        <!--<ul class="pagination">-->
+                            <!--<li class="page-item"><a class="page-link" href="#">Prev</a></li>-->
+                            <!--<li class="page-item active">-->
+                                <!--<a class="page-link" href="#">1</a>-->
+                            <!--</li>-->
+                            <!--<li class="page-item"><a class="page-link" href="#">2</a></li>-->
+                            <!--<li class="page-item"><a class="page-link" href="#">3</a></li>-->
+                            <!--<li class="page-item"><a class="page-link" href="#">4</a></li>-->
+                            <!--<li class="page-item"><a class="page-link" href="#">Next</a></li>-->
+                        <!--</ul>-->
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button ng-click="openNewUserModal()" type="button" class="btn btn-primary"><i class="fa fa-plus"></i> New User</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div ng-include="'partials/footer.html'"></div>
+
+

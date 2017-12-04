@@ -1,0 +1,9 @@
+* try-resources überall einführen
+* Error-Dateien nicht berücksichtigen
+* Import so umbauen, dass jede Datei eine abgeschlossene Transaktion beinhaltet, sonst dauert es zu lange, bis etwas passiert
+* GGf. Erzeugung des Thumbnails nachgelagert ausführen, da dies z.Z. am längsten dauert.
+* Checksum-Kalkulation des selben dokuments nach splitter.split() nicht identisch.
+* Etwas mehr loggen, damit man weiß, was eigentlich gerade abgeht
+* es gibt einen memory-leak, da memory immer größer wird über die Zeit (ggf gelöst, wenn alles try-resource-blocks sind)
+* jquery + bootstrap at the moment. try to figure out if there is a pure angular variant instead
+* enum mappings sollte überall ausgeschriebener Enum-wert sein, anstatt oridnal

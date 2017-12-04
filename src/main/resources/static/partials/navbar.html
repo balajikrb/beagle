@@ -1,0 +1,56 @@
+<header ng-controller="NavbarController as vm" class="navbar navbar-expand-md fixed-top navbar-dark bg-dark beagle-header" role="navigation">
+    <button class="navbar-toggler navbar-toggler-right" type="button"
+            data-toggle="collapse" data-target="#navbarTop"
+            aria-expanded="false" aria-controls="navbarTop" aria-label="Toggle Navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand col-sm-3 col-md-2" href="#!/home">Beagle <span class="badge badge-info">UI</span></a>
+    <div id="navbarTop" class="navbar-collapse collapse">
+        <form class="form-inline my-2 my-lg-0 mr-2" role="form">
+            <div class="input-group input-group-sm">
+                <input class="form-control" type="search" placeholder="Search for..." aria-label="Search">
+                <span class="input-group-btn">
+                    <button type="submit" ng-click="search()" class="btn btn-info" role="button"><i class="fa fa-search"></i></button>
+                </span>
+            </div>
+        </form>
+        <form class="form-inline ml-auto mr-auto">
+            <button type="button" ng-click="triggerDetection()" class="btn btn-primary btn-sm" title="Import new files">
+                <i class="fa fa-refresh"/>
+            </button>
+        </form>
+
+        <ul class="navbar-nav ml-auto mr-3">
+            <li class="nav-item">
+                <a class="nav-link" href="#!/home">
+                    <i class="fa fa-tasks"></i>
+                    <span class="indicator text-primary d-none d-lg-block">
+                        <i class="fa fa-fw fa-circle"></i>
+                    </span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#!/home">
+                    <i class="fa fa-bell"></i>
+                    <span class="indicator text-warning d-none d-lg-block">
+                        <i class="fa fa-fw fa-circle"></i>
+                    </span>
+                </a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav d-md-down-none">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <img src="{{profile.image}}" class="img-avatar" alt="{{profile.email}}">
+                    <span class="d-md-down-none">{{profile.name}}</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#!/profile"><i class="fa fa-user"></i> Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" ng-click="logout()"><i class="fa fa-lock"></i> Logout</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</header>

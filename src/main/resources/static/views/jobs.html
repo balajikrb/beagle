@@ -1,0 +1,37 @@
+<div ng-include="'partials/navbar.html'"></div>
+<div ng-include="'partials/sidebar.html'"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2">
+            <h2>Jobs</h2>
+            <hr/>
+            <div ng-if="jobs.length == 0">No data available</div>
+
+            <table class="table" ng-if="jobs.length > 0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">State</th>
+                        <th scope="col">Start Time</th>
+                        <th scope="col">End Time</th>
+                        <th scope="col">Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="job in jobs">
+                        <th scope="row">{{job.id}}</th>
+                        <td>{{job.description}}</td>
+                        <td>{{job.state}}</td>
+                        <td>{{job.startTime | date: 'medium'}}</td>
+                        <td>{{job.completeTime | date: 'medium'}}</td>
+                        <td>{{!job.progress.indeterminate ? job.progress.progress + "/" + job.progress.totalProgress : "-"}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+
+<div ng-include="'partials/footer.html'"></div>
