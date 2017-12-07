@@ -16,20 +16,12 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.repository;
+package de.keybird.beagle.events;
 
-import java.util.List;
+import de.keybird.beagle.jobs.execution.AbstractJobExecution;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
-import de.keybird.beagle.api.ProfileState;
-import de.keybird.beagle.api.Profile;
-
-@Repository
-public interface ProfileRepository extends CrudRepository<Profile, Long> {
-
-    List<Profile> findByState(ProfileState state);
-
-    Profile findByChecksum(String checksum);
+public class JobExecutionStartedEvent extends JobExecutionEvent {
+    public JobExecutionStartedEvent(AbstractJobExecution job) {
+        super(job);
+    }
 }

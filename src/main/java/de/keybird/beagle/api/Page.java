@@ -19,6 +19,8 @@
 package de.keybird.beagle.api;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,8 +32,8 @@ import javax.persistence.Table;
 import org.springframework.context.annotation.Lazy;
 
 @Entity
-@Table(name="profile")
-public class Profile {
+@Table(name="pages")
+public class Page {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -39,7 +41,8 @@ public class Profile {
 
     private String name;
 
-    private ProfileState state;
+    @Enumerated(EnumType.STRING)
+    private PageState state;
 
     private String checksum;
 
@@ -54,21 +57,21 @@ public class Profile {
     private byte[] thumbnail;
 
     @ManyToOne
-    @JoinColumn(name="import_id")
-    private Import theImport;
+    @JoinColumn(name="document_id")
+    private Document theDocument;
 
-    public Profile() {
+    public Page() {
 
     }
 
-    public Profile(Profile file) {
-        setChecksum(file.getChecksum());
-        setErrorMessage(file.getErrorMessage());
-        setId(file.getId());
-        setName(file.getName());
-        setState(file.getState());
-        setPayload(file.getPayload());
-        setThumbnail(file.getThumbnail());
+    public Page(Page page) {
+        setChecksum(page.getChecksum());
+        setErrorMessage(page.getErrorMessage());
+        setId(page.getId());
+        setName(page.getName());
+        setState(page.getState());
+        setPayload(page.getPayload());
+        setThumbnail(page.getThumbnail());
     }
 
     public Long getId() {
@@ -87,11 +90,11 @@ public class Profile {
         this.name = name;
     }
 
-    public ProfileState getState() {
+    public PageState getState() {
         return state;
     }
 
-    public void setState(ProfileState state) {
+    public void setState(PageState state) {
         this.state = state;
     }
 
@@ -127,11 +130,11 @@ public class Profile {
         return thumbnail;
     }
 
-    public void setImport(Import eachImport) {
-        this.theImport = eachImport;
+    public void setImport(Document eachDocument) {
+        this.theDocument = eachDocument;
     }
 
-    public Import getImport() {
-        return theImport;
+    public Document getImport() {
+        return theDocument;
     }
 }

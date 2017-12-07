@@ -19,6 +19,7 @@
 package de.keybird.beagle.jobs;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -32,6 +33,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.EventBus;
 
+import de.keybird.beagle.repository.JobRepository;
+
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class JobContext {
@@ -40,6 +43,9 @@ public class JobContext {
 
     @Autowired
     private EventBus eventBus;
+
+    @Autowired
+    private JobRepository jobRepository;
 
     private Path workingPath;
     private Path inboxPath;
@@ -50,7 +56,10 @@ public class JobContext {
         workingDirectory = workingDirectory.replaceAll("~", System.getProperty("user.home"));
         this.workingPath = Paths.get(workingDirectory);
         this.inboxPath = workingPath.resolve("1_inbox");
-        this.archivePath = workingPath.resolve("2_archive");
+        this.archivePath = workingPath.resolve("2_archive"); // TODO MVR rip out
+
+        Files.createDirectories(getInboxPath());
+        Files.createDirectories(getArchivePath()); // TODO MVR rip out?
     }
 
     public Path getInboxPath() {
@@ -63,5 +72,9 @@ public class JobContext {
 
     public EventBus getEventBus() {
         return eventBus;
+    }
+
+    public JobRepository getJobRepository() {
+        return jobRepository;
     }
 }

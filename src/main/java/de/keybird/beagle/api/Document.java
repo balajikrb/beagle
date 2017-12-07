@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,8 +33,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name="import")
-public class Import {
+@Table(name="documents")
+public class Document {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,7 +48,8 @@ public class Import {
 
     private int pageCount;
 
-    private ImportState state = ImportState.New;
+    @Enumerated(EnumType.STRING)
+    private DocumentState state = DocumentState.New;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date importDate;
@@ -54,19 +57,19 @@ public class Import {
     @Lob
     private byte[] payload;
 
-    public Import() {
+    public Document() {
 
     }
 
-    public Import(Import anImport) {
-        this.id = anImport.id;
-        this.filename = anImport.filename;
-        this.checksum = anImport.checksum;
-        this.error = anImport.error;
-        this.pageCount = anImport.pageCount;
-        this.importDate = anImport.importDate;
-        this.state = anImport.state;
-        this.payload = anImport.payload != null ? Arrays.copyOf(anImport.payload, anImport.payload.length) : null;
+    public Document(Document anDocument) {
+        this.id = anDocument.id;
+        this.filename = anDocument.filename;
+        this.checksum = anDocument.checksum;
+        this.error = anDocument.error;
+        this.pageCount = anDocument.pageCount;
+        this.importDate = anDocument.importDate;
+        this.state = anDocument.state;
+        this.payload = anDocument.payload != null ? Arrays.copyOf(anDocument.payload, anDocument.payload.length) : null;
     }
 
 
@@ -130,11 +133,11 @@ public class Import {
         this.importDate = importDate;
     }
 
-    public ImportState getState() {
+    public DocumentState getState() {
         return state;
     }
 
-    public void setState(ImportState state) {
+    public void setState(DocumentState state) {
         this.state = state;
     }
 }

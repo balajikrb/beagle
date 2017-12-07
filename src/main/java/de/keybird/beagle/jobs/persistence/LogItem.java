@@ -16,12 +16,24 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api;
+package de.keybird.beagle.jobs.persistence;
 
-public enum ImportState {
-    New,
-    Rejected,
-    Error,
-    Importing,
-    Imported
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("log")
+public class LogItem extends JobItem {
+
+    @Column
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

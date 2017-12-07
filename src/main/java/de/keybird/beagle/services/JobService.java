@@ -27,11 +27,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.keybird.beagle.events.JobEvent;
+import de.keybird.beagle.events.JobExecutionEvent;
+import de.keybird.beagle.jobs.JobExecutionManager;
 import de.keybird.beagle.jobs.JobInfo;
-import de.keybird.beagle.jobs.JobManager;
 import de.keybird.beagle.jobs.JobState;
-import de.keybird.beagle.rest.JobInfoDTO;
+import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.rest.JobRestController;
 
 @Service
 public class JobService {
@@ -40,25 +41,25 @@ public class JobService {
     private SimpMessagingTemplate messageTemplate;
 
     @Autowired
-    private JobManager jobManager;
+    private JobExecutionManager jobManager;
 
     @Subscribe
     // TODO MVR this is okay, but one thing is missing -> we have to fetch jobs once.
     // Otherwise, we only see jobs when they are created AFTER we have connected.
     // We may miss ones already kicked off by another user
-    public void onJobChange(JobEvent event) throws Exception {
-        final List<JobInfo> jobs = jobManager.getJobs();
+    public void onJobExecutionChange(JobExecutionEvent event) {
+        final List<AbstractJobExecution> jobs = jobManager.getExecutions();
 
         // Return all jobs except success ones.
         // They are only returned, if they finished within the last n seconds
         final List<JobInfo> jobData = jobs.stream()
-                .filter(job -> {
-                    if (job.getState() == JobState.Success) {
-                        long completedSinceMs = System.currentTimeMillis() - job.getCompleteTime().getTime();
+                .filter(execution -> {
+                    if (execution.getJobEntity().getStatus().getState() == JobState.Success) {
+                        long completedSinceMs = System.currentTimeMillis() - execution.getJobEntity().getCompleteTime().getTime();
                         return completedSinceMs <= 8 * 1000;
                     }
                     return true;
-                }).map(job -> new JobInfoDTO(job)).collect(Collectors.toList());
+                }).map(execution -> JobRestController.createFrom(execution)).collect(Collectors.toList());
         messageTemplate.convertAndSend("/topic/jobs", jobData);
     }
 }

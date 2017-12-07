@@ -16,34 +16,33 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.events;
+package de.keybird.beagle.jobs.persistence.status;
 
-import java.util.Objects;
+import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
-import de.keybird.beagle.jobs.Job;
-import de.keybird.beagle.jobs.JobResult;
+import de.keybird.beagle.api.PageState;
 
-public class JobFinishedEvent extends JobEvent {
-    private final JobResult jobResult;
+@Embeddable
+public class PageStatus {
+    @Enumerated(EnumType.STRING)
+    private PageState state;
+    private String errorMessage;
 
-    public JobFinishedEvent(Job job, JobResult jobResult) {
-        super(job);
-        this.jobResult = Objects.requireNonNull(jobResult);
+    public PageState getState() {
+        return state;
     }
 
-    public boolean isSuccess() {
-        return jobResult.getException() == null;
+    public void setState(PageState state) {
+        this.state = state;
     }
 
-    public boolean isFailed() {
-        return !isSuccess();
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public Throwable getException() {
-        return jobResult.getException();
-    }
-
-    public <T> T getResult() {
-        return (T) jobResult.getResult();
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

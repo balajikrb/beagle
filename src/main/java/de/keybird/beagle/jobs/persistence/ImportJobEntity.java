@@ -16,23 +16,36 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.jobs.persistence;
 
-import java.util.Date;
+import java.util.Objects;
 
-// TODO MVR delete
-public interface JobInfo {
-    long getId();
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
-    String getDescription();
+import de.keybird.beagle.api.Document;
 
-    Date getStartTime();
+@Entity
+@DiscriminatorValue("import")
+public class ImportJobEntity extends JobEntity {
 
-    Date getCompleteTime();
+    @ManyToOne
+    private Document document;
 
-    JobState getState();
+    public ImportJobEntity() {
 
-    String getErrorMessage();
+    }
 
-    Progress getProgress();
+    public ImportJobEntity(Document document) {
+        this.document = Objects.requireNonNull(document);
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public void setDocument(Document document) {
+        this.document = document;
+    }
 }

@@ -16,20 +16,13 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.events;
+package de.keybird.beagle.api;
 
-import java.util.Objects;
-
-import de.keybird.beagle.jobs.Job;
-
-public class JobEvent {
-    private final Job source;
-
-    public JobEvent(Job source) {
-        this.source = Objects.requireNonNull(source);
-    }
-
-    public Job getSource() {
-        return source;
-    }
+public enum DocumentState {
+    New,
+    Accepted,
+    Rejected,
+    Error,
+    Importing,
+    Imported
 }

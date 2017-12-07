@@ -16,23 +16,13 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.events;
 
-import java.util.Date;
+import de.keybird.beagle.jobs.execution.AbstractJobExecution;
 
-// TODO MVR delete
-public interface JobInfo {
-    long getId();
+public class JobExecutionSubmittedEvent extends JobExecutionEvent {
 
-    String getDescription();
-
-    Date getStartTime();
-
-    Date getCompleteTime();
-
-    JobState getState();
-
-    String getErrorMessage();
-
-    Progress getProgress();
+    public JobExecutionSubmittedEvent(AbstractJobExecution job) {
+        super(job);
+    }
 }

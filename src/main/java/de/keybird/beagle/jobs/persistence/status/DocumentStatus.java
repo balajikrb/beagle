@@ -16,23 +16,34 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.jobs.persistence.status;
 
-import java.util.Date;
+import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
-// TODO MVR delete
-public interface JobInfo {
-    long getId();
+import de.keybird.beagle.api.DocumentState;
 
-    String getDescription();
+@Embeddable
+public class DocumentStatus {
 
-    Date getStartTime();
+    @Enumerated(EnumType.STRING)
+    private DocumentState state;
+    private String errorMessage;
 
-    Date getCompleteTime();
+    public DocumentState getState() {
+        return state;
+    }
 
-    JobState getState();
+    public void setState(DocumentState state) {
+        this.state = state;
+    }
 
-    String getErrorMessage();
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-    Progress getProgress();
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }

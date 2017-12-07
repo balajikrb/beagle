@@ -16,23 +16,13 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.repository;
 
-import java.util.Date;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-// TODO MVR delete
-public interface JobInfo {
-    long getId();
+import de.keybird.beagle.jobs.persistence.JobEntity;
 
-    String getDescription();
-
-    Date getStartTime();
-
-    Date getCompleteTime();
-
-    JobState getState();
-
-    String getErrorMessage();
-
-    Progress getProgress();
+@Repository
+public interface JobRepository extends CrudRepository<JobEntity, Long> {
 }

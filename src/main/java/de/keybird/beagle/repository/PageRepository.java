@@ -16,13 +16,20 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.events;
+package de.keybird.beagle.repository;
 
-import de.keybird.beagle.jobs.Job;
+import java.util.List;
 
-public class JobSubmittedEvent extends JobEvent {
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-    public JobSubmittedEvent(Job job) {
-        super(job);
-    }
+import de.keybird.beagle.api.Page;
+import de.keybird.beagle.api.PageState;
+
+@Repository
+public interface PageRepository extends CrudRepository<Page, Long> {
+
+    List<Page> findByState(PageState state);
+
+    Page findByChecksum(String checksum);
 }

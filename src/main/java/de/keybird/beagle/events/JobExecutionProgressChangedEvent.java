@@ -18,19 +18,16 @@
 
 package de.keybird.beagle.events;
 
-import java.util.Objects;
+import de.keybird.beagle.jobs.Progress;
+import de.keybird.beagle.jobs.execution.AbstractJobExecution;
 
-import de.keybird.beagle.jobs.Job;
-import de.keybird.beagle.jobs.JobState;
+public class JobExecutionProgressChangedEvent extends JobExecutionEvent {
+    private final Progress oldProgress;
+    private final Progress newProgress;
 
-public class JobStateChangedEvent extends JobEvent {
-
-    private final JobState oldState;
-    private final JobState newState;
-
-    public <T> JobStateChangedEvent(Job<T> job, JobState oldState, JobState state) {
+    public JobExecutionProgressChangedEvent(AbstractJobExecution job, Progress oldProgress, Progress newProgress) {
         super(job);
-        this.oldState = Objects.requireNonNull(oldState);
-        this.newState = Objects.requireNonNull(state);
+        this.oldProgress = oldProgress;
+        this.newProgress = newProgress;
     }
 }

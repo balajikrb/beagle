@@ -16,15 +16,12 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.jobs.execution;
 
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +32,10 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonObject;
 
-import de.keybird.beagle.api.Profile;
-import de.keybird.beagle.api.ProfileState;
-import de.keybird.beagle.repository.ProfileRepository;
+import de.keybird.beagle.api.Page;
+import de.keybird.beagle.api.PageState;
+import de.keybird.beagle.jobs.persistence.IndexJobEntity;
+import de.keybird.beagle.repository.PageRepository;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.DocumentResult;
 import io.searchbox.core.Index;
@@ -45,55 +43,60 @@ import io.searchbox.core.Index;
 // Syncs database content with elastic
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class IndexJob extends AbstractJob<Void> {
+public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IndexJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IndexJobExecution.class);
 
     @Autowired
     private JestClient client;
 
     @Autowired
-    private ProfileRepository profileRepository;
+    private PageRepository pageRepository;
 
-    @PostConstruct
-    public void init() {
-        setDescription("Indexing new files");
+    @Override
+    public String getDescription() {
+        return "Indexing pages";
     }
 
     @Override
-    // TODO MVR at the moment nothing is indexed
-    protected Void executeInternal() throws ExecutionException {
-        final List<Profile> importedProfiles = profileRepository.findByState(ProfileState.Imported);
-        final AtomicInteger i = new AtomicInteger(0);
-        int totalSize = importedProfiles.size();
-        updateProgress(i.get(), totalSize);
+    protected Void executeInternal() {
+        final List<Page> importedPages = pageRepository.findByState(PageState.Imported);
+        final AtomicInteger index = new AtomicInteger(0);
+        int totalSize = importedPages.size();
+        updateProgress(index.get(), totalSize);
 
-        importedProfiles.forEach(file -> {
+        importedPages.forEach(page -> {
+            logItem("Indexing page '{}'", page.getName());
+
             // Sync with elastic
-            final byte[] base64bytes = Base64.getEncoder().encode(file.getPayload());
+            final byte[] base64bytes = Base64.getEncoder().encode(page.getPayload());
             final JsonObject json = new JsonObject();
             json.addProperty("data", new String(base64bytes));
-            json.addProperty("id", file.getId()); // we add the id to ensure it is referencable
+            json.addProperty("id", page.getId()); // we add the id to ensure it is referencable
             try {
-                Index action = new Index.Builder(json).index("documents").type("profiles").setParameter("pipeline", "attachment").build();
-                DocumentResult result = client.execute(action);
+                final Index action = new Index.Builder(json)
+                        .index("documents")
+                        .type("pages")
+                        .setParameter("pipeline", "attachment")
+                        .build();
+                final DocumentResult result = client.execute(action);
                 if (!result.isSucceeded()) {
-                    LOG.error("Could not index file {}. Reason: ", file.getName(), result.getErrorMessage());
-                    file.setErrorMessage(result.getErrorMessage());
+                    LOG.error("Could not index file {}. Reason: ", page.getName(), result.getErrorMessage());
+                    logPage(page, PageState.Error, result.getErrorMessage());
                     return;
                 }
             } catch (IOException e) {
-                LOG.error("Could not index file {}. Reason: ", file.getName(), e.getMessage());
-                file.setErrorMessage(e.getMessage());
+                LOG.error("Could not index file {}. Reason: ", page.getName(), e.getMessage());
+                logPage(page, PageState.Error, e.getMessage());
                 return;
             }
 
             // Mark as indexed
-            file.setState(ProfileState.Indexed);
-            updateProgress(i.incrementAndGet(), totalSize);
+            logPage(page, PageState.Indexed);
+            updateProgress(index.incrementAndGet(), totalSize);
         });
 
-        profileRepository.save(importedProfiles);
+        pageRepository.save(importedPages);
         updateProgress(totalSize, totalSize);
         return null;
     }

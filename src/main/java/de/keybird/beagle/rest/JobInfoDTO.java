@@ -26,7 +26,7 @@ import de.keybird.beagle.jobs.Progress;
 
 public class JobInfoDTO implements JobInfo {
 
-    private int id;
+    private long id;
     private String description;
     private Date startTime;
     private Date completeTime;
@@ -49,11 +49,11 @@ public class JobInfoDTO implements JobInfo {
         this.progress = info.getProgress() == null ? null : new Progress(info.getProgress());
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

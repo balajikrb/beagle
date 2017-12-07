@@ -16,18 +16,12 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.events;
+package de.keybird.beagle.jobs.persistence;
 
-import de.keybird.beagle.jobs.Job;
-import de.keybird.beagle.jobs.Progress;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
-public class JobProgressChangedEvent extends JobEvent {
-    private final Progress oldProgress;
-    private final Progress newProgress;
-
-    public JobProgressChangedEvent(Job job, Progress oldProgress, Progress newProgress) {
-        super(job);
-        this.oldProgress = oldProgress;
-        this.newProgress = newProgress;
-    }
+@Entity
+@DiscriminatorValue("sync")
+public class SyncJobEntity extends JobEntity {
 }

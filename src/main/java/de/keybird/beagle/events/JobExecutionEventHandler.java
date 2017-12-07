@@ -26,53 +26,52 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.keybird.beagle.api.ImportState;
-import de.keybird.beagle.jobs.DetectJob;
-import de.keybird.beagle.jobs.ImportJob;
-import de.keybird.beagle.jobs.IndexJob;
-import de.keybird.beagle.jobs.JobFactory;
-import de.keybird.beagle.jobs.JobManager;
-import de.keybird.beagle.jobs.JobState;
-import de.keybird.beagle.repository.ImportRepository;
+import de.keybird.beagle.api.DocumentState;
+import de.keybird.beagle.jobs.JobExecutionFactory;
+import de.keybird.beagle.jobs.JobExecutionManager;
+import de.keybird.beagle.jobs.execution.DetectJobExecution;
+import de.keybird.beagle.jobs.execution.ImportJobExecution;
+import de.keybird.beagle.jobs.execution.IndexJobExecution;
+import de.keybird.beagle.repository.DocumentRepository;
 
 @Component
 @Scope("singleton")
-public class JobEventHandler {
+public class JobExecutionEventHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JobEventHandler.class);
-
-    @Autowired
-    private JobFactory jobFactory;
+    private static final Logger LOG = LoggerFactory.getLogger(JobExecutionEventHandler.class);
 
     @Autowired
-    private JobManager jobManager;
+    private JobExecutionFactory jobFactory;
 
     @Autowired
-    private ImportRepository importRepository;
+    private JobExecutionManager jobManager;
+
+    @Autowired
+    private DocumentRepository documentRepository;
 
     @Subscribe
-    public void onJobStarted(JobStartedEvent event) {
+    public void onJobStarted(JobExecutionStartedEvent event) {
         LOG.info("Job of type {} started", event.getSource().getClass().getSimpleName());
     }
 
     @Subscribe
-    public void onJobFinished(JobFinishedEvent event) {
+    public void onJobFinished(JobExecutionFinishedEvent event) {
         LOG.info("Execution of {} completed {}", event.getSource().getClass().getSimpleName(), event.isFailed() ? "with error" : "successful");
         if (event.isFailed()) {
             LOG.error("Reason: {}", event.getException().getMessage(), event.getException());
         }
         if (event.isSuccess()) {
             // Kick of import of documents
-            if (event.getSource() instanceof DetectJob) {
+            if (event.getSource() instanceof DetectJobExecution) {
                 // TODO MVR use service for this?
-                importRepository
-                        .findByState(ImportState.New)
+                documentRepository
+                        .findByState(DocumentState.New)
                         .forEach(theImport -> jobManager.submit(jobFactory.createImportJob(theImport)));
             }
             // After import kick of indexing, when no import job is running anymore
-            if (event.getSource() instanceof ImportJob) {
-                boolean noImportJobsRunningAnymore = jobManager.getJobs(ImportJob.class, JobState.Pending, JobState.Initializing, JobState.Running).isEmpty();
-                if (noImportJobsRunningAnymore && jobManager.getJobs(IndexJob.class).isEmpty()) {
+            if (event.getSource() instanceof ImportJobExecution) {
+                boolean noImportJobsRunningAnymore = jobManager.getExecutions(ImportJobExecution.class).isEmpty();
+                if (noImportJobsRunningAnymore && jobManager.getExecutions(IndexJobExecution.class).isEmpty()) {
                     jobManager.submit(jobFactory.createIndexJob());
                 }
             }
@@ -80,7 +79,7 @@ public class JobEventHandler {
     }
 
     @Subscribe
-    public void onJobSubmitted(JobSubmittedEvent event) {
+    public void onJobSubmitted(JobExecutionSubmittedEvent event) {
         LOG.info("Job of type {} submitted", event.getSource().getClass().getSimpleName());
     }
 

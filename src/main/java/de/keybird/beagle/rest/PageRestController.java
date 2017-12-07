@@ -38,32 +38,32 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import de.keybird.beagle.api.ProfileState;
-import de.keybird.beagle.api.Profile;
-import de.keybird.beagle.repository.ProfileRepository;
+import de.keybird.beagle.api.Page;
+import de.keybird.beagle.api.PageState;
+import de.keybird.beagle.repository.PageRepository;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
 
 @RestController
-@RequestMapping("/profiles")
-public class ProfileRestController {
+@RequestMapping("/pages")
+public class PageRestController {
 
     @Autowired
-    private ProfileRepository profileRepository;
+    private PageRepository pageRepository;
 
     @Autowired
     private JestClient jestClient;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Profile>> listFiles() {
-        Iterable<Profile> files = profileRepository.findAll();
+    public ResponseEntity<List<Page>> listFiles() {
+        Iterable<Page> files = pageRepository.findAll();
         if (!files.iterator().hasNext()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
         files = StreamSupport.stream(files.spliterator(), false)
                 .map(f -> {
-                    Profile file = new Profile(f);
+                    Page file = new Page(f);
                     file.setPayload(null);
                     file.setThumbnail(null);
                     return file;
@@ -74,8 +74,8 @@ public class ProfileRestController {
 
     @RequestMapping(value="count", method=RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity count() {
-        final List<Profile> byState = profileRepository.findByState(ProfileState.Indexed);
-        byState.addAll(profileRepository.findByState(ProfileState.Synced));
+        final List<Page> byState = pageRepository.findByState(PageState.Indexed);
+        byState.addAll(pageRepository.findByState(PageState.Synced));
         return new ResponseEntity(byState.size(), HttpStatus.OK);
     }
 
@@ -96,11 +96,11 @@ public class ProfileRestController {
         // Build search
         final Search search = new Search.Builder(rootObject.toString())
                 .addIndex("documents")
-                .addType("profiles")
+                .addType("pages")
                 .addSourceExcludePattern("data")
                 .build();
         final SearchResult result = jestClient.execute(search);
-        final Set<Profile> files = new HashSet<>();
+        final Set<Page> files = new HashSet<>();
         if (result.isSucceeded()) {
             final JsonArray hits = result.getJsonObject()
                     .get("hits").getAsJsonObject()
@@ -111,7 +111,7 @@ public class ProfileRestController {
                         .get("id");
                 if (jsonElement != null) {
                     final long internalId = jsonElement.getAsLong();
-                    final Profile file = profileRepository.findOne(internalId);
+                    final Page file = pageRepository.findOne(internalId);
                     if (file != null) {
                         files.add(file);
                     }

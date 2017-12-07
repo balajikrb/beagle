@@ -16,9 +16,20 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.events;
 
-public interface Job<T> extends JobInfo {
+import java.util.Objects;
 
-    T execute();
+import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+
+public class JobExecutionEvent {
+    private final AbstractJobExecution source;
+
+    public JobExecutionEvent(AbstractJobExecution source) {
+        this.source = Objects.requireNonNull(source);
+    }
+
+    public AbstractJobExecution getSource() {
+        return source;
+    }
 }

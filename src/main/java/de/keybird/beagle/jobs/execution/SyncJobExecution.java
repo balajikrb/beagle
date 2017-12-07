@@ -16,7 +16,7 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.jobs.execution;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,43 +30,47 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import de.keybird.beagle.api.Profile;
-import de.keybird.beagle.api.ProfileState;
-import de.keybird.beagle.repository.ProfileRepository;
+import de.keybird.beagle.api.PageState;
+import de.keybird.beagle.api.Page;
+import de.keybird.beagle.jobs.JobContext;
+import de.keybird.beagle.jobs.persistence.SyncJobEntity;
+import de.keybird.beagle.repository.PageRepository;
 
 // Sync database with filesystem
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SyncJob extends AbstractJob<Void> {
+public class SyncJobExecution extends AbstractJobExecution<Void, SyncJobEntity> {
 
     @Autowired
-    private ProfileRepository profileRepository;
+    private PageRepository pageRepository;
 
     @Autowired
     private JobContext context;
 
     @PostConstruct
-    public void init() throws IOException {
-        Files.createDirectories(context.getInboxPath());
-        setDescription("Archiving persisted files");
+    public String getDescription() {
+        return "Archiving indexed pages";
     }
 
     @Override
     protected Void executeInternal() {
+        logItem("Archiving pages ...");
         final Path archivePath = context.getArchivePath();
-        final List<Profile> filesImported = profileRepository.findByState(ProfileState.Indexed);
+        final List<Page> archiveList = pageRepository.findByState(PageState.Indexed);
+        logItem("Found {} index no of pages to archive", archiveList.size());
 
-        filesImported.forEach(file -> {
-            final Path path = archivePath.resolve(file.getName());
+        archiveList.forEach(page -> {
+            logItem("Archiving page '{}/{}'", page.getName(), page.getName());
+
+            final Path path = archivePath.resolve(page.getName());
             try {
-                Files.write(path, file.getPayload());
-                file.setState(ProfileState.Synced);
+                Files.write(path, page.getPayload());
             } catch (IOException e) {
-                file.setErrorMessage(e.getMessage());
+                logPage(page, PageState.Error, e.getMessage());
             }
         });
 
-        profileRepository.save(filesImported);
+        pageRepository.save(archiveList);
         return null;
     }
 }

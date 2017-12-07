@@ -16,21 +16,13 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.repository;
+package de.keybird.beagle.api;
 
-import java.util.List;
+public enum PageState {
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
-import de.keybird.beagle.api.Import;
-import de.keybird.beagle.api.ImportState;
-
-@Repository
-public interface ImportRepository extends CrudRepository<Import, Integer> {
-
-    Import findByChecksum(String checksum);
-
-    List<Import> findByState(ImportState state);
-
+    Imported,
+    Indexed,
+    Synced,
+    Deleted,
+    Error;
 }

@@ -30,27 +30,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.keybird.beagle.api.Import;
-import de.keybird.beagle.repository.ImportRepository;
+import de.keybird.beagle.api.Document;
+import de.keybird.beagle.repository.DocumentRepository;
 
 @RestController
 @RequestMapping("/imports")
 public class ImportRestController {
 
     @Autowired
-    private ImportRepository importRepository;
+    private DocumentRepository documentRepository;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Import>> listImports() {
-        Iterable<Import> files = importRepository.findAll();
+    public ResponseEntity<List<Document>> listImports() {
+        Iterable<Document> files = documentRepository.findAll();
         if (!files.iterator().hasNext()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
         files = StreamSupport.stream(files.spliterator(), false)
                 .map(f -> {
-                    Import theImport = new Import(f);
-                    theImport.setPayload(null);
-                    return theImport;
+                    Document theDocument = new Document(f);
+                    theDocument.setPayload(null);
+                    return theDocument;
                 })
                 .collect(Collectors.toList());
         return new ResponseEntity(files, HttpStatus.OK);

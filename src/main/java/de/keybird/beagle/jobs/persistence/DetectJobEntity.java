@@ -16,12 +16,12 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.events;
+package de.keybird.beagle.jobs.persistence;
 
-import de.keybird.beagle.jobs.Job;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
-public class JobStartedEvent extends JobEvent {
-    public JobStartedEvent(Job job) {
-        super(job);
-    }
+@Entity
+@DiscriminatorValue("detect")
+public class DetectJobEntity extends JobEntity {
 }

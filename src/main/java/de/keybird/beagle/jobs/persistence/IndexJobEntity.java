@@ -16,13 +16,13 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api;
+package de.keybird.beagle.jobs.persistence;
 
-public enum ProfileState {
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
-    Imported,
-    Indexed,
-    Synced,
-    Deleted,
-    Error;
+@Entity
+@DiscriminatorValue("index")
+public class IndexJobEntity extends JobEntity {
+
 }

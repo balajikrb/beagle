@@ -27,6 +27,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import de.keybird.beagle.repository.DocumentRepository;
+import de.keybird.beagle.repository.JobRepository;
+import de.keybird.beagle.repository.PageRepository;
 import de.keybird.beagle.repository.UserRepository;
 import de.keybird.beagle.security.User;
 import de.keybird.beagle.security.UserState;
@@ -40,6 +43,15 @@ public class BeagleApplication implements CommandLineRunner {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private JobRepository jobRepository;
+
+	@Autowired
+	private DocumentRepository documentRepository;
+
+	@Autowired
+	private PageRepository pageRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BeagleApplication.class, args);
@@ -75,6 +87,40 @@ public class BeagleApplication implements CommandLineRunner {
 		userRepository.save(mvr);
 		userRepository.save(fs);
 		userRepository.save(test);
+
+//		Document document = new Document();
+//		document.setFilename("My file name.pdf");
+//		document.setPageCount(1);
+//
+//		Page profile = new Page();
+//		profile.setImport(document);
+//		profile.setName("01");
+//
+//		documentRepository.save(document);
+//		profileRepository.save(profile);
+//
+//
+//
+//		final DetectJobEntity detectJobEntity = new DetectJobEntity();
+//		detectJobEntity.setCreatTime(new Date());
+//		detectJobEntity.setCompleteTime(new Date());
+//		detectJobEntity.setStartDate(new Date());
+//
+//		final LogItem logManifestItem = new LogItem();
+//		logManifestItem.setMessage("XXX");
+//		detectJobEntity.addManifestItem(logManifestItem);
+//
+//		final DocumentItem documentItem = new DocumentItem();
+//		documentItem.setDocument(document);
+//
+//		final PageItem pageItem = new PageItem();
+//		pageItem.setPage(profile);
+//
+//		detectJobEntity.addManifestItem(documentItem);
+//		detectJobEntity.addManifestItem(pageItem);
+//
+//		jobRepository.save(detectJobEntity);
+//		jobRepository.save(new ImportJobEntity());
 	}
 
 }

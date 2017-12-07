@@ -38,18 +38,21 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import de.keybird.beagle.events.JobFinishedEvent;
-import de.keybird.beagle.events.JobStartedEvent;
-import de.keybird.beagle.events.JobSubmittedEvent;
+import de.keybird.beagle.events.JobExecutionFinishedEvent;
+import de.keybird.beagle.events.JobExecutionStartedEvent;
+import de.keybird.beagle.events.JobExecutionSubmittedEvent;
+import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.repository.JobRepository;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class JobManager {
+public class JobExecutionManager {
 
-    private static Logger LOG = LoggerFactory.getLogger(JobManager.class);
+    private static Logger LOG = LoggerFactory.getLogger(JobExecutionManager.class);
 
     @Autowired
     private EventBus eventBus;
@@ -57,9 +60,12 @@ public class JobManager {
     @Value("${jobmanager.pool.size:5}")
     private int poolSize;
 
-    private final List<Job> jobList = new CopyOnWriteArrayList<>();
+    @Autowired
+    private JobRepository jobRepository;
 
     private ExecutorService executorService;
+
+    private List<AbstractJobExecution> jobExecutionList = new CopyOnWriteArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -81,9 +87,10 @@ public class JobManager {
     }
 
     // TODO MVR think about maybe persisting jobs to some kind of table
-    public void submit(final Job job) {
-        eventBus.post(new JobSubmittedEvent(job));
-        jobList.add(job);
+    public void submit(final AbstractJobExecution jobExecution) {
+        jobExecutionList.add(jobExecution);
+        eventBus.post(new JobExecutionSubmittedEvent(jobExecution));
+        jobRepository.save(jobExecution.getJobEntity());
 
         // Make the job execution completable
         final CompletableFuture completableFuture = new CompletableFuture();
@@ -91,36 +98,34 @@ public class JobManager {
         // First handle error/success
         completableFuture.handle((result, exception) -> {
             // TODO MVR we don't remove it for now, as we use it to show in the UI
-            eventBus.post(new JobFinishedEvent(job, new JobResult(result, (Throwable) exception)));
+            eventBus.post(new JobExecutionFinishedEvent(jobExecution, new JobResult(result, (Throwable) exception)));
             return result;
         });
 
         // run it
         completableFuture.runAsync(() -> {
-            Thread.currentThread().setName(getClass().getName() + " - " + job.getId());
-            eventBus.post(new JobStartedEvent(job));
-            Object result = job.execute();
+            Thread.currentThread().setName(getClass().getName() + " - " + jobExecution.getJobEntity().getId());
+            eventBus.post(new JobExecutionStartedEvent(jobExecution));
+            Object result = jobExecution.execute();
             completableFuture.complete(result);
-        }, executorService);
-    }
-
-    public List<JobInfo> getJobs() {
-        return new ArrayList<>(jobList);
+        }, executorService)
+        .thenRun(() -> jobExecutionList.remove(jobExecution)); // Remove job
     }
 
     public boolean hasRunningJobs() {
-        return jobList.stream().anyMatch(job -> job.getState() == JobState.Running);
+        return !jobExecutionList.isEmpty();
     }
 
-    public List<JobInfo> getJobs(Class<? extends Job> jobType, JobState... state) {
-        final List<JobInfo> collected = jobList.stream()
-                .filter(job -> jobType.isAssignableFrom(job.getClass()) && Arrays.asList(state).contains(job.getState()))
-                .collect(Collectors.toList());
-        return collected;
-    }
-
-    public List<JobInfo> getJobs(JobState... state) {
-        return jobList.stream()
-                .filter(job -> Arrays.asList(state).contains(job.getState())).collect(Collectors.toList());
+    public List<AbstractJobExecution> getExecutions(Class<? extends AbstractJobExecution>... type) {
+        if (type == null || type.length == 0) {
+            return new ArrayList<>(jobExecutionList);
+        }
+        return new ArrayList<>(
+            jobExecutionList
+                .stream()
+                    .filter(execution -> Arrays.asList(type).contains(execution.getClass()))
+                    .filter(execution -> Lists.newArrayList(JobState.Success, JobState.Error).contains(execution.getJobEntity().getStatus().getState()))
+                    .collect(Collectors.toSet())
+        );
     }
 }

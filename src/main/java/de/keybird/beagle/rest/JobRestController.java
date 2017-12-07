@@ -30,61 +30,83 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.keybird.beagle.api.ImportState;
-import de.keybird.beagle.jobs.JobFactory;
-import de.keybird.beagle.jobs.JobInfo;
-import de.keybird.beagle.jobs.JobManager;
-import de.keybird.beagle.repository.ImportRepository;
+import com.google.common.collect.Lists;
+
+import de.keybird.beagle.api.DocumentState;
+import de.keybird.beagle.jobs.JobExecutionFactory;
+import de.keybird.beagle.jobs.JobExecutionManager;
+import de.keybird.beagle.jobs.Progress;
+import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.repository.DocumentRepository;
+import de.keybird.beagle.repository.JobRepository;
 
 @RestController
 @RequestMapping("/jobs")
 public class JobRestController {
 
     @Autowired
-    private JobManager jobManager;
+    private JobExecutionFactory jobFactory;
 
     @Autowired
-    private JobFactory jobFactory;
+    private JobExecutionManager jobExecutionManager;
 
     @Autowired
-    private ImportRepository importRepository;
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private JobRepository jobRepository;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<JobInfoDTO>> showProgress() {
-        final List<JobInfo> jobs = jobManager.getJobs();
-        if (jobs.isEmpty()) {
+    public ResponseEntity listJobs() {
+        final Iterable<JobEntity> all = jobRepository.findAll();
+        if (!all.iterator().hasNext()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+        return new ResponseEntity(Lists.newArrayList(all), HttpStatus.OK);
+    }
 
-        final List<JobInfoDTO> jobDTOList = jobs.stream().map(jobInfo -> new JobInfoDTO(jobInfo)).collect(Collectors.toList());
+    @RequestMapping(path="/running", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<JobInfoDTO>> showProgress() {
+        final List<AbstractJobExecution> executions = jobExecutionManager.getExecutions();
+        if (executions.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        final List<JobInfoDTO> jobDTOList = executions.stream().map(jobExecution -> createFrom(jobExecution)).collect(Collectors.toList());
         jobDTOList.sort(Comparator.comparing(JobInfoDTO::getId).reversed());
         return new ResponseEntity<>(jobDTOList, HttpStatus.OK);
     }
 
     @RequestMapping(path="/detect", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startDetect() {
-        if (!jobManager.hasRunningJobs()) {
-            jobManager.submit(jobFactory.createDetectJob());
-        }
+        jobExecutionManager.submit(jobFactory.createDetectJob());
         return ResponseEntity.accepted().build();
     }
 
     @RequestMapping(path="/import", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startImport() {
-        if (!jobManager.hasRunningJobs()) {
-            // TODO MVR use service for this?
-            importRepository
-                .findByState(ImportState.New)
-                .forEach(theImport -> jobManager.submit(jobFactory.createImportJob(theImport)));
-        }
+        // TODO MVR use service for this?
+        documentRepository
+            .findByState(DocumentState.New)
+            .forEach(theImport -> jobExecutionManager.submit(jobFactory.createImportJob(theImport)));
         return ResponseEntity.accepted().build();
     }
 
     @RequestMapping(path="/index", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startIndex() {
-        if (!jobManager.hasRunningJobs()) {
-            jobManager.submit(jobFactory.createIndexJob());
-        }
+        jobExecutionManager.submit(jobFactory.createIndexJob());
         return ResponseEntity.accepted().build();
+    }
+
+    public static JobInfoDTO createFrom(AbstractJobExecution jobExecution) {
+        final JobInfoDTO jobInfoDTO = new JobInfoDTO();
+        jobInfoDTO.setDescription(jobExecution.getDescription());
+        jobInfoDTO.setId(jobExecution.getJobEntity().getId());
+        jobInfoDTO.setCompleteTime(jobExecution.getJobEntity().getCompleteTime());
+        jobInfoDTO.setStartTime(jobExecution.getJobEntity().getStartTime());
+        jobInfoDTO.setErrorMessage(jobExecution.getJobEntity().getStatus().getErrorMessage());
+        jobInfoDTO.setState(jobExecution.getJobEntity().getStatus().getState());
+        jobInfoDTO.setProgress(new Progress(jobExecution.getProgress()));
+        return jobInfoDTO;
     }
 }

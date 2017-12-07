@@ -1,22 +1,22 @@
 <div class="card">
     <div class="card-header alert-secondary">
-        <h3 class="card-title">{{profile.name}}</h3>
+        <h3 class="card-title">{{page.name}}</h3>
     </div>
     <div class="card-block">
         <div class="row">
             <div class="col-md-2 col-lg-2" align="center">
-                <img alt="User Pic" src="{{profile.image}}" class="rounded-circle img-fluid mx-2 my-2">
+                <img alt="User Pic" src="{{page.image}}" class="rounded-circle img-fluid mx-2 my-2">
             </div>
             <div class="col-md-6 col-lg-6">
                 <table class="table table-user-information">
                     <tbody>
                     <tr>
                         <td>Register date:</td>
-                        <td>{{profile.registerDate | date}}</td>
+                        <td>{{page.registerDate | date}}</td>
                     </tr>
                     <tr>
                         <td>Email</td>
-                        <td><a href="mailto:{{profile.email}}">{{profile.email}}</a></td>
+                        <td><a href="mailto:{{page.email}}">{{page.email}}</a></td>
                     </tr>
                     <tr>
                         <td>Role</td>
@@ -24,7 +24,7 @@
                     </tr>
                     <tr>
                         <td>Status</td>
-                        <td><span class="badge badge-success">{{profile.state}}</span></td>
+                        <td><span class="badge badge-success">{{page.state}}</span></td>
                     </tr>
 
                     </tbody>
