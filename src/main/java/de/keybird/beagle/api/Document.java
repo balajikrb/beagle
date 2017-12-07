@@ -44,7 +44,7 @@ public class Document {
 
     private String checksum;
 
-    private String error;
+    private String errorMessage;
 
     private int pageCount;
 
@@ -65,13 +65,12 @@ public class Document {
         this.id = anDocument.id;
         this.filename = anDocument.filename;
         this.checksum = anDocument.checksum;
-        this.error = anDocument.error;
+        this.errorMessage = anDocument.errorMessage;
         this.pageCount = anDocument.pageCount;
         this.importDate = anDocument.importDate;
         this.state = anDocument.state;
         this.payload = anDocument.payload != null ? Arrays.copyOf(anDocument.payload, anDocument.payload.length) : null;
     }
-
 
     public String getFilename() {
         return filename;
@@ -97,10 +96,6 @@ public class Document {
         this.payload = payload;
     }
 
-    public void setErrorMessage(String message) {
-        this.error = message;
-    }
-
     public Integer getId() {
         return id;
     }
@@ -109,12 +104,12 @@ public class Document {
         this.id = id;
     }
 
-    public String getError() {
-        return error;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setError(String error) {
-        this.error = error;
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public void setPageCount(int count) {

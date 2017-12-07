@@ -72,10 +72,10 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
     public Void executeInternal() throws Exception {
         logItem("Importing '{}'", getDocument().getFilename());
 
-        final Document importMe = getDocument();
-        final PDDocument document = PdfManager.load(importMe.getPayload());
+        final Document importDocument = getDocument();
+        final PDDocument pdfDocument = PdfManager.load(importDocument.getPayload());
         final Splitter splitter = new Splitter();
-        final List<PDDocument> splitDocuments = splitter.split(document);
+        final List<PDDocument> splitDocuments = splitter.split(pdfDocument);
 
         // Update progress, as we now know how many pages there are
         int index = 0;
@@ -84,7 +84,8 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
         // TODO MVR this is not deterministic. Figure out why and maybe do it differently
         for (PDDocument splitDocument : splitDocuments) {
             final Page page = new Page();
-            page.setImport(importMe);
+            page.setDocument(importDocument);
+            page.setPageNumber(index + 1);
 
             try {
                 // Determine payload
@@ -121,13 +122,15 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
 
     @Override
     protected void onSuccess(Void result) {
-        logDocument(getDocument(), DocumentState.Imported);
+        // TODO MVR figure out if partially imported
+        getDocument().setState(DocumentState.Imported);
         documentRepository.save(getDocument());
     }
 
     @Override
     protected void onError(Throwable t) {
-        logDocument(getDocument(), DocumentState.Error, t.getMessage());
+        getDocument().setState(DocumentState.Error);
+        getDocument().setErrorMessage(t.getMessage());
         documentRepository.save(getDocument());
     }
 }

@@ -40,6 +40,7 @@ import de.keybird.beagle.jobs.execution.AbstractJobExecution;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
+import de.keybird.beagle.rest.model.JobInfoDTO;
 
 @RestController
 @RequestMapping("/jobs")

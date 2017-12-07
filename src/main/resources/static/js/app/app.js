@@ -36,10 +36,15 @@ app.config(['$stateProvider', '$urlRouterProvider', '$httpProvider',
                 controller: 'LoginController',
                 url: '/login'
             })
-            .state('files', {
+            .state('imports', {
                 templateUrl: 'views/imports.html',
                 controller: 'ImportController',
                 url: '/imports'
+            })
+            .state('pages', {
+                templateUrl: 'views/pages.html',
+                controller: 'PageController',
+                url: '/documents'
             })
             .state('jobs', {
                 templateUrl: 'views/jobs.html',

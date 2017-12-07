@@ -65,7 +65,7 @@ public class JobExecutionEventHandler {
             if (event.getSource() instanceof DetectJobExecution) {
                 // TODO MVR use service for this?
                 documentRepository
-                        .findByState(DocumentState.New)
+                        .findByState(DocumentState.Accepted)
                         .forEach(theImport -> jobManager.submit(jobFactory.createImportJob(theImport)));
             }
             // After import kick of indexing, when no import job is running anymore

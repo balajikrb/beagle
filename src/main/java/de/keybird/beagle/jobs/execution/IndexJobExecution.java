@@ -85,6 +85,7 @@ public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity
                     logPage(page, PageState.Error, result.getErrorMessage());
                     return;
                 }
+                logPage(page, PageState.Indexed);
             } catch (IOException e) {
                 LOG.error("Could not index file {}. Reason: ", page.getName(), e.getMessage());
                 logPage(page, PageState.Error, e.getMessage());
@@ -92,7 +93,6 @@ public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity
             }
 
             // Mark as indexed
-            logPage(page, PageState.Indexed);
             updateProgress(index.incrementAndGet(), totalSize);
         });
 

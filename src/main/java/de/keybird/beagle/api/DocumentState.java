@@ -23,6 +23,5 @@ public enum DocumentState {
     Accepted,
     Rejected,
     Error,
-    Importing,
     Imported
 }

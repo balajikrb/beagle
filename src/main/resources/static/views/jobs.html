@@ -12,21 +12,34 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Description</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Duration</th>
                         <th scope="col">State</th>
-                        <th scope="col">Start Time</th>
-                        <th scope="col">End Time</th>
-                        <th scope="col">Progress</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr ng-repeat="job in jobs">
+                <tbody ng-repeat="job in jobs">
+                    <tr>
                         <th scope="row">{{job.id}}</th>
-                        <td>{{job.description}}</td>
-                        <td>{{job.state}}</td>
                         <td>{{job.startTime | date: 'medium'}}</td>
-                        <td>{{job.completeTime | date: 'medium'}}</td>
-                        <td>{{!job.progress.indeterminate ? job.progress.progress + "/" + job.progress.totalProgress : "-"}}</td>
+                        <td>{{job.type}} Job</td>
+                        <td>{{job.completeTime - job.startTime}}</td>
+                        <td><span class="badge" ng-class="{ 'badge-success' : job.status.state === 'Success', 'badge-danger' : job.status.state === 'Error' }">{{job.status.state}}</span></td>
+                    </tr>
+                    <tr>
+                       <td colspan="5">
+                           <div>
+                               <table class="table">
+                                   <tr ng-repeat="item in job.manifestItems">
+                                       <td>{{item.id}}</td>
+                                       <td>{{item.date | date: 'medium'}}</td>
+                                       <td ng-if="item.message">{{item.message}}</td>
+                                       <td ng-if="item.document">Document '{{item.document.filename}}' <span class="badge" ng-class="{ 'badge-success' : item.status.state === 'Accepted', 'badge-danger' : item.status.state === 'Error' }">{{item.status.state}}</span></td>
+                                       <td ng-if="item.page">Page '{{item.page.document.filename}}/{{item.page.pageNumber}}' <span class="badge" ng-class="{ 'badge-success' : item.status.state === 'Imported', 'badge-danger' : item.status.state === 'Error' }">{{item.status.state}}</span></td>
+                                   </tr>
+                               </table>
+                           </div>
+                       </td>
                     </tr>
                 </tbody>
             </table>

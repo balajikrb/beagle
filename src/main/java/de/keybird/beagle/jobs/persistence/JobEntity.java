@@ -36,12 +36,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import de.keybird.beagle.jobs.JobState;
+import de.keybird.beagle.jobs.execution.JobType;
 import de.keybird.beagle.jobs.persistence.status.JobStatus;
 
 @Entity
 @Table(name="jobs")
 @Inheritance(strategy= InheritanceType.SINGLE_TABLE)
-public class JobEntity {
+public abstract class JobEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -54,7 +55,7 @@ public class JobEntity {
     private Date startTime;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date creatTime = new Date();
+    private Date createTime = new Date();
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date completeTime;
@@ -78,12 +79,12 @@ public class JobEntity {
         this.startTime = startTime;
     }
 
-    public Date getCreatTime() {
-        return creatTime;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setCreatTime(Date creatTime) {
-        this.creatTime = creatTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     public Date getCompleteTime() {
@@ -121,4 +122,6 @@ public class JobEntity {
     public void setErrorMessage(String errorMessage) {
         status.setErrorMessage(errorMessage);
     }
+
+    public abstract JobType getType();
 }

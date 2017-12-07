@@ -25,6 +25,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
 import de.keybird.beagle.api.Document;
+import de.keybird.beagle.jobs.execution.JobType;
 
 @Entity
 @DiscriminatorValue("import")
@@ -47,5 +48,10 @@ public class ImportJobEntity extends JobEntity {
 
     public void setDocument(Document document) {
         this.document = document;
+    }
+
+    @Override
+    public JobType getType() {
+        return JobType.Import;
     }
 }

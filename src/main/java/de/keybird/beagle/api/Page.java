@@ -48,6 +48,8 @@ public class Page {
 
     private String errorMessage;
 
+    private int pageNumber;
+
     @Lob
     @Lazy
     private byte[] payload;
@@ -58,7 +60,7 @@ public class Page {
 
     @ManyToOne
     @JoinColumn(name="document_id")
-    private Document theDocument;
+    private Document document;
 
     public Page() {
 
@@ -72,6 +74,8 @@ public class Page {
         setState(page.getState());
         setPayload(page.getPayload());
         setThumbnail(page.getThumbnail());
+        setPageNumber(page.getPageNumber());
+        setDocument(page.getDocument());
     }
 
     public Long getId() {
@@ -130,11 +134,19 @@ public class Page {
         return thumbnail;
     }
 
-    public void setImport(Document eachDocument) {
-        this.theDocument = eachDocument;
+    public int getPageNumber() {
+        return pageNumber;
     }
 
-    public Document getImport() {
-        return theDocument;
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public void setDocument(Document document) {
+        this.document = document;
     }
 }

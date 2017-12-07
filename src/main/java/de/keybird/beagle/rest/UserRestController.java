@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.keybird.beagle.repository.UserRepository;
+import de.keybird.beagle.rest.model.CreateUserDTO;
 import de.keybird.beagle.security.User;
 import de.keybird.beagle.security.UserState;
 

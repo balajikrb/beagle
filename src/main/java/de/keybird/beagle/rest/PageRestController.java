@@ -56,7 +56,7 @@ public class PageRestController {
     private JestClient jestClient;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Page>> listFiles() {
+    public ResponseEntity<List<Page>> listPages() {
         Iterable<Page> files = pageRepository.findAll();
         if (!files.iterator().hasNext()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);

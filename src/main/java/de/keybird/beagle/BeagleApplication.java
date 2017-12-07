@@ -102,7 +102,7 @@ public class BeagleApplication implements CommandLineRunner {
 //
 //
 //		final DetectJobEntity detectJobEntity = new DetectJobEntity();
-//		detectJobEntity.setCreatTime(new Date());
+//		detectJobEntity.setCreateTime(new Date());
 //		detectJobEntity.setCompleteTime(new Date());
 //		detectJobEntity.setStartDate(new Date());
 //

@@ -92,7 +92,6 @@ public class DetectJobExecution extends AbstractJobExecution<Integer, DetectJobE
                             deleteFile(entry);
                         }
                     });
-
         } catch (IOException e) {
             logger.error("Error while listing files: {}", e.getMessage(), e);
             throw new ExecutionException(e);

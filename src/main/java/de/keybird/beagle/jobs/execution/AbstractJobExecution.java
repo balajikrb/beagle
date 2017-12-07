@@ -141,6 +141,9 @@ public abstract class AbstractJobExecution<T, J extends JobEntity> {
     protected void logDocument(Document document, DocumentState state, String message) {
         LOG.info("Document with id {} new state: {}, was: {}.{}", document.getId(), state, document.getState(), message != null ? " Reason: " + message : "");
 
+        document.setState(state);
+        document.setErrorMessage(message);
+
         DocumentItem documentItem = new DocumentItem();
         documentItem.setDocument(document);
         documentItem.setStatus(state, message);
@@ -153,6 +156,9 @@ public abstract class AbstractJobExecution<T, J extends JobEntity> {
 
     protected void logPage(Page page, PageState state, String message) {
         LOG.info("Page with id {} new state: {}, was: {}.{}", page.getId(), state, page.getState(), message != null ? " Reason: " + message : "");
+
+        page.setState(state);
+        page.setErrorMessage(message);
 
         PageItem pageItem = new PageItem();
         pageItem.setPage(page);

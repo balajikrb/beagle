@@ -16,7 +16,7 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.rest;
+package de.keybird.beagle.rest.model;
 
 public class CreateUserDTO {
     private String email;

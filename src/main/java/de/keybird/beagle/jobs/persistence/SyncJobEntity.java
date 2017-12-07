@@ -21,7 +21,13 @@ package de.keybird.beagle.jobs.persistence;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import de.keybird.beagle.jobs.execution.JobType;
+
 @Entity
 @DiscriminatorValue("sync")
 public class SyncJobEntity extends JobEntity {
+    @Override
+    public JobType getType() {
+        return JobType.Sync;
+    }
 }
