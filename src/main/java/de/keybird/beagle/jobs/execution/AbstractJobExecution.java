@@ -18,6 +18,7 @@
 
 package de.keybird.beagle.jobs.execution;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
 
@@ -53,9 +54,11 @@ public abstract class AbstractJobExecution<J extends JobEntity> {
 
     @Transactional
     public void execute() {
-        setState(JobState.Initializing);
-        start();
         try {
+            setState(JobState.Initializing);
+            initialize();
+            start();
+
             executeInternal();
             complete();
             onSuccess();
@@ -107,6 +110,10 @@ public abstract class AbstractJobExecution<J extends JobEntity> {
     protected void start() {
         setStartTime(new Date());
         setState(JobState.Running);
+    }
+
+    protected void initialize() throws IOException {
+
     }
 
     protected void complete() {

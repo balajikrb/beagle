@@ -18,8 +18,6 @@
 
 package de.keybird.beagle.jobs;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -52,14 +50,11 @@ public class JobContext {
     private Path archivePath;
 
     @PostConstruct
-    public void init() throws IOException {
+    public void init() {
         workingDirectory = workingDirectory.replaceAll("~", System.getProperty("user.home"));
         this.workingPath = Paths.get(workingDirectory);
         this.inboxPath = workingPath.resolve("1_inbox");
         this.archivePath = workingPath.resolve("2_archive"); // TODO MVR rip out
-
-        Files.createDirectories(getInboxPath());
-        Files.createDirectories(getArchivePath()); // TODO MVR rip out?
     }
 
     public Path getInboxPath() {

@@ -54,6 +54,11 @@ public class SyncJobExecution extends AbstractJobExecution<SyncJobEntity> {
     }
 
     @Override
+    protected void initialize() throws IOException {
+        Files.createDirectories(context.getArchivePath());
+    }
+
+    @Override
     protected void executeInternal() {
         logEntry(LogLevel.Info, "Archiving pages ...");
         final Path archivePath = context.getArchivePath();

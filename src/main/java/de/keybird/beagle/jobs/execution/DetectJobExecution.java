@@ -56,6 +56,11 @@ public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
     }
 
     @Override
+    protected void initialize() throws IOException {
+        Files.createDirectories(context.getInboxPath());
+    }
+
+    @Override
     protected void executeInternal() throws ExecutionException {
         try {
             logEntry(LogLevel.Info,"Reading contents from directory '{}'", context.getInboxPath());
