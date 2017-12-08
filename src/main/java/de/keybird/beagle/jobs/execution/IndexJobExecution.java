@@ -44,7 +44,7 @@ import io.searchbox.core.Index;
 // Syncs database content with elastic
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity> {
+public class IndexJobExecution extends AbstractJobExecution<IndexJobEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexJobExecution.class);
 
@@ -60,7 +60,7 @@ public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity
     }
 
     @Override
-    protected Void executeInternal() {
+    protected void executeInternal() {
         final List<Page> importedPages = pageRepository.findByState(PageState.Imported);
         final AtomicInteger index = new AtomicInteger(0);
         int totalSize = importedPages.size();
@@ -104,6 +104,5 @@ public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity
 
         pageRepository.save(importedPages);
         updateProgress(totalSize, totalSize);
-        return null;
     }
 }

@@ -43,7 +43,7 @@ import de.keybird.beagle.services.PdfManager;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class DetectJobExecution extends AbstractJobExecution<Integer, DetectJobEntity> {
+public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
 
     private final Logger logger = LoggerFactory.getLogger(DetectJobExecution.class);
 
@@ -56,7 +56,7 @@ public class DetectJobExecution extends AbstractJobExecution<Integer, DetectJobE
     }
 
     @Override
-    protected Integer executeInternal() throws ExecutionException {
+    protected void executeInternal() throws ExecutionException {
         try {
             logEntry(LogLevel.Info,"Reading contents from directory '{}'", context.getInboxPath());
 
@@ -98,7 +98,6 @@ public class DetectJobExecution extends AbstractJobExecution<Integer, DetectJobE
             logger.error("Error while listing files: {}", e.getMessage(), e);
             throw new ExecutionException(e);
         }
-        return 0;
     }
 
     private void deleteFile(Path p) {

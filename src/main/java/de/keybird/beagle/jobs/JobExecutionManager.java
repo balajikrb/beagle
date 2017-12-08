@@ -106,8 +106,8 @@ public class JobExecutionManager {
         completableFuture.runAsync(() -> {
             Thread.currentThread().setName(getClass().getName() + " - " + jobExecution.getJobEntity().getId());
             eventBus.post(new JobExecutionStartedEvent(jobExecution));
-            Object result = jobExecution.execute();
-            completableFuture.complete(result);
+            jobExecution.execute();
+            completableFuture.complete(null);
         }, executorService)
         .thenRun(() -> jobExecutionList.remove(jobExecution)); // Remove job
     }

@@ -40,7 +40,7 @@ import de.keybird.beagle.jobs.persistence.LogLevel;
 
 // TODO MVR es wird jetzt zwar geloggt, welche dokumente usw. abgewiesen wurden, aber ein übergeordneter status für die dokumente, pages fehlt noch
 // Das muss noch eingeführt werden, damit die queries funktionieren
-public abstract class AbstractJobExecution<T, J extends JobEntity> {
+public abstract class AbstractJobExecution<J extends JobEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractJobExecution.class);
 
@@ -52,14 +52,13 @@ public abstract class AbstractJobExecution<T, J extends JobEntity> {
     private final Progress progress = new Progress();
 
     @Transactional
-    public T execute() {
+    public void execute() {
         setState(JobState.Initializing);
         start();
         try {
-            T result = executeInternal();
+            executeInternal();
             complete();
-            onSuccess(result);
-            return result;
+            onSuccess();
         } catch (Throwable t) {
             error(t);
             onError(t);
@@ -138,10 +137,10 @@ public abstract class AbstractJobExecution<T, J extends JobEntity> {
         context.getEventBus().post(new JobExecutionProgressChangedEvent(this, oldProgress, getProgress()));
     }
 
-    protected abstract T executeInternal() throws Exception;
+    protected abstract void executeInternal() throws Exception;
 
     // Callback hook
-    protected void onSuccess(T result) {
+    protected void onSuccess() {
 
     }
 

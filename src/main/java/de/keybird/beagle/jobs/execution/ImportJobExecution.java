@@ -51,7 +51,7 @@ import de.keybird.beagle.services.PdfManager;
 // Imports files to database
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEntity> {
+public class ImportJobExecution extends AbstractJobExecution<ImportJobEntity> {
 
     private final Logger logger = LoggerFactory.getLogger(ImportJobExecution.class);
 
@@ -66,11 +66,8 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
         return String.format("Importing '%s'", getDocument().getFilename());
     }
 
-    private Document getDocument() {
-        return getJobEntity().getDocument();
-    }
-
-    public Void executeInternal() throws Exception {
+    @Override
+    public void executeInternal() throws Exception {
         logEntry(LogLevel.Info, "Importing '{}'", getDocument().getFilename());
 
         final Document importDocument = getDocument();
@@ -120,11 +117,10 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
                 page.setErrorMessage(ex.getMessage());
             }
         }
-        return null;
     }
 
     @Override
-    protected void onSuccess(Void result) {
+    protected void onSuccess() {
         // TODO MVR figure out if partially imported
         getDocument().setState(DocumentState.Imported);
         getDocument().setErrorMessage(null);
@@ -135,5 +131,9 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
     protected void onError(Throwable t) {
         getDocument().setErrorMessage(t.getMessage());
         documentRepository.save(getDocument());
+    }
+
+    private Document getDocument() {
+        return getJobEntity().getDocument();
     }
 }

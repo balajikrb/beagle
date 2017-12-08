@@ -40,7 +40,7 @@ import de.keybird.beagle.repository.PageRepository;
 // Sync database with filesystem
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SyncJobExecution extends AbstractJobExecution<Void, SyncJobEntity> {
+public class SyncJobExecution extends AbstractJobExecution<SyncJobEntity> {
 
     @Autowired
     private PageRepository pageRepository;
@@ -54,7 +54,7 @@ public class SyncJobExecution extends AbstractJobExecution<Void, SyncJobEntity> 
     }
 
     @Override
-    protected Void executeInternal() {
+    protected void executeInternal() {
         logEntry(LogLevel.Info, "Archiving pages ...");
         final Path archivePath = context.getArchivePath();
         final List<Page> archiveList = pageRepository.findByState(PageState.Indexed);
@@ -70,6 +70,5 @@ public class SyncJobExecution extends AbstractJobExecution<Void, SyncJobEntity> 
                 logEntry(LogLevel.Error, "Could not archive page {}/{}. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
             }
         });
-        return null;
     }
 }
