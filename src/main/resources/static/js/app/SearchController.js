@@ -40,7 +40,7 @@ angular.module('beagleApp')
                     return;
                 }
                 $scope.errorMessage = '';
-                $http.get("/profiles/search", {params: {query: $scope.searchQuery}}).then(function(response) {
+                $http.get("/pages/search", {params: {query: $scope.searchQuery}}).then(function(response) {
                         console.log("success", response);
 
                         if (response.data) {
@@ -56,7 +56,7 @@ angular.module('beagleApp')
             };
 
             $scope.count = function () {
-                $http.get('/profiles/count')
+                $http.get('/pages/count')
                     .then(function(response) {
                         if (response.data) {
                             $scope.documentCount = response.data;
