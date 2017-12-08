@@ -54,6 +54,11 @@ public abstract class AbstractJobExecution<J extends JobEntity> {
 
     @Transactional
     public void execute() {
+        // Enforce a jobEntity
+        if (jobEntity == null) {
+            throw new IllegalStateException("Job was not properly created. JobEntity is null, but must not. Bailing.");
+        }
+
         try {
             setState(JobState.Initializing);
             initialize();
@@ -73,7 +78,9 @@ public abstract class AbstractJobExecution<J extends JobEntity> {
             }
             throw new RuntimeException(t);
         } finally {
-            context.getJobRepository().save(jobEntity); // Update job entity
+            if (context != null && context.getJobRepository() != null && jobEntity != null) {
+                context.getJobRepository().save(jobEntity); // Update job entity
+            }
         }
     }
 
