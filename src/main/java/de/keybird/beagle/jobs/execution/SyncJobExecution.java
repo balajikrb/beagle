@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.jobs.JobContext;
+import de.keybird.beagle.jobs.persistence.LogLevel;
 import de.keybird.beagle.jobs.persistence.SyncJobEntity;
 import de.keybird.beagle.repository.PageRepository;
 
@@ -54,23 +55,21 @@ public class SyncJobExecution extends AbstractJobExecution<Void, SyncJobEntity> 
 
     @Override
     protected Void executeInternal() {
-        logItem("Archiving pages ...");
+        logEntry(LogLevel.Info, "Archiving pages ...");
         final Path archivePath = context.getArchivePath();
         final List<Page> archiveList = pageRepository.findByState(PageState.Indexed);
-        logItem("Found {} index no of pages to archive", archiveList.size());
+        logEntry(LogLevel.Info,"Found {} no of pages to archive.", archiveList.size());
 
         archiveList.forEach(page -> {
-            logItem("Archiving page '{}/{}'", page.getName(), page.getName());
+            logEntry(LogLevel.Info, "Archiving page '{}/{}'", page.getName(), page.getName());
 
             final Path path = archivePath.resolve(page.getName());
             try {
                 Files.write(path, page.getPayload());
             } catch (IOException e) {
-                logPage(page, PageState.Error, e.getMessage());
+                logEntry(LogLevel.Error, "Could not archive page {}/{}. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
             }
         });
-
-        pageRepository.save(archiveList);
         return null;
     }
 }

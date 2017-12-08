@@ -54,7 +54,7 @@ public class JobService {
         // They are only returned, if they finished within the last n seconds
         final List<JobInfo> jobData = jobs.stream()
                 .filter(execution -> {
-                    if (execution.getJobEntity().getStatus().getState() == JobState.Success) {
+                    if (execution.getJobEntity().getState() == JobState.Completed) {
                         long completedSinceMs = System.currentTimeMillis() - execution.getJobEntity().getCompleteTime().getTime();
                         return completedSinceMs <= 8 * 1000;
                     }

@@ -22,6 +22,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,10 +33,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-@Table(name="job_items")
+@Table(name="logs")
 @Entity
 @Inheritance(strategy= InheritanceType.SINGLE_TABLE)
-public class JobItem {
+public class LogEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -43,6 +45,13 @@ public class JobItem {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private Date date = new Date();
+
+    @Column(nullable = false)
+    private String message;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LogLevel level;
 
     public Long getId() {
         return id;
@@ -58,5 +67,21 @@ public class JobItem {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public LogLevel getLevel() {
+        return level;
+    }
+
+    public void setLevel(LogLevel level) {
+        this.level = level;
     }
 }

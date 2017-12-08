@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -37,7 +36,6 @@ import javax.persistence.TemporalType;
 
 import de.keybird.beagle.jobs.JobState;
 import de.keybird.beagle.jobs.execution.JobType;
-import de.keybird.beagle.jobs.persistence.status.JobStatus;
 
 @Entity
 @Table(name="jobs")
@@ -48,8 +46,9 @@ public abstract class JobEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Embedded
-    private JobStatus status = new JobStatus(JobState.Pending);
+    private String errorMessage;
+
+    private JobState state = JobState.Pending;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
@@ -61,7 +60,7 @@ public abstract class JobEntity {
     private Date completeTime;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JobItem> manifestItems = new ArrayList<>();
+    private List<LogEntity> logs = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -95,32 +94,32 @@ public abstract class JobEntity {
         this.completeTime = completeTime;
     }
 
-    public List<JobItem> getManifestItems() {
-        return manifestItems;
+    public List<LogEntity> getLogs() {
+        return logs;
     }
 
-    public void setManifestItems(List<JobItem> manifestItems) {
-        this.manifestItems = manifestItems;
+    public void setLogs(List<LogEntity> logs) {
+        this.logs = logs;
     }
 
-    public void addManifestItem(JobItem item) {
-        manifestItems.add(item);
+    public void addLogEntry(LogEntity item) {
+        logs.add(item);
     }
 
-    public JobStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(JobStatus status) {
-        this.status = status;
-    }
-
-    public void setState(JobState state) {
-        status.setState(state);
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     public void setErrorMessage(String errorMessage) {
-        status.setErrorMessage(errorMessage);
+        this.errorMessage = errorMessage;
+    }
+
+    public JobState getState() {
+        return state;
+    }
+
+    public void setState(JobState state) {
+        this.state = state;
     }
 
     public abstract JobType getType();

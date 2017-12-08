@@ -35,6 +35,7 @@ import com.google.gson.JsonObject;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.jobs.persistence.IndexJobEntity;
+import de.keybird.beagle.jobs.persistence.LogLevel;
 import de.keybird.beagle.repository.PageRepository;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.DocumentResult;
@@ -66,7 +67,7 @@ public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity
         updateProgress(index.get(), totalSize);
 
         importedPages.forEach(page -> {
-            logItem("Indexing page '{}'", page.getName());
+            logEntry(LogLevel.Info,"Indexing page '{}/{}'...", page.getDocument().getFilename(), page.getPageNumber());
 
             // Sync with elastic
             final byte[] base64bytes = Base64.getEncoder().encode(page.getPayload());
@@ -82,13 +83,18 @@ public class IndexJobExecution extends AbstractJobExecution<Void, IndexJobEntity
                 final DocumentResult result = client.execute(action);
                 if (!result.isSucceeded()) {
                     LOG.error("Could not index file {}. Reason: ", page.getName(), result.getErrorMessage());
-                    logPage(page, PageState.Error, result.getErrorMessage());
+                    page.setErrorMessage(result.getErrorMessage());
+                    logEntry(LogLevel.Error, "Page {}/{} could not be index. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), result.getErrorMessage());
                     return;
                 }
-                logPage(page, PageState.Indexed);
+                // Mark as Success
+                logEntry(LogLevel.Success, "Page {}/{} was indexed successfully", page.getDocument().getFilename(), page.getPageNumber());
+                page.setState(PageState.Indexed);
+                page.setErrorMessage(null);
             } catch (IOException e) {
                 LOG.error("Could not index file {}. Reason: ", page.getName(), e.getMessage());
-                logPage(page, PageState.Error, e.getMessage());
+                page.setErrorMessage(e.getMessage());
+                logEntry(LogLevel.Error, "Page {}/{} could not be index. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
                 return;
             }
 

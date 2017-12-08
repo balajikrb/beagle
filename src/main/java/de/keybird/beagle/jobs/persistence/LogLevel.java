@@ -16,33 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.persistence.status;
+package de.keybird.beagle.jobs.persistence;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
-import de.keybird.beagle.api.PageState;
-
-@Embeddable
-public class PageStatus {
-    @Enumerated(EnumType.STRING)
-    private PageState state;
-    private String errorMessage;
-
-    public PageState getState() {
-        return state;
-    }
-
-    public void setState(PageState state) {
-        this.state = state;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+public enum LogLevel {
+    Info,
+    Success,
+    Warn,
+    Error
 }

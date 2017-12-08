@@ -105,8 +105,8 @@ public class JobRestController {
         jobInfoDTO.setId(jobExecution.getJobEntity().getId());
         jobInfoDTO.setCompleteTime(jobExecution.getJobEntity().getCompleteTime());
         jobInfoDTO.setStartTime(jobExecution.getJobEntity().getStartTime());
-        jobInfoDTO.setErrorMessage(jobExecution.getJobEntity().getStatus().getErrorMessage());
-        jobInfoDTO.setState(jobExecution.getJobEntity().getStatus().getState());
+        jobInfoDTO.setErrorMessage(jobExecution.getJobEntity().getErrorMessage());
+        jobInfoDTO.setState(jobExecution.getJobEntity().getState());
         jobInfoDTO.setProgress(new Progress(jobExecution.getProgress()));
         return jobInfoDTO;
     }

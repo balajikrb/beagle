@@ -24,8 +24,7 @@ angular.module('beagleApp')
             var colorMap = {
                 'Pending': 'secondary',
                 'Running': 'primary',
-                'Error': 'danger',
-                'Success': 'success',
+                'Completed': 'success',
                 'Initializing': 'info',
             };
 
@@ -52,7 +51,7 @@ angular.module('beagleApp')
                                             total: job.progress.totalProgress,
                                         },
                                         state: job.state,
-                                        color: colorMap[job.state]
+                                        color: job.errorMessage ? 'danger' : colorMap[job.state]
                                     };
                                     if (jobData.progress.indeterminate === false) {
                                         if (jobData.progress.current === 0 && jobData.progress.total === 0) {

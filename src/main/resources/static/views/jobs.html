@@ -15,27 +15,33 @@
                         <th scope="col">Date</th>
                         <th scope="col">Name</th>
                         <th scope="col">Duration</th>
-                        <th scope="col">State</th>
+                        <th scope="col">Status</th>
                     </tr>
                 </thead>
                 <tbody ng-repeat="job in jobs">
-                    <tr>
+                    <tr class="clickable alert-{{job.color}}" data-toggle="collapse" data-target="#job-details-{{job.id}}">
                         <th scope="row">{{job.id}}</th>
                         <td>{{job.startTime | date: 'medium'}}</td>
-                        <td>{{job.type}} Job</td>
-                        <td>{{job.completeTime - job.startTime}}</td>
-                        <td><span class="badge" ng-class="{ 'badge-success' : job.status.state === 'Success', 'badge-danger' : job.status.state === 'Error' }">{{job.status.state}}</span></td>
+                        <td>{{job.name}}</td>
+                        <td>{{job.duration}}</td>
+                        <td ng-if="job.status === 'Failed'">
+                            <span class="badge badge-{{job.color}}">{{job.status}} : {{job.errorMessage}}</span>
+                        </td>
+                        <td ng-if="job.status === 'Success' && job.hasWarnings || job.hasErrors">
+                            <span class="badge badge-{{job.color}}">Ran with<span ng-if="job.hasErrors"> errors</span><span ng-if="job.hasWarnings"> warnings</span></span>
+                        </td>
+                        <td ng-if="job.status === 'Success' && !job.hasWarnings && !job.hasErrors">
+                            <span class="badge badge-{{job.color}}">Success</span>
+                        </td>
                     </tr>
-                    <tr>
+                    <tr class="collapse alert alert-{{job.color}}" id="job-details-{{job.id}}">
                        <td colspan="5">
                            <div>
                                <table class="table">
-                                   <tr ng-repeat="item in job.manifestItems">
-                                       <td>{{item.id}}</td>
-                                       <td>{{item.date | date: 'medium'}}</td>
-                                       <td ng-if="item.message">{{item.message}}</td>
-                                       <td ng-if="item.document">Document '{{item.document.filename}}' <span class="badge" ng-class="{ 'badge-success' : item.status.state === 'Accepted', 'badge-danger' : item.status.state === 'Error' }">{{item.status.state}}</span></td>
-                                       <td ng-if="item.page">Page '{{item.page.document.filename}}/{{item.page.pageNumber}}' <span class="badge" ng-class="{ 'badge-success' : item.status.state === 'Imported', 'badge-danger' : item.status.state === 'Error' }">{{item.status.state}}</span></td>
+                                   <tr ng-repeat="log in job.logs" class="alert alert-{{log.color}}">
+                                       <td>{{log.id}}</td>
+                                       <td>{{log.date | date: 'medium'}}</td>
+                                       <td>{{log.message}}</td>
                                    </tr>
                                </table>
                            </div>

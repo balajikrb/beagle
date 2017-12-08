@@ -34,8 +34,8 @@
         <li class="bg-white text-{{job.color}}" style="font-size: 12px; position:relative; padding-top: 15px" ng-repeat="job in jobs">
             <span ng-if="job.state === 'Pending'" title="Pending"><i class="fa fa-pause"></i></span>
             <span ng-if="job.state === 'Running'" title="Running"><i class="fa fa-play"></i></span>
-            <span ng-if="job.state === 'Success'" title="Completed"><i class="fa fa-check"></i></span>
-            <span ng-if="job.state === 'Error'" title="Error"><i class="fa fa-times"></i></span>
+            <span ng-if="job.state === 'Completed' && !job.errorMessage" title="Completed"><i class="fa fa-check"></i></span>
+            <span ng-if="job.state === 'Completed' && job.errorMessage" title="Error"><i class="fa fa-times"></i></span>
             <span style="font-size: 12px; width: 100%; overflow: hidden" title="{{job.name}}">{{job.name}}</span>
             <div class="progress w-75" style="height: 6px; margin-bottom: 2px; margin-top: 2px">
                 <div class="progress-bar bg-{{job.color}}"
@@ -45,7 +45,7 @@
                 </div>
             </div>
             <span style="position: absolute; right: 10px; top: 28px; font-size: 11px" ng-if="job.progress.total > 0">{{job.progress.current}}/{{job.progress.total}}</span>
-            <span style="font-size: 11px" ng-if="job.description">{{job.description}}...</span>
+            <span style="font-size: 11px" ng-if="job.description">{{job.description}}</span><span ng-if="job.state !== 'Completed'">...</span>
         </li>
         <hr/>
 

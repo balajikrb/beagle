@@ -27,8 +27,52 @@ angular.module('beagleApp')
             $http.get("/jobs").then(function(response) {
                 console.log("success", response);
 
-                if (response.data) {
-                    $scope.jobs = response.data;
+                // log level to bootstrap coler
+                var colorMapping = {
+                    'Info': 'secondary',
+                    'Success': 'success',
+                    'Warn': 'warning',
+                    'Error': 'danger',
+                    'Failed': 'danger',
+                };
+
+                if (response.data && Array.isArray(response.data)) {
+                    $scope.jobs = [];
+                    for (var i=0; i<response.data.length; i++) {
+                        var entry = response.data[i];
+                        var jobInfo = {
+                            id: entry.id,
+                            startTime: entry.startTime,
+                            name: entry.type + " Job",
+                            duration: entry.completeTime - entry.startTime,
+                            status : entry.errorMessage ? "Failed" : "Success",
+                            hasWarnings: false,
+                            hasErrors: false,
+                            logs: entry.logs.slice(0)
+                        };
+
+                        // Apply color
+                        jobInfo.color = colorMapping[jobInfo.status];
+
+                        // If job ran successful, some items may caused warnings/errors
+                        for (var a=0; a<jobInfo.logs.length; a++) {
+                            var logEntry = jobInfo.logs[a];
+
+                            if (logEntry.level === 'Warn') {
+                                jobInfo.hasWarnings = true;
+                                jobInfo.color = 'warning';
+                            }
+                            if (logEntry.level === 'Error') {
+                                jobInfo.hasErrors = true;
+                                jobInfo.hasWarnings = false;
+                                jobInfo.color = 'danger';
+                            }
+                            logEntry.color = colorMapping[logEntry.level];
+                        }
+
+                        $scope.jobs.push(jobInfo);
+                    }
+                    console.log($scope.jobs);
                 } else {
                     $scope.errorMessage = "Something went wrong"; // TODO MVR do more of this...
                 }

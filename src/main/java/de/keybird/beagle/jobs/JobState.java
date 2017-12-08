@@ -22,6 +22,5 @@ public enum JobState {
     Pending,
     Initializing,
     Running,
-    Error,
-    Success;
+    Completed
 }

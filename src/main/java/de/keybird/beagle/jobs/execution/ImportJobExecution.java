@@ -43,6 +43,7 @@ import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.jobs.persistence.ImportJobEntity;
+import de.keybird.beagle.jobs.persistence.LogLevel;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.PageRepository;
 import de.keybird.beagle.services.PdfManager;
@@ -70,7 +71,7 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
     }
 
     public Void executeInternal() throws Exception {
-        logItem("Importing '{}'", getDocument().getFilename());
+        logEntry(LogLevel.Info, "Importing '{}'", getDocument().getFilename());
 
         final Document importDocument = getDocument();
         final PDDocument pdfDocument = PdfManager.load(importDocument.getPayload());
@@ -109,12 +110,14 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
                 // TODO MVR don't import same page twice
 
                 // Mark as imported
-                logPage(page, PageState.Imported);
+                page.setState(PageState.Imported);
+                page.setErrorMessage(null);
+                logEntry(LogLevel.Info.Success, "Page {} was imported successful", index + 1);
                 updateProgress(++index, splitDocuments.size());
                 pageRepository.save(page);
             } catch (Exception ex) {
                 logger.error("Error while importing page", ex);
-                logPage(page, PageState.Error, ex.getMessage());
+                page.setErrorMessage(ex.getMessage());
             }
         }
         return null;
@@ -124,12 +127,12 @@ public class ImportJobExecution extends AbstractJobExecution<Void, ImportJobEnti
     protected void onSuccess(Void result) {
         // TODO MVR figure out if partially imported
         getDocument().setState(DocumentState.Imported);
+        getDocument().setErrorMessage(null);
         documentRepository.save(getDocument());
     }
 
     @Override
     protected void onError(Throwable t) {
-        getDocument().setState(DocumentState.Error);
         getDocument().setErrorMessage(t.getMessage());
         documentRepository.save(getDocument());
     }

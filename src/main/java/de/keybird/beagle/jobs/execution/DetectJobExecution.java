@@ -37,6 +37,7 @@ import com.google.common.hash.Hashing;
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
+import de.keybird.beagle.jobs.persistence.LogLevel;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.services.PdfManager;
 
@@ -57,7 +58,7 @@ public class DetectJobExecution extends AbstractJobExecution<Integer, DetectJobE
     @Override
     protected Integer executeInternal() throws ExecutionException {
         try {
-            logItem("Reading contents from directory {}", context.getInboxPath());
+            logEntry(LogLevel.Info,"Reading contents from directory '{}'", context.getInboxPath());
 
             Files.list(context.getInboxPath())
                     // TODO MVR also handle jpg, etc.
@@ -66,7 +67,7 @@ public class DetectJobExecution extends AbstractJobExecution<Integer, DetectJobE
                         return accept;
                     })
                     .forEach(entry -> {
-                        logItem("Handling file {}", entry.toString());
+                        logEntry(LogLevel.Info,"Handling file '{}'", entry.toString());
 
                         final Document theDocument = new Document();
                         theDocument.setState(DocumentState.New);
@@ -82,13 +83,14 @@ public class DetectJobExecution extends AbstractJobExecution<Integer, DetectJobE
                             final PDDocument pdfDocument = PdfManager.load(payload);
                             theDocument.setPageCount(pdfDocument.getPages().getCount());
 
-                            logDocument(theDocument, DocumentState.Accepted);
+                            logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
+                            theDocument.setState(DocumentState.New);
+                            documentRepository.save(theDocument);
                         } catch (IOException ex) {
-                            logDocument(theDocument, DocumentState.Error, ex.getMessage());
+                            logEntry(LogLevel.Error, "Document '{}' was rejected. Reason: {}", entry, ex.getMessage());
                         }
-                        documentRepository.save(theDocument);
                         if (theDocument.getPayload() != null) {
-                            logItem("Deleting file {}", entry);
+                            logEntry(LogLevel.Info,"Deleting file '{}'", entry);
                             deleteFile(entry);
                         }
                     });

@@ -20,8 +20,5 @@ package de.keybird.beagle.api;
 
 public enum DocumentState {
     New,
-    Accepted,
-    Rejected,
-    Error,
     Imported
 }

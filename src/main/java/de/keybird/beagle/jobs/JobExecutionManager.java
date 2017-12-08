@@ -124,7 +124,7 @@ public class JobExecutionManager {
             jobExecutionList
                 .stream()
                     .filter(execution -> Arrays.asList(type).contains(execution.getClass()))
-                    .filter(execution -> Lists.newArrayList(JobState.Success, JobState.Error).contains(execution.getJobEntity().getStatus().getState()))
+                    .filter(execution -> Lists.newArrayList(JobState.Completed).contains(execution.getJobEntity().getState()))
                     .collect(Collectors.toSet())
         );
     }
