@@ -66,7 +66,6 @@ public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
             logEntry(LogLevel.Info,"Reading contents from directory '{}'", context.getInboxPath());
 
             Files.list(context.getInboxPath())
-                    // TODO MVR also handle jpg, etc.
                     .filter(entry -> {
                         boolean accept = !Files.isDirectory(entry) && entry.toString().toLowerCase().endsWith(".pdf");
                         return accept;
@@ -88,9 +87,13 @@ public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
                             final PDDocument pdfDocument = PdfManager.load(payload);
                             theDocument.setPageCount(pdfDocument.getPages().getCount());
 
-                            logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
-                            theDocument.setState(DocumentState.New);
-                            documentRepository.save(theDocument);
+                            // Ensure it is not already persisted
+                            if (documentRepository.findByChecksum(hashCode.toString()) != null) {
+                                logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Document already exists.", entry);
+                            } else {
+                                logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
+                                documentRepository.save(theDocument);
+                            }
                         } catch (IOException ex) {
                             logEntry(LogLevel.Error, "Document '{}' was rejected. Reason: {}", entry, ex.getMessage());
                         }
