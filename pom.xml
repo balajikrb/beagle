@@ -74,10 +74,14 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- TODO MVR ensure that this is not part of the build, when building for prod environment -->
+		<!--
+			According to the official documentation this dependency is never included in production builds.
+			See https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html#using-boot-devtools
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 	<build>
@@ -85,6 +89,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludeDevtools>true</excludeDevtools>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.mycila</groupId>
