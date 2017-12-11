@@ -72,4 +72,8 @@ public class JobContext {
     public JobRepository getJobRepository() {
         return jobRepository;
     }
+
+    public Path getWorkingPath() {
+        return workingPath;
+    }
 }

@@ -20,6 +20,8 @@ package de.keybird.beagle;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -27,9 +29,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import de.keybird.beagle.repository.DocumentRepository;
-import de.keybird.beagle.repository.JobRepository;
-import de.keybird.beagle.repository.PageRepository;
+import de.keybird.beagle.jobs.JobContext;
 import de.keybird.beagle.repository.UserRepository;
 import de.keybird.beagle.security.User;
 import de.keybird.beagle.security.UserState;
@@ -38,6 +38,8 @@ import de.keybird.beagle.security.UserState;
 @EnableScheduling
 public class BeagleApplication implements CommandLineRunner {
 
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	@Autowired
 	private UserRepository userRepository;
 
@@ -45,13 +47,7 @@ public class BeagleApplication implements CommandLineRunner {
 	private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private JobRepository jobRepository;
-
-	@Autowired
-	private DocumentRepository documentRepository;
-
-	@Autowired
-	private PageRepository pageRepository;
+	private JobContext jobContext;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BeagleApplication.class, args);
@@ -59,6 +55,11 @@ public class BeagleApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... strings) throws Exception {
+		logger.info("Working directory: {}", jobContext.getWorkingPath());
+		logger.info("Inbox directory: {}", jobContext.getInboxPath());
+		logger.info("Archive directory: {}", jobContext.getArchivePath());
+
+
 		// Create dummy user(s) for now
 		// TODO MVR remove later
 		final User test = new User();
@@ -87,40 +88,6 @@ public class BeagleApplication implements CommandLineRunner {
 		userRepository.save(mvr);
 		userRepository.save(fs);
 		userRepository.save(test);
-
-//		Document document = new Document();
-//		document.setFilename("My file name.pdf");
-//		document.setPageCount(1);
-//
-//		Page profile = new Page();
-//		profile.setImport(document);
-//		profile.setName("01");
-//
-//		documentRepository.save(document);
-//		profileRepository.save(profile);
-//
-//
-//
-//		final DetectJobEntity detectJobEntity = new DetectJobEntity();
-//		detectJobEntity.setCreateTime(new Date());
-//		detectJobEntity.setCompleteTime(new Date());
-//		detectJobEntity.setStartDate(new Date());
-//
-//		final LogItem logManifestItem = new LogItem();
-//		logManifestItem.setMessage("XXX");
-//		detectJobEntity.addManifestItem(logManifestItem);
-//
-//		final DocumentItem documentItem = new DocumentItem();
-//		documentItem.setDocument(document);
-//
-//		final PageItem pageItem = new PageItem();
-//		pageItem.setPage(profile);
-//
-//		detectJobEntity.addManifestItem(documentItem);
-//		detectJobEntity.addManifestItem(pageItem);
-//
-//		jobRepository.save(detectJobEntity);
-//		jobRepository.save(new ImportJobEntity());
 	}
 
 }
