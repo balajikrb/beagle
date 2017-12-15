@@ -31,7 +31,7 @@ angular.module('beagleApp')
             // // TODO MVR
             $scope.jobs = [];
             // TODO MVR add authentication
-            $stomp.connect('http://localhost:8080/beagle-websocket', {})
+            $stomp.connect('/beagle-websocket', {})
                 .then(function (frame) {
                     var subscription = $stomp.subscribe('/topic/jobs',
                         function (payload, headers, res) {
