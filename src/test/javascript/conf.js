@@ -25,6 +25,12 @@ exports.config = {
             args: ["--headless", "--no-sandbox", "--disable-gpu", "--window-size=1920,1080"]
         },
     },
+    onPrepare: function() {
+        if (browser.baseUrl === undefined || browser.baseUrl === '') {
+            browser.baseUrl = 'http://localhost:8080';
+        }
+        console.log("Using baseUrl: " + browser.baseUrl);
+    },
     seleniumAddress: 'http://localhost:4444/wd/hub',
     specs: ['**/specs/*.js']
 };
