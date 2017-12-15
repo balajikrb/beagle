@@ -100,14 +100,17 @@ public class JobRestController {
     }
 
     public static JobInfoDTO createFrom(AbstractJobExecution jobExecution) {
+        final JobEntity jobEntity = jobExecution.getJobEntity();
         final JobInfoDTO jobInfoDTO = new JobInfoDTO();
         jobInfoDTO.setDescription(jobExecution.getDescription());
-        jobInfoDTO.setId(jobExecution.getJobEntity().getId());
-        jobInfoDTO.setCompleteTime(jobExecution.getJobEntity().getCompleteTime());
-        jobInfoDTO.setStartTime(jobExecution.getJobEntity().getStartTime());
-        jobInfoDTO.setErrorMessage(jobExecution.getJobEntity().getErrorMessage());
-        jobInfoDTO.setState(jobExecution.getJobEntity().getState());
+        jobInfoDTO.setCompleteTime(jobEntity.getCompleteTime());
+        jobInfoDTO.setStartTime(jobEntity.getStartTime());
+        jobInfoDTO.setErrorMessage(jobEntity.getErrorMessage());
+        jobInfoDTO.setState(jobEntity.getState());
         jobInfoDTO.setProgress(new Progress(jobExecution.getProgress()));
+        if (jobEntity.getId() != null) { // TODO MVR the id should not be null here
+            jobInfoDTO.setId(jobInfoDTO.getId());
+        }
         return jobInfoDTO;
     }
 }

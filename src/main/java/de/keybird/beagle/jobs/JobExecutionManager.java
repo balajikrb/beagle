@@ -116,16 +116,16 @@ public class JobExecutionManager {
         return !jobExecutionList.isEmpty();
     }
 
-    public List<AbstractJobExecution> getExecutions(Class<? extends AbstractJobExecution>... type) {
-        if (type == null || type.length == 0) {
+    public List<AbstractJobExecution> getExecutions(Class<? extends AbstractJobExecution>... types) {
+        if (types == null || types.length == 0) {
             return new ArrayList<>(jobExecutionList);
         }
         return new ArrayList<>(
-            jobExecutionList
-                .stream()
-                    .filter(execution -> Arrays.asList(type).contains(execution.getClass()))
-                    .filter(execution -> Lists.newArrayList(JobState.Completed).contains(execution.getJobEntity().getState()))
-                    .collect(Collectors.toSet())
+                jobExecutionList
+                        .stream()
+                        .filter(execution -> Arrays.asList(types).stream().filter(t -> t.isAssignableFrom(execution.getClass())).findAny().isPresent())
+                        .filter(execution -> !Lists.newArrayList(JobState.Completed).contains(execution.getJobEntity().getState()))
+                        .collect(Collectors.toSet())
         );
     }
 }
