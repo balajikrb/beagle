@@ -6,6 +6,9 @@ jobs:
     docker:
       - image: circleci/openjdk:8-jdk-browsers
 
+    environment:
+      - MAVEN_OPTS: -Xmx2048m -XX:ReservedCodeCacheSize=512m
+
     steps:
 
       - checkout

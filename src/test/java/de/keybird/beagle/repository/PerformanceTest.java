@@ -128,7 +128,7 @@ public class PerformanceTest {
         transactionOperations.execute((TransactionCallback<Void>) transactionStatus -> {
             documentRepository.save(document);
 
-            for (int i=0; i<1000; i++) {
+            for (int i=0; i<250; i++) {
                 Page page = new Page();
                 page.setDocument(document);
                 page.setState(PageState.Imported);
