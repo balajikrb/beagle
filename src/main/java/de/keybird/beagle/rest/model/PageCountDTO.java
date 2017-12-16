@@ -16,7 +16,35 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api;
+package de.keybird.beagle.rest.model;
 
-public class Payload {
+public class PageCountDTO {
+    private int indexed;
+    private int imported;
+
+    public int getIndexed() {
+        return indexed;
+    }
+
+    public void setIndexed(int indexed) {
+        this.indexed = indexed;
+    }
+
+    public int getImported() {
+        return imported;
+    }
+
+    public void setImported(int imported) {
+        this.imported = imported;
+    }
+
+    public PageCountDTO withImportedCount(int importedCount) {
+        setImported(importedCount);
+        return this;
+    }
+
+    public PageCountDTO withIndexedCount(int indexedCount) {
+        setIndexed(indexedCount);
+        return this;
+    }
 }

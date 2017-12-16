@@ -16,33 +16,19 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api;
+package de.keybird.beagle.rest.model;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import java.util.Objects;
 
-import org.hibernate.annotations.BatchSize;
+import de.keybird.beagle.api.Page;
+import de.keybird.beagle.api.PageState;
 
-@Entity
-@Table(name="pages")
-public class Page {
+public class PageDTO {
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
     private String name;
 
-    @Enumerated(EnumType.STRING)
     private PageState state;
 
     private String checksum;
@@ -51,20 +37,28 @@ public class Page {
 
     private int pageNumber;
 
-    @Lob
-    private byte[] payload;
-
-    @Lob
-    private byte[] thumbnail;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="document_id")
-    @BatchSize(size=100)
-    private Document document;
-
-    public Page() {
+    public PageDTO() {
 
     }
+
+    public PageDTO(Page page) {
+        setChecksum(page.getChecksum());
+        setErrorMessage(page.getErrorMessage());
+        setId(page.getId());
+        setName(page.getName());
+        setPageNumber(page.getPageNumber());
+        setState(page.getState());
+    }
+
+    // TODO MVR add payload URL
+//    private byte[] payload;
+
+    // TODO MVR add thumbnail URL
+//    private byte[] thumbnail;
+
+    // TODO MVR add document URL
+//    private Long documentId;
+
 
     public Long getId() {
         return id;
@@ -106,22 +100,6 @@ public class Page {
         this.errorMessage = errorMessage;
     }
 
-    public byte[] getPayload() {
-        return payload;
-    }
-
-    public void setPayload(byte[] payload) {
-        this.payload = payload;
-    }
-
-    public void setThumbnail(byte[] thumbnail) {
-        this.thumbnail = thumbnail;
-    }
-
-    public byte[] getThumbnail() {
-        return thumbnail;
-    }
-
     public int getPageNumber() {
         return pageNumber;
     }
@@ -130,11 +108,22 @@ public class Page {
         this.pageNumber = pageNumber;
     }
 
-    public Document getDocument() {
-        return document;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final PageDTO pageDTO = (PageDTO) o;
+        final boolean equals = Objects.equals(pageNumber, pageDTO.pageNumber)
+                && Objects.equals(id, pageDTO.id)
+                && Objects.equals(name, pageDTO.name)
+                && Objects.equals(state, pageDTO.state)
+                && Objects.equals(checksum, pageDTO.checksum)
+                && Objects.equals(errorMessage, pageDTO.errorMessage);
+        return equals;
     }
 
-    public void setDocument(Document document) {
-        this.document = document;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, state, checksum, errorMessage, pageNumber);
     }
 }

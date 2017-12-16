@@ -16,27 +16,15 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api;
+package de.keybird.beagle.rest.model;
 
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import de.keybird.beagle.api.Document;
+import de.keybird.beagle.api.DocumentState;
 
-@Entity
-@Table(name="documents")
-public class Document {
+public class DocumentDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
     private String filename;
@@ -47,17 +35,30 @@ public class Document {
 
     private int pageCount;
 
-    @Enumerated(EnumType.STRING)
-    private DocumentState state = DocumentState.New;
+    private DocumentState state;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date importDate;
 
-    @Lob
-    private byte[] payload;
+    public DocumentDTO() {
 
-    public Document() {
+    }
 
+    public DocumentDTO(Document document) {
+        setId(document.getId());
+        setChecksum(document.getChecksum());
+        setErrorMessage(document.getErrorMessage());
+        setFilename(document.getFilename());
+        setImportDate(document.getImportDate());
+        setPageCount(document.getPageCount());
+        setState(document.getState());
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getFilename() {
@@ -76,22 +77,6 @@ public class Document {
         this.checksum = checksum;
     }
 
-    public byte[] getPayload() {
-        return payload;
-    }
-
-    public void setPayload(byte[] payload) {
-        this.payload = payload;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -100,20 +85,12 @@ public class Document {
         this.errorMessage = errorMessage;
     }
 
-    public void setPageCount(int count) {
-        this.pageCount = count;
-    }
-
     public int getPageCount() {
         return pageCount;
     }
 
-    public Date getImportDate() {
-        return importDate;
-    }
-
-    public void setImportDate(Date importDate) {
-        this.importDate = importDate;
+    public void setPageCount(int pageCount) {
+        this.pageCount = pageCount;
     }
 
     public DocumentState getState() {
@@ -122,5 +99,13 @@ public class Document {
 
     public void setState(DocumentState state) {
         this.state = state;
+    }
+
+    public Date getImportDate() {
+        return importDate;
+    }
+
+    public void setImportDate(Date importDate) {
+        this.importDate = importDate;
     }
 }

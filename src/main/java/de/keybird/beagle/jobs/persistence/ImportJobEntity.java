@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
 import de.keybird.beagle.api.Document;
@@ -31,7 +32,7 @@ import de.keybird.beagle.jobs.execution.JobType;
 @DiscriminatorValue("import")
 public class ImportJobEntity extends JobEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Document document;
 
     public ImportJobEntity() {

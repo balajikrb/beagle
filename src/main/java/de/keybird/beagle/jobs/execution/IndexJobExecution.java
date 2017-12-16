@@ -96,10 +96,9 @@ public class IndexJobExecution extends AbstractJobExecution<IndexJobEntity> {
                 page.setErrorMessage(e.getMessage());
                 logEntry(LogLevel.Error, "Page {}/{} could not be index. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
                 return;
+            } finally {
+                updateProgress(index.incrementAndGet(), totalSize);
             }
-
-            // Mark as indexed
-            updateProgress(index.incrementAndGet(), totalSize);
         });
 
         pageRepository.save(importedPages);

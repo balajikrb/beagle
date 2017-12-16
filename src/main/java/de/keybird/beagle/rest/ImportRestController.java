@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.repository.DocumentRepository;
+import de.keybird.beagle.rest.model.DocumentDTO;
 
 @RestController
 @RequestMapping("/imports")
@@ -42,17 +43,14 @@ public class ImportRestController {
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Document>> listImports() {
-        Iterable<Document> files = documentRepository.findAll();
-        if (!files.iterator().hasNext()) {
+        Iterable<Document> documents = documentRepository.findAll();
+        if (!documents.iterator().hasNext()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
-        files = StreamSupport.stream(files.spliterator(), false)
-                .map(f -> {
-                    Document theDocument = new Document(f);
-                    theDocument.setPayload(null);
-                    return theDocument;
-                })
+        // Convert to DTOs
+        final List<DocumentDTO> documentDTOS = StreamSupport.stream(documents.spliterator(), false)
+                .map(document -> new DocumentDTO(document))
                 .collect(Collectors.toList());
-        return new ResponseEntity(files, HttpStatus.OK);
+        return new ResponseEntity(documentDTOS, HttpStatus.OK);
     }
 }

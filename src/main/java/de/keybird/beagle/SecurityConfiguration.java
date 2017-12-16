@@ -73,6 +73,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .anyRequest()
             .authenticated()
         .and()
-            .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+            .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        .and()
+            .headers().frameOptions().sameOrigin();
     }
 }

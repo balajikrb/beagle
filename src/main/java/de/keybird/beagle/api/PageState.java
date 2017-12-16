@@ -21,6 +21,5 @@ package de.keybird.beagle.api;
 public enum PageState {
     Imported,
     Indexed,
-    Synced,
     Deleted
 }

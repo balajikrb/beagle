@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
-var app = angular.module('beagleApp', ['ui.router', 'ui.bootstrap', 'ngStomp']);
+var app = angular.module('beagleApp', ['ui.router', 'ui.bootstrap', 'ngStomp', 'angular-loading-bar', 'ngAnimate']);
 
 app.constant('urls', {
 });
 
-app.config(['$stateProvider', '$urlRouterProvider', '$httpProvider',
-    function($stateProvider, $urlRouterProvider, $httpProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', '$httpProvider', 'cfpLoadingBarProvider',
+    function($stateProvider, $urlRouterProvider, $httpProvider, cfpLoadingBarProvider) {
 
         // Required by spring security to not sent authentication headers back to client (prevents browser's credentials dialog)
         $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
@@ -53,6 +53,9 @@ app.config(['$stateProvider', '$urlRouterProvider', '$httpProvider',
             })
             .state('search', {
                 templateUrl: '/views/search.html',
+                params: {
+                    query: null
+                },
                 controller: 'SearchController',
                 url: '/search'
             })

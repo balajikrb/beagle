@@ -24,6 +24,7 @@ import de.keybird.beagle.jobs.JobInfo;
 import de.keybird.beagle.jobs.JobState;
 import de.keybird.beagle.jobs.Progress;
 
+// TODO MVR jobInfoDTO is not the right name
 public class JobInfoDTO implements JobInfo {
 
     private long id;

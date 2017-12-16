@@ -22,5 +22,5 @@ public enum JobType {
     Detect,
     Import,
     Index,
-    Warning, Sync
+    Sync
 }

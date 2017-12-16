@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,6 +42,8 @@ import com.google.gson.JsonObject;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.repository.PageRepository;
+import de.keybird.beagle.rest.model.PageCountDTO;
+import de.keybird.beagle.rest.model.PageDTO;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
@@ -57,26 +60,43 @@ public class PageRestController {
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Page>> listPages() {
-        Iterable<Page> files = pageRepository.findAll();
-        if (!files.iterator().hasNext()) {
+        final Iterable<Page> pages = pageRepository.findAll();
+        if (!pages.iterator().hasNext()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
-        files = StreamSupport.stream(files.spliterator(), false)
-                .map(f -> {
-                    Page file = new Page(f);
-                    file.setPayload(null);
-                    file.setThumbnail(null);
-                    return file;
-                })
-        .collect(Collectors.toList());
-        return new ResponseEntity(files, HttpStatus.OK);
+        // Convert to DTOS
+        final List<PageDTO> pageDTOs = StreamSupport.stream(pages.spliterator(), false)
+                .map(page -> new PageDTO(page))
+                .collect(Collectors.toList());
+        return new ResponseEntity(pageDTOs, HttpStatus.OK);
     }
 
     @RequestMapping(value="count", method=RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity count() {
-        final List<Page> byState = pageRepository.findByState(PageState.Indexed);
-        byState.addAll(pageRepository.findByState(PageState.Synced));
-        return new ResponseEntity(byState.size(), HttpStatus.OK);
+        final List<Page> indexedDocuments = pageRepository.findByState(PageState.Indexed);
+        final List<Page> importedDocuments = pageRepository.findByState(PageState.Imported);
+        final PageCountDTO pageCountDTO = new PageCountDTO()
+                .withImportedCount(importedDocuments.size() + indexedDocuments.size())
+                .withIndexedCount(indexedDocuments.size());
+        return new ResponseEntity(pageCountDTO, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    public ResponseEntity getPayload(@PathVariable("id") long pageId) {
+        final Page page = pageRepository.findOne(pageId);
+        if (page == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(page.getPayload());
+    }
+
+    @RequestMapping(value = "{id}/thumbnail", method = RequestMethod.GET)
+    public ResponseEntity getThumbnail(@PathVariable("id") long pageId) {
+        final Page page = pageRepository.findOne(pageId);
+        if (page == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(page.getThumbnail());
     }
 
     @RequestMapping(value="search", method=RequestMethod.GET)
@@ -100,7 +120,7 @@ public class PageRestController {
                 .addSourceExcludePattern("data")
                 .build();
         final SearchResult result = jestClient.execute(search);
-        final Set<Page> files = new HashSet<>();
+        final Set<PageDTO> pages = new HashSet<>();
         if (result.isSucceeded()) {
             final JsonArray hits = result.getJsonObject()
                     .get("hits").getAsJsonObject()
@@ -111,13 +131,13 @@ public class PageRestController {
                         .get("id");
                 if (jsonElement != null) {
                     final long internalId = jsonElement.getAsLong();
-                    final Page file = pageRepository.findOne(internalId);
-                    if (file != null) {
-                        files.add(file);
+                    final Page page = pageRepository.findOne(internalId);
+                    if (page != null) {
+                        pages.add(new PageDTO(page));
                     }
                 }
             }
         }
-        return new ResponseEntity(files, HttpStatus.OK);
+        return new ResponseEntity(pages, HttpStatus.OK);
     }
 }

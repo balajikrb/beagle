@@ -21,6 +21,7 @@ package de.keybird.beagle.rest;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
-
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
@@ -40,6 +39,7 @@ import de.keybird.beagle.jobs.execution.AbstractJobExecution;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
+import de.keybird.beagle.rest.model.JobDTO;
 import de.keybird.beagle.rest.model.JobInfoDTO;
 
 @RestController
@@ -64,7 +64,11 @@ public class JobRestController {
         if (!all.iterator().hasNext()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity(Lists.newArrayList(all), HttpStatus.OK);
+        // Convert entities to DTOs (let's us fine-tune what to expose)
+        final List<JobDTO> entities = StreamSupport.stream(all.spliterator(), false)
+                .map(e -> new JobDTO(e))
+                .collect(Collectors.toList());
+        return new ResponseEntity(entities, HttpStatus.OK);
     }
 
     @RequestMapping(path="/running", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

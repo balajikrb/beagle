@@ -37,6 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
 import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.execution.JobType;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 
 @RunWith(SpringRunner.class)
@@ -66,11 +67,11 @@ public class JobExecutionManagerTest {
 
         // Verify execution is in progress
         assertThat(jobExecutionManager.hasRunningJobs(), is(true));
-        assertThat(jobExecutionManager.getExecutions(DummyJobExecution.class), Matchers.hasSize(1));
+        assertThat(jobExecutionManager.getExecutions(JobType.Detect), Matchers.hasSize(1));
 
         // Wait until finished
         await().atMost(10, SECONDS).until(() -> !jobExecutionManager.hasRunningJobs());
-        assertThat(jobExecutionManager.getExecutions(DummyJobExecution.class), Matchers.hasSize(0));
+        assertThat(jobExecutionManager.getExecutions(JobType.Detect), Matchers.hasSize(0));
 
     }
 

@@ -16,54 +16,49 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.persistence;
+package de.keybird.beagle.rest.model;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.BatchSize;
+import java.util.stream.Collectors;
 
 import de.keybird.beagle.jobs.JobState;
 import de.keybird.beagle.jobs.execution.JobType;
+import de.keybird.beagle.jobs.persistence.JobEntity;
 
-@Entity
-@Table(name="jobs")
-@Inheritance(strategy= InheritanceType.SINGLE_TABLE)
-public abstract class JobEntity {
+public class JobDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String errorMessage;
 
     private JobState state = JobState.Pending;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createTime = new Date();
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date completeTime;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size=100)
-    private List<LogEntity> logs = new ArrayList<>();
+    private List<LogDTO> logs = new ArrayList<>();
+
+    private JobType type;
+
+    public JobDTO() {
+
+    }
+
+    public JobDTO(JobEntity jobEntity) {
+        setId(jobEntity.getId());
+        setCompleteTime(jobEntity.getCompleteTime());
+        setCreateTime(jobEntity.getCreateTime());
+        setErrorMessage(jobEntity.getErrorMessage());
+        setStartTime(jobEntity.getStartTime());
+        setState(jobEntity.getState());
+        setType(jobEntity.getType());
+        setLogs(jobEntity.getLogs().stream().map(le -> new LogDTO(le)).collect(Collectors.toList()));
+    }
 
     public Long getId() {
         return id;
@@ -71,6 +66,22 @@ public abstract class JobEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public JobState getState() {
+        return state;
+    }
+
+    public void setState(JobState state) {
+        this.state = state;
     }
 
     public Date getStartTime() {
@@ -97,33 +108,19 @@ public abstract class JobEntity {
         this.completeTime = completeTime;
     }
 
-    public List<LogEntity> getLogs() {
+    public List<LogDTO> getLogs() {
         return logs;
     }
 
-    public void setLogs(List<LogEntity> logs) {
+    public void setLogs(List<LogDTO> logs) {
         this.logs = logs;
     }
 
-    public void addLogEntry(LogEntity item) {
-        logs.add(item);
+    public JobType getType() {
+        return type;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public void setType(JobType type) {
+        this.type = type;
     }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public JobState getState() {
-        return state;
-    }
-
-    public void setState(JobState state) {
-        this.state = state;
-    }
-
-    public abstract JobType getType();
 }

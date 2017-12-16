@@ -10,9 +10,9 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-5">
-                        <div class="alert alert-success" role="alert" ng-if="successMessage">{{successMessage}}</div>
                         <div class="alert alert-danger" role="alert" ng-if="errorMessage">{{errorMessage}}</div>
-                        <div>Anzahl Dokumente: {{documentCount}}</div>
+                        <div>Anzahl Dokumente: {{count.imported}}</div>
+                        <div ng-if="count.imported != count.indexed">Davon durchsuchbar: {{count.indexed}}</div>
                         <h2></h2>
                         <form name="search">
                             <input id="search-input" ng-model="searchQuery" type="text" class="form-control"/>
@@ -22,19 +22,18 @@
                             <div ng-if="searchResult && searchResult.length == 0">Nothing found!</div>
                             <div ng-if="searchResult && searchResult.length > 0">Documents found: {{searchResult.length}}</div>
 
-                            <img ng-repeat="item in searchResult"
+                            <img class="result-item" ng-repeat="item in searchResult"
                                  title="{{item.name}}"
                                  alt="{{item.name}}"
-                                 style="max-width: 50%; max-height: auto;"
-                                 src='data:image/png;base64,{{item.thumbnail}}'
-                                 ng-click="showPdf(item)" />
+                                 src="/pages/{{item.id}}/thumbnail"
+                                 ng-click="select(item)" />
                             </img>
                         </div>
                     </div>
-                    <div class="col-md-7" style="height: 800px"> <!-- TODO MVR find a more elegant way of doing this -->
+                    <div class="col-md-7" style="height: 800px">
                         <!-- Content for the pdf -->
-                         <div ng-if="previewData" style="width: 100%; height:100%">
-                            <object width='100%' height='100%' data='data:application/pdf;base64,{{previewData}}'></object>
+                         <div ng-if="selectedItem.payload" style="width: 100%; height:100%">
+                            <object width='100%' height='100%' data='data:application/pdf;base64,{{selectedItem.payload}}'></object>
                         </div>
                     </div>
                 </div>

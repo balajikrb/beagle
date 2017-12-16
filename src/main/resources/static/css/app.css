@@ -8,6 +8,8 @@ body {
  */
 .result-item {
     width: 50%;
+    max-width: 50%;
+    max-height: auto;
     float: left;
     padding: 10px;
 }

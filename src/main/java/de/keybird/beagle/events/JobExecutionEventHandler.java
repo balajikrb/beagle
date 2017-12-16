@@ -29,9 +29,7 @@ import com.google.common.eventbus.Subscribe;
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
-import de.keybird.beagle.jobs.execution.DetectJobExecution;
-import de.keybird.beagle.jobs.execution.ImportJobExecution;
-import de.keybird.beagle.jobs.execution.IndexJobExecution;
+import de.keybird.beagle.jobs.execution.JobType;
 import de.keybird.beagle.repository.DocumentRepository;
 
 @Component
@@ -51,36 +49,46 @@ public class JobExecutionEventHandler {
 
     @Subscribe
     public void onJobStarted(JobExecutionStartedEvent event) {
-        LOG.info("Job of type {} started", event.getSource().getClass().getSimpleName());
+        LOG.info("Job of type {} started", event.getSource().getJobEntity().getType());
     }
 
     @Subscribe
     public void onJobFinished(JobExecutionFinishedEvent event) {
-        LOG.info("Execution of {} completed {}", event.getSource().getClass().getSimpleName(), event.isFailed() ? "with error" : "successful");
+        LOG.info("Execution of {} job completed {}", event.getSource().getJobEntity().getType(), event.isFailed() ? "with error" : "successful");
         if (event.isFailed()) {
             LOG.error("Reason: {}", event.getException().getMessage(), event.getException());
         }
         if (event.isSuccess()) {
             // Kick of import of documents
-            if (event.getSource() instanceof DetectJobExecution) {
-                // TODO MVR use service for this?
+            if (event.getSource().getJobEntity().getType() == JobType.Detect) {
+                // TODO MVR use service for this
                 documentRepository
                         .findByState(DocumentState.New)
                         .forEach(theImport -> jobManager.submit(jobFactory.createImportJob(theImport)));
-            }
-            // After import kick of indexing, when no import job is running anymore
-            if (event.getSource() instanceof ImportJobExecution) {
-                boolean noImportJobsRunningAnymore = jobManager.getExecutions(ImportJobExecution.class).isEmpty();
-                if (noImportJobsRunningAnymore && jobManager.getExecutions(IndexJobExecution.class).isEmpty()) {
-                    jobManager.submit(jobFactory.createIndexJob());
+
+                // Kick of import if we have imported documents
+                if (!documentRepository.findByState(DocumentState.Imported).isEmpty()) {
+                    kickOffImportIfNecessary();
                 }
+            }
+            if (event.getSource().getJobEntity().getType() == JobType.Import) {
+                kickOffImportIfNecessary();
             }
         }
     }
 
     @Subscribe
     public void onJobSubmitted(JobExecutionSubmittedEvent event) {
-        LOG.info("Job of type {} submitted", event.getSource().getClass().getSimpleName());
+        LOG.info("Job of type {} submitted", event.getSource().getJobEntity().getType());
+    }
+
+    private void kickOffImportIfNecessary() {
+        // TODO MVR use service for this
+        // After import kick of indexing, when no import job is running anymore
+        boolean noImportJobsRunningAnymore = jobManager.getExecutions(JobType.Import).isEmpty();
+        if (noImportJobsRunningAnymore && jobManager.getExecutions(JobType.Index).isEmpty()) {
+            jobManager.submit(jobFactory.createIndexJob());
+        }
     }
 
 }

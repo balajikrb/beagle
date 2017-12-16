@@ -25,7 +25,10 @@ angular.module('beagleApp')
             $scope.newImportsAvailable = false;
 
             $scope.search = function () {
-                // TODO MVR implement me
+                console.log("SEARCH");
+                if ($scope.searchQuery && $scope.searchQuery.trim().length > 0) {
+                    $state.go("search", {query: $scope.searchQuery});
+                }
             };
 
             $scope.logout = function() {

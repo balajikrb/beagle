@@ -46,6 +46,7 @@ import de.keybird.beagle.events.JobExecutionFinishedEvent;
 import de.keybird.beagle.events.JobExecutionStartedEvent;
 import de.keybird.beagle.events.JobExecutionSubmittedEvent;
 import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.execution.JobType;
 import de.keybird.beagle.repository.JobRepository;
 
 @Service
@@ -116,16 +117,13 @@ public class JobExecutionManager {
         return !jobExecutionList.isEmpty();
     }
 
-    public List<AbstractJobExecution> getExecutions(Class<? extends AbstractJobExecution>... types) {
+    public List<AbstractJobExecution> getExecutions(JobType... types) {
         if (types == null || types.length == 0) {
             return new ArrayList<>(jobExecutionList);
         }
-        return new ArrayList<>(
-                jobExecutionList
-                        .stream()
-                        .filter(execution -> Arrays.asList(types).stream().filter(t -> t.isAssignableFrom(execution.getClass())).findAny().isPresent())
-                        .filter(execution -> !Lists.newArrayList(JobState.Completed).contains(execution.getJobEntity().getState()))
-                        .collect(Collectors.toSet())
-        );
+        final List<JobType> typeList = Arrays.asList(types);
+        return jobExecutionList.stream().filter(ex -> typeList.contains(ex.getJobEntity().getType()))
+                .filter(execution -> !Lists.newArrayList(JobState.Completed).contains(execution.getJobEntity().getState()))
+                .collect(Collectors.toList());
     }
 }
