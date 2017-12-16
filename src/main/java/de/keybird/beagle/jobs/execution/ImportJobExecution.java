@@ -18,6 +18,8 @@
 
 package de.keybird.beagle.jobs.execution;
 
+import static de.keybird.beagle.Utils.closeSilently;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
@@ -79,7 +81,6 @@ public class ImportJobExecution extends AbstractJobExecution<ImportJobEntity> {
         int index = 0;
         updateProgress(index, splitDocuments.size());
 
-        // TODO MVR this is not deterministic. Figure out why and maybe do it differently
         for (PDDocument splitDocument : splitDocuments) {
             final Page page = new Page();
             page.setDocument(importDocument);
@@ -103,25 +104,24 @@ public class ImportJobExecution extends AbstractJobExecution<ImportJobEntity> {
                 final BufferedImage bufferedImage = new PDFRenderer(splitDocument).renderImage(0);
                 ImageIO.write(bufferedImage, "png", thumbnailByteStream);
                 page.setThumbnail(thumbnailByteStream.toByteArray());
-                // TODO MVR rescale thumbnail
-                // TODO MVR don't import same page twice
 
                 // Mark as imported
                 page.setState(PageState.Imported);
                 page.setErrorMessage(null);
-                logEntry(LogLevel.Info.Success, "Page {} was imported successful", index + 1);
+                logEntry(LogLevel.Success, "Page {} was imported successful", index + 1);
                 updateProgress(++index, splitDocuments.size());
                 pageRepository.save(page);
             } catch (Exception ex) {
                 logger.error("Error while importing page", ex);
                 page.setErrorMessage(ex.getMessage());
             }
+            closeSilently(splitDocument);
         }
+        closeSilently(pdfDocument);
     }
 
     @Override
     protected void onSuccess() {
-        // TODO MVR figure out if partially imported
         getDocument().setState(DocumentState.Imported);
         getDocument().setErrorMessage(null);
         documentRepository.save(getDocument());
