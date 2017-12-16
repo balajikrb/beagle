@@ -30,6 +30,8 @@ jobs:
 
       - store_test_results:
           path: target/surefire-reports
+      - store_artifacts:
+          path: target/surefire-reports
 
       - store_artifacts:
           path: target/beagle-0.0.1-SNAPSHOT.jar
