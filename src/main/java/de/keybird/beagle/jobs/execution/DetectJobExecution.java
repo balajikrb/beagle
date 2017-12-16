@@ -18,6 +18,8 @@
 
 package de.keybird.beagle.jobs.execution;
 
+import static de.keybird.beagle.Utils.closeSilently;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -86,6 +88,7 @@ public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
 
                             final PDDocument pdfDocument = PdfManager.load(payload);
                             theDocument.setPageCount(pdfDocument.getPages().getCount());
+                            closeSilently(pdfDocument);
 
                             // Ensure it is not already persisted
                             if (documentRepository.findByChecksum(hashCode.toString()) != null) {
