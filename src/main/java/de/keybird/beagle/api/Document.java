@@ -20,9 +20,11 @@ package de.keybird.beagle.api;
 
 import java.util.Date;
 
+import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,6 +56,7 @@ public class Document {
     private Date importDate;
 
     @Lob
+    @Basic(fetch= FetchType.LAZY)
     private byte[] payload;
 
     public Document() {
