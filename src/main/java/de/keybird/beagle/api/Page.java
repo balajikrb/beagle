@@ -18,6 +18,7 @@
 
 package de.keybird.beagle.api;
 
+import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -52,9 +53,11 @@ public class Page {
     private int pageNumber;
 
     @Lob
+    @Basic(fetch=FetchType.LAZY)
     private byte[] payload;
 
     @Lob
+    @Basic(fetch=FetchType.LAZY)
     private byte[] thumbnail;
 
     @ManyToOne(fetch=FetchType.LAZY)
