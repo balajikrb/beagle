@@ -29,7 +29,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import de.keybird.beagle.jobs.JobContext;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
 import de.keybird.beagle.repository.UserRepository;
 import de.keybird.beagle.security.User;
 import de.keybird.beagle.security.UserState;
@@ -47,14 +47,14 @@ public class BeagleApplication implements CommandLineRunner {
 	private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private JobContext jobContext;
+	private JobExecutionContext jobContext;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BeagleApplication.class, args);
 	}
 
 	@Override
-	public void run(String... strings) throws Exception {
+	public void run(String... strings) {
 		logger.info("Working directory: {}", jobContext.getWorkingPath());
 		logger.info("Inbox directory: {}", jobContext.getInboxPath());
 		logger.info("Archive directory: {}", jobContext.getArchivePath());

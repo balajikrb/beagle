@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +42,8 @@ import io.searchbox.core.Index;
 
 // Syncs database content with elastic
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class IndexJobExecution extends AbstractJobExecution<IndexJobEntity> {
+@Scope("prototype")
+public class IndexJobExecution implements JobExecution<IndexJobEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexJobExecution.class);
 
@@ -54,20 +53,14 @@ public class IndexJobExecution extends AbstractJobExecution<IndexJobEntity> {
     @Autowired
     private PageRepository pageRepository;
 
-    @Override
-    public String getDescription() {
-        return "Indexing pages";
-    }
-
-    @Override
-    protected void executeInternal() {
+    public void execute(JobExecutionContext<IndexJobEntity> context) {
         final List<Page> importedPages = pageRepository.findByState(PageState.Imported);
         final AtomicInteger index = new AtomicInteger(0);
         int totalSize = importedPages.size();
-        updateProgress(index.get(), totalSize);
+        context.updateProgress(index.get(), totalSize);
 
         importedPages.forEach(page -> {
-            logEntry(LogLevel.Info,"Indexing page '{}/{}'...", page.getDocument().getFilename(), page.getPageNumber());
+            context.logEntry(LogLevel.Info,"Indexing page '{}/{}'...", page.getDocument().getFilename(), page.getPageNumber());
 
             // Sync with elastic
             final byte[] base64bytes = Base64.getEncoder().encode(page.getPayload());
@@ -82,26 +75,25 @@ public class IndexJobExecution extends AbstractJobExecution<IndexJobEntity> {
                         .build();
                 final DocumentResult result = client.execute(action);
                 if (!result.isSucceeded()) {
-                    LOG.error("Could not index file {}. Reason: ", page.getName(), result.getErrorMessage());
                     page.setErrorMessage(result.getErrorMessage());
-                    logEntry(LogLevel.Error, "Page {}/{} could not be index. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), result.getErrorMessage());
+                    context.logEntry(LogLevel.Error, "Page {}/{} could not be index. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), result.getErrorMessage());
                     return;
                 }
                 // Mark as Success
-                logEntry(LogLevel.Success, "Page {}/{} was indexed successfully", page.getDocument().getFilename(), page.getPageNumber());
+                context.logEntry(LogLevel.Success, "Page {}/{} was indexed successfully", page.getDocument().getFilename(), page.getPageNumber());
                 page.setState(PageState.Indexed);
                 page.setErrorMessage(null);
             } catch (IOException e) {
                 LOG.error("Could not index file {}. Reason: ", page.getName(), e.getMessage());
                 page.setErrorMessage(e.getMessage());
-                logEntry(LogLevel.Error, "Page {}/{} could not be index. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
+                context.logEntry(LogLevel.Error, "Page {}/{} could not be index. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
                 return;
             } finally {
-                updateProgress(index.incrementAndGet(), totalSize);
+                context.updateProgress(index.incrementAndGet(), totalSize);
             }
         });
 
         pageRepository.save(importedPages);
-        updateProgress(totalSize, totalSize);
+        context.updateProgress(totalSize, totalSize);
     }
 }

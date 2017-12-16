@@ -16,23 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.jobs.persistence;
 
-import java.util.Date;
-
-// TODO MVR delete
-public interface JobInfo {
-    long getId();
-
-    String getDescription();
-
-    Date getStartTime();
-
-    Date getCompleteTime();
-
-    JobState getState();
-
-    String getErrorMessage();
-
-    Progress getProgress();
+public enum JobType {
+    Detect,
+    Import,
+    Index,
+    Archive
 }

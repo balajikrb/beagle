@@ -16,13 +16,10 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.repository;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+package de.keybird.beagle.jobs.execution;
 
 import de.keybird.beagle.jobs.persistence.JobEntity;
 
-@Repository
-public interface JobRepository extends JpaRepository<JobEntity, Long> {
+public interface ErrorHandler<J extends JobEntity> {
+    void handle(JobExecutionContext<J> context, Throwable throwable);
 }

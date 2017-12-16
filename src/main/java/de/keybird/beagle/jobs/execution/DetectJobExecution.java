@@ -29,7 +29,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -44,8 +43,8 @@ import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.services.PdfManager;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
+@Scope("prototype")
+public class DetectJobExecution implements JobExecution<DetectJobEntity> {
 
     private final Logger logger = LoggerFactory.getLogger(DetectJobExecution.class);
 
@@ -53,19 +52,10 @@ public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
     private DocumentRepository documentRepository;
 
     @Override
-    public String getDescription() {
-        return "Detecting new files";
-    }
-
-    @Override
-    protected void initialize() throws IOException {
-        Files.createDirectories(context.getInboxPath());
-    }
-
-    @Override
-    protected void executeInternal() throws ExecutionException {
+    public void execute(JobExecutionContext<DetectJobEntity> context) throws ExecutionException {
         try {
-            logEntry(LogLevel.Info,"Reading contents from directory '{}'", context.getInboxPath());
+            Files.createDirectories(context.getInboxPath());
+            context.logEntry(LogLevel.Info,"Reading contents from directory '{}'", context.getInboxPath());
 
             Files.list(context.getInboxPath())
                     .filter(entry -> {
@@ -73,7 +63,7 @@ public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
                         return accept;
                     })
                     .forEach(entry -> {
-                        logEntry(LogLevel.Info,"Handling file '{}'", entry.toString());
+                        context.logEntry(LogLevel.Info,"Handling file '{}'", entry.toString());
 
                         final Document theDocument = new Document();
                         theDocument.setState(DocumentState.New);
@@ -92,16 +82,16 @@ public class DetectJobExecution extends AbstractJobExecution<DetectJobEntity> {
 
                             // Ensure it is not already persisted
                             if (documentRepository.findByChecksum(hashCode.toString()) != null) {
-                                logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Document already exists.", entry);
+                                context.logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Document already exists.", entry);
                             } else {
-                                logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
+                                context.logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
                                 documentRepository.save(theDocument);
                             }
                         } catch (IOException ex) {
-                            logEntry(LogLevel.Error, "Document '{}' was rejected. Reason: {}", entry, ex.getMessage());
+                            context.logEntry(LogLevel.Error, "Document '{}' was rejected. Reason: {}", entry, ex.getMessage());
                         }
                         if (theDocument.getPayload() != null) {
-                            logEntry(LogLevel.Info,"Deleting file '{}'", entry);
+                            context.logEntry(LogLevel.Info,"Deleting file '{}'", entry);
                             deleteFile(entry);
                         }
                     });

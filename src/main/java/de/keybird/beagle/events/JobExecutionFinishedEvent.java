@@ -21,13 +21,13 @@ package de.keybird.beagle.events;
 import java.util.Objects;
 
 import de.keybird.beagle.jobs.JobResult;
-import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
 public class JobExecutionFinishedEvent extends JobExecutionEvent {
     private final JobResult jobResult;
 
-    public JobExecutionFinishedEvent(AbstractJobExecution job, JobResult jobResult) {
-        super(job);
+    public JobExecutionFinishedEvent(JobExecutionContext context, JobResult jobResult) {
+        super(context);
         this.jobResult = Objects.requireNonNull(jobResult);
     }
 

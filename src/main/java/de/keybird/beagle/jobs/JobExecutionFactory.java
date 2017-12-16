@@ -18,8 +18,6 @@
 
 package de.keybird.beagle.jobs;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.inject.Provider;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +27,14 @@ import de.keybird.beagle.api.Document;
 import de.keybird.beagle.jobs.execution.DetectJobExecution;
 import de.keybird.beagle.jobs.execution.ImportJobExecution;
 import de.keybird.beagle.jobs.execution.IndexJobExecution;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
+import de.keybird.beagle.jobs.execution.JobRunner;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.ImportJobEntity;
 import de.keybird.beagle.jobs.persistence.IndexJobEntity;
 
 @Service
 public class JobExecutionFactory {
-
-    private static AtomicInteger counter = new AtomicInteger(1);
 
     @Autowired
     private Provider<DetectJobExecution> detectJobExecutionProvider;
@@ -47,22 +45,31 @@ public class JobExecutionFactory {
     @Autowired
     private Provider<IndexJobExecution> indexJobExecutionProvider;
 
-    public DetectJobExecution createDetectJob() {
-        DetectJobExecution execution = detectJobExecutionProvider.get();
-        execution.setJobEntity(new DetectJobEntity());
-        return execution;
+    @Autowired
+    private Provider<JobExecutionContext> jobExecutionContextProvider;
+
+    public JobRunner<DetectJobEntity> createDetectJobRunner() {
+        final DetectJobExecution execution = detectJobExecutionProvider.get();
+        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
+        jobExecutionContext.setJobEntity(new DetectJobEntity());
+
+        return new JobRunner<>(jobExecutionContext, execution);
     }
 
-    public IndexJobExecution createIndexJob() {
-        final IndexJobExecution indexJobExecution = indexJobExecutionProvider.get();
-        indexJobExecution.setJobEntity(new IndexJobEntity());
-        return indexJobExecution;
+    public JobRunner<IndexJobEntity> createIndexJobRunner() {
+        final IndexJobExecution execution = indexJobExecutionProvider.get();
+        final JobExecutionContext<IndexJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
+        jobExecutionContext.setJobEntity(new IndexJobEntity());
+
+        return new JobRunner<>(jobExecutionContext, execution);
     }
 
-    public ImportJobExecution createImportJob(Document document) {
-        final ImportJobExecution importJobExecution = importJobExecutionProvider.get();
-        importJobExecution.setJobEntity(new ImportJobEntity(document));
-        return importJobExecution;
+    public JobRunner<ImportJobEntity> createImportJobRunner(Document document) {
+        final ImportJobExecution execution = importJobExecutionProvider.get();
+        final JobExecutionContext<ImportJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
+        jobExecutionContext.setJobEntity(new ImportJobEntity(document));
+
+        return new JobRunner<>(jobExecutionContext, execution);
     }
 
 }

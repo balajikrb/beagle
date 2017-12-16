@@ -19,14 +19,14 @@
 package de.keybird.beagle.events;
 
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
 public class JobExecutionProgressChangedEvent extends JobExecutionEvent {
     private final Progress oldProgress;
     private final Progress newProgress;
 
-    public JobExecutionProgressChangedEvent(AbstractJobExecution job, Progress oldProgress, Progress newProgress) {
-        super(job);
+    public JobExecutionProgressChangedEvent(JobExecutionContext context, Progress oldProgress, Progress newProgress) {
+        super(context);
         this.oldProgress = oldProgress;
         this.newProgress = newProgress;
     }

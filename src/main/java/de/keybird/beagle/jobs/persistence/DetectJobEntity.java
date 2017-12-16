@@ -21,13 +21,16 @@ package de.keybird.beagle.jobs.persistence;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import de.keybird.beagle.jobs.execution.JobType;
-
 @Entity
 @DiscriminatorValue("detect")
 public class DetectJobEntity extends JobEntity {
     @Override
     public JobType getType() {
         return JobType.Detect;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Detecting new files";
     }
 }

@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.keybird.beagle.jobs.JobState;
-import de.keybird.beagle.jobs.execution.JobType;
+import de.keybird.beagle.jobs.persistence.JobState;
+import de.keybird.beagle.jobs.persistence.JobType;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 
 public class JobDTO {

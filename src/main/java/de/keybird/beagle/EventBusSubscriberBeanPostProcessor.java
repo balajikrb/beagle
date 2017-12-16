@@ -52,6 +52,7 @@ public class EventBusSubscriberBeanPostProcessor implements DestructionAwareBean
         return bean;
     }
 
+    // TODO MVR unregistering of beans does not work properly. An exception is raised in the logs. Should be investigated
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
         for (Method m : bean.getClass().getMethods()) {

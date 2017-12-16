@@ -18,7 +18,16 @@
 
 package de.keybird.beagle;
 
+import java.net.URL;
+
 public interface TestConfig {
     String WORKING_DIRECTORY = "target/beagle-home";
     String INBOX_DIRECTORY = String.format("%s/1_inbox", WORKING_DIRECTORY);
+
+    String BEAGLE_DE_PDF_NAME = "Beagle_(Hunderasse).pdf";
+    URL BEAGLE_DE_PDF_URL = TestConfig.class.getResource("/" + BEAGLE_DE_PDF_NAME);
+
+    String BEAGLE_EN_PDF_NAME = "Beagle.pdf";
+    URL BEAGLE_EN_PDF_URL = TestConfig.class.getResource("/" + BEAGLE_EN_PDF_NAME);
+
 }

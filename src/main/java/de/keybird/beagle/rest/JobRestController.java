@@ -35,12 +35,12 @@ import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
 import de.keybird.beagle.rest.model.JobDTO;
-import de.keybird.beagle.rest.model.JobInfoDTO;
+import de.keybird.beagle.rest.model.JobExecutionDTO;
 
 @RestController
 @RequestMapping("/jobs")
@@ -72,19 +72,19 @@ public class JobRestController {
     }
 
     @RequestMapping(path="/running", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<JobInfoDTO>> showProgress() {
-        final List<AbstractJobExecution> executions = jobExecutionManager.getExecutions();
+    public ResponseEntity<List<JobExecutionDTO>> showProgress() {
+        final List<JobExecutionContext> executions = jobExecutionManager.getExecutions();
         if (executions.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        final List<JobInfoDTO> jobDTOList = executions.stream().map(jobExecution -> createFrom(jobExecution)).collect(Collectors.toList());
-        jobDTOList.sort(Comparator.comparing(JobInfoDTO::getId).reversed());
+        final List<JobExecutionDTO> jobDTOList = executions.stream().map(jobExecution -> createFrom(jobExecution)).collect(Collectors.toList());
+        jobDTOList.sort(Comparator.comparing(JobExecutionDTO::getId).reversed());
         return new ResponseEntity<>(jobDTOList, HttpStatus.OK);
     }
 
     @RequestMapping(path="/detect", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startDetect() {
-        jobExecutionManager.submit(jobFactory.createDetectJob());
+        jobExecutionManager.submit(jobFactory.createDetectJobRunner());
         return ResponseEntity.accepted().build();
     }
 
@@ -93,25 +93,25 @@ public class JobRestController {
         // TODO MVR use service for this?
         documentRepository
             .findByState(DocumentState.New)
-            .forEach(theImport -> jobExecutionManager.submit(jobFactory.createImportJob(theImport)));
+            .forEach(theImport -> jobExecutionManager.submit(jobFactory.createImportJobRunner(theImport)));
         return ResponseEntity.accepted().build();
     }
 
     @RequestMapping(path="/index", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startIndex() {
-        jobExecutionManager.submit(jobFactory.createIndexJob());
+        jobExecutionManager.submit(jobFactory.createIndexJobRunner());
         return ResponseEntity.accepted().build();
     }
 
-    public static JobInfoDTO createFrom(AbstractJobExecution jobExecution) {
-        final JobEntity jobEntity = jobExecution.getJobEntity();
-        final JobInfoDTO jobInfoDTO = new JobInfoDTO();
-        jobInfoDTO.setDescription(jobExecution.getDescription());
+    public static JobExecutionDTO createFrom(JobExecutionContext context) {
+        final JobEntity jobEntity = context.getJobEntity();
+        final JobExecutionDTO jobInfoDTO = new JobExecutionDTO();
+        jobInfoDTO.setDescription(jobEntity.getDescription());
         jobInfoDTO.setCompleteTime(jobEntity.getCompleteTime());
         jobInfoDTO.setStartTime(jobEntity.getStartTime());
         jobInfoDTO.setErrorMessage(jobEntity.getErrorMessage());
         jobInfoDTO.setState(jobEntity.getState());
-        jobInfoDTO.setProgress(new Progress(jobExecution.getProgress()));
+        jobInfoDTO.setProgress(new Progress(context.getProgress()));
         if (jobEntity.getId() != null) { // TODO MVR the id should not be null here
             jobInfoDTO.setId(jobInfoDTO.getId());
         }

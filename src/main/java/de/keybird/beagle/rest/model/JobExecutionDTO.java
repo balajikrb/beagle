@@ -20,12 +20,10 @@ package de.keybird.beagle.rest.model;
 
 import java.util.Date;
 
-import de.keybird.beagle.jobs.JobInfo;
-import de.keybird.beagle.jobs.JobState;
 import de.keybird.beagle.jobs.Progress;
+import de.keybird.beagle.jobs.persistence.JobState;
 
-// TODO MVR jobInfoDTO is not the right name
-public class JobInfoDTO implements JobInfo {
+public class JobExecutionDTO {
 
     private long id;
     private String description;
@@ -35,19 +33,8 @@ public class JobInfoDTO implements JobInfo {
     private JobState state = JobState.Pending;
     private Progress progress = new Progress();
 
-    public JobInfoDTO() {
+    public JobExecutionDTO() {
 
-    }
-
-    public JobInfoDTO(JobInfo info) {
-        if (info == null) return;
-        this.id = info.getId();
-        this.description = info.getDescription();
-        this.startTime = info.getStartTime();
-        this.completeTime = info.getCompleteTime();
-        this.errorMessage = info.getErrorMessage();
-        this.state = info.getState();
-        this.progress = info.getProgress() == null ? null : new Progress(info.getProgress());
     }
 
     public long getId() {

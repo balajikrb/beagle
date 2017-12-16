@@ -16,11 +16,21 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs;
+package de.keybird.beagle.jobs.persistence;
 
-public enum JobState {
-    Pending,
-    Initializing,
-    Running,
-    Completed
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("archive")
+public class ArchiveJobEntity extends JobEntity {
+    @Override
+    public JobType getType() {
+        return JobType.Archive;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Archiving indexed pages";
+    }
 }

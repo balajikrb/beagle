@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -36,12 +38,10 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.BatchSize;
 
-import de.keybird.beagle.jobs.JobState;
-import de.keybird.beagle.jobs.execution.JobType;
-
 @Entity
 @Table(name="jobs")
 @Inheritance(strategy= InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 public abstract class JobEntity {
 
     @Id
@@ -126,4 +126,6 @@ public abstract class JobEntity {
     }
 
     public abstract JobType getType();
+
+    public abstract String getDescription();
 }
