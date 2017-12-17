@@ -24,9 +24,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
 import javax.transaction.Transactional;
 
 import org.junit.After;
@@ -38,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
@@ -68,12 +66,18 @@ public class DetectJobExecutionTest {
     @Autowired
     private JobRepository jobRepository;
 
+    @Autowired
+    private JobExecutionContext<DetectJobEntity> context;
+
     @Before
     public void setUp() {
+        tearDown();
+
         assertEquals(0, documentRepository.count());
         assertEquals(0, jobRepository.count());
 
-        detectJobExecution.setJobEntity(new DetectJobEntity());
+        context.setJobEntity(new DetectJobEntity());
+        context.updateProgress(0, 0);
     }
 
     @After
@@ -83,41 +87,48 @@ public class DetectJobExecutionTest {
     }
 
     @Test
-    public void verifyJobExecution() {
-        detectJobExecution.execute();
+    public void verifyJobExecution() throws Exception {
+        detectJobExecution.execute(context);
+        context.complete();
 
         assertEquals(0, documentRepository.count());
         assertEquals(1, jobRepository.count());
     }
 
     @Test
-    public void verifyImportsPdf() throws IOException, URISyntaxException {
+    public void verifyImportsPdf() throws Exception {
         // Add a document to the inbox directory
-        inboxDirectory.addFile(getClass().getResource("/Beagle_(Hunderasse).pdf"));
+        inboxDirectory.addFile(TestConfig.BEAGLE_DE_PDF_URL);
 
         // Detect new files
-        detectJobExecution.execute();
+        detectJobExecution.execute(context);
+
+        // Manually invoke save as the execution does not do that anymore, but the runner
+        context.complete();
 
         // Ensure the document was imported
         assertEquals(1, jobRepository.count());
         assertEquals(1, documentRepository.count());
         final Document document = documentRepository.findAll().iterator().next();
-        assertThat(document.getFilename(), is("Beagle_(Hunderasse).pdf"));
+        assertThat(document.getFilename(), is(TestConfig.BEAGLE_DE_PDF_NAME));
         assertThat(document.getPageCount(), is(4));
         assertThat(document.getState(), is(DocumentState.New));
         assertThat(document.getErrorMessage(), nullValue());
     }
 
     @Test
-    public void verifyDoesNotImportAlreadyImportedFile() throws URISyntaxException, IOException {
+    public void verifyDoesNotImportAlreadyImportedFile() throws Exception {
         // import the same file multiple times
         int N = 2;
         for (int i=0; i<N; i++) {
             // Add a document to the inbox directory
-            inboxDirectory.addFile(getClass().getResource("/Beagle_(Hunderasse).pdf"));
+            inboxDirectory.addFile(TestConfig.BEAGLE_DE_PDF_URL);
 
             // Detect new files
-            detectJobExecution.execute();
+            detectJobExecution.execute(context);
+
+            // Manually invoke save as the execution does not do that anymore, but the runner
+            context.complete();
         }
 
         // Ensure it is only available once
@@ -128,9 +139,10 @@ public class DetectJobExecutionTest {
     }
 
     @Test
-    public void verifyIgnoresNonPdfFiles() throws IOException, URISyntaxException {
+    public void verifyIgnoresNonPdfFiles() throws Exception {
         inboxDirectory.addFile(getClass().getResource("/static/img/beagles/beagle1.jpg"));
-        detectJobExecution.execute();
+        detectJobExecution.execute(context);
+        context.complete(); // Manually invoke save as the execution does not do that anymore, but the runner
         assertEquals(0, documentRepository.count());
         assertEquals(1, jobRepository.count());
     }

@@ -16,36 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.websocket;
+package de.keybird.beagle.jobs.persistence;
 
-import java.util.Date;
-
-public class Message {
-    private Date date;
-    private String text;
-
-    public Message() {
-
-    }
-
-    public Message(Date date, String text) {
-        this.date = date;
-        this.text = text;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
+public enum JobState {
+    Pending,
+    Initializing,
+    Running,
+    Completed
 }

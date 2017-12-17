@@ -18,11 +18,11 @@
 
 package de.keybird.beagle.events;
 
-import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
 public class JobExecutionSubmittedEvent extends JobExecutionEvent {
 
-    public JobExecutionSubmittedEvent(AbstractJobExecution job) {
-        super(job);
+    public JobExecutionSubmittedEvent(JobExecutionContext context) {
+        super(context);
     }
 }

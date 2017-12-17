@@ -33,7 +33,6 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +51,8 @@ import de.keybird.beagle.services.PdfManager;
 
 // Imports files to database
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ImportJobExecution extends AbstractJobExecution<ImportJobEntity> {
+@Scope("prototype")
+public class ImportJobExecution implements JobExecution<ImportJobEntity> {
 
     private final Logger logger = LoggerFactory.getLogger(ImportJobExecution.class);
 
@@ -64,22 +63,28 @@ public class ImportJobExecution extends AbstractJobExecution<ImportJobEntity> {
     private DocumentRepository documentRepository;
 
     @Override
-    public String getDescription() {
-        return String.format("Importing '%s'", getDocument().getFilename());
-    }
+    public void execute(JobExecutionContext<ImportJobEntity> context) throws Exception {
+        context.logEntry(LogLevel.Info, "Importing '{}'", context.getJobEntity().getDocument().getFilename());
 
-    @Override
-    public void executeInternal() throws Exception {
-        logEntry(LogLevel.Info, "Importing '{}'", getDocument().getFilename());
+        context.setSuccessHandler((SuccessHandler<ImportJobEntity>) context1 -> {
+            context1.getJobEntity().getDocument().setState(DocumentState.Imported);
+            context1.getJobEntity().getDocument().setErrorMessage(null);
+            documentRepository.save(context1.getJobEntity().getDocument());
+        });
 
-        final Document importDocument = getDocument();
+        context.setErrorHandler((ErrorHandler<ImportJobEntity>) (context12, throwable) -> {
+            context12.getJobEntity().getDocument().setErrorMessage(throwable.getMessage());
+            documentRepository.save(context12.getJobEntity().getDocument());
+        });
+
+        final Document importDocument = context.getJobEntity().getDocument();
         final PDDocument pdfDocument = PdfManager.load(importDocument.getPayload());
         final Splitter splitter = new Splitter();
         final List<PDDocument> splitDocuments = splitter.split(pdfDocument);
 
         // Update progress, as we now know how many pages there are
         int index = 0;
-        updateProgress(index, splitDocuments.size());
+        context.updateProgress(index, splitDocuments.size());
 
         for (PDDocument splitDocument : splitDocuments) {
             final Page page = new Page();
@@ -108,8 +113,8 @@ public class ImportJobExecution extends AbstractJobExecution<ImportJobEntity> {
                 // Mark as imported
                 page.setState(PageState.Imported);
                 page.setErrorMessage(null);
-                logEntry(LogLevel.Success, "Page {} was imported successful", index + 1);
-                updateProgress(++index, splitDocuments.size());
+                context.logEntry(LogLevel.Success, "Page {} was imported successful", index + 1);
+                context.updateProgress(++index, splitDocuments.size());
                 pageRepository.save(page);
             } catch (Exception ex) {
                 logger.error("Error while importing page", ex);
@@ -118,22 +123,5 @@ public class ImportJobExecution extends AbstractJobExecution<ImportJobEntity> {
             closeSilently(splitDocument);
         }
         closeSilently(pdfDocument);
-    }
-
-    @Override
-    protected void onSuccess() {
-        getDocument().setState(DocumentState.Imported);
-        getDocument().setErrorMessage(null);
-        documentRepository.save(getDocument());
-    }
-
-    @Override
-    protected void onError(Throwable t) {
-        getDocument().setErrorMessage(t.getMessage());
-        documentRepository.save(getDocument());
-    }
-
-    private Document getDocument() {
-        return getJobEntity().getDocument();
     }
 }

@@ -18,48 +18,63 @@
 
 package de.keybird.beagle.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import com.google.common.eventbus.Subscribe;
-
-import de.keybird.beagle.events.JobExecutionEvent;
+import de.keybird.beagle.api.DocumentState;
+import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
-import de.keybird.beagle.jobs.JobInfo;
-import de.keybird.beagle.jobs.JobState;
-import de.keybird.beagle.jobs.execution.AbstractJobExecution;
-import de.keybird.beagle.rest.JobRestController;
+import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.persistence.JobType;
+import de.keybird.beagle.repository.DocumentRepository;
+import de.keybird.beagle.repository.JobRepository;
 
 @Service
 public class JobService {
 
-    @Autowired
-    private SimpMessagingTemplate messageTemplate;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private JobExecutionManager jobManager;
 
-    @Subscribe
-    // TODO MVR this is okay, but one thing is missing -> we have to fetch jobs once.
-    // Otherwise, we only see jobs when they are created AFTER we have connected.
-    // We may miss ones already kicked off by another user
-    public void onJobExecutionChange(JobExecutionEvent event) {
-        final List<AbstractJobExecution> jobs = jobManager.getExecutions();
+    @Autowired
+    private JobRepository jobRepository;
 
-        // Return all jobs except success ones.
-        // They are only returned, if they finished within the last n seconds
-        final List<JobInfo> jobData = jobs.stream()
-                .filter(execution -> {
-                    if (execution.getJobEntity().getState() == JobState.Completed) {
-                        long completedSinceMs = System.currentTimeMillis() - execution.getJobEntity().getCompleteTime().getTime();
-                        return completedSinceMs <= 8 * 1000;
-                    }
-                    return true;
-                }).map(execution -> JobRestController.createFrom(execution)).collect(Collectors.toList());
-        messageTemplate.convertAndSend("/topic/jobs", jobData);
+    @Autowired
+    private JobExecutionFactory jobExecutionFactory;
+
+    @Autowired
+    private DocumentRepository documentRepository;
+
+    @Transactional
+    public void save(JobEntity jobEntity) {
+        jobRepository.save(jobEntity);
+    }
+
+    @Transactional
+    public void importDocuments() {
+        // Kick of import of documents
+        documentRepository
+                .findByState(DocumentState.New)
+                .forEach(document -> {
+                    document.getPayload(); // lazy load property
+                    jobManager.submit(jobExecutionFactory.createImportJobRunner(document));
+                });
+        indexPagesIfNecessary();
+    }
+
+    public void indexPagesIfNecessary() {
+        // Kick of index if we have imported documents
+        if (!documentRepository.findByState(DocumentState.Imported).isEmpty()) {
+            // After import kick of indexing, when no import job is running anymore
+            boolean noImportJobsRunningAnymore = jobManager.getExecutions(JobType.Import).isEmpty();
+            if (noImportJobsRunningAnymore && jobManager.getExecutions(JobType.Index).isEmpty()) {
+                jobManager.submit(jobExecutionFactory.createIndexJobRunner());
+            }
+        }
     }
 }

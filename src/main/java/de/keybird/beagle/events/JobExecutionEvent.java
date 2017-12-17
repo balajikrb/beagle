@@ -20,16 +20,16 @@ package de.keybird.beagle.events;
 
 import java.util.Objects;
 
-import de.keybird.beagle.jobs.execution.AbstractJobExecution;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
 public class JobExecutionEvent {
-    private final AbstractJobExecution source;
+    private final JobExecutionContext source;
 
-    public JobExecutionEvent(AbstractJobExecution source) {
+    public JobExecutionEvent(JobExecutionContext source) {
         this.source = Objects.requireNonNull(source);
     }
 
-    public AbstractJobExecution getSource() {
+    public JobExecutionContext getSource() {
         return source;
     }
 }

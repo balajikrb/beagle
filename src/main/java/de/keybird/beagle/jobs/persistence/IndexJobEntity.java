@@ -21,8 +21,6 @@ package de.keybird.beagle.jobs.persistence;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import de.keybird.beagle.jobs.execution.JobType;
-
 @Entity
 @DiscriminatorValue("index")
 public class IndexJobEntity extends JobEntity {
@@ -30,5 +28,10 @@ public class IndexJobEntity extends JobEntity {
     @Override
     public JobType getType() {
         return JobType.Index;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Indexing pages";
     }
 }

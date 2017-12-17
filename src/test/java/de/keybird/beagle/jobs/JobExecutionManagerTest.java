@@ -21,28 +21,44 @@ package de.keybird.beagle.jobs;
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 
-import javax.transaction.Transactional;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
-import org.hamcrest.Matchers;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
-import de.keybird.beagle.jobs.execution.AbstractJobExecution;
-import de.keybird.beagle.jobs.execution.JobType;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
+import de.keybird.beagle.jobs.execution.JobRunner;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
+import de.keybird.beagle.jobs.persistence.ImportJobEntity;
+import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.persistence.JobState;
+import de.keybird.beagle.jobs.persistence.JobType;
+import de.keybird.beagle.repository.DocumentRepository;
+import de.keybird.beagle.repository.JobRepository;
+import de.keybird.beagle.repository.PageRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = { "working.directory=" + TestConfig.WORKING_DIRECTORY })
-@Transactional
 public class JobExecutionManagerTest {
 
     @Rule
@@ -52,7 +68,39 @@ public class JobExecutionManagerTest {
     private JobExecutionManager jobExecutionManager;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private JobExecutionFactory jobExecutionFactory;
+
+    @Autowired
+    private Provider<JobExecutionContext> jobExecutionContextProvider;
+
+    @Autowired
+    private JobRepository jobRepository;
+
+    @Autowired
+    private PageRepository pageRepository;
+
+    @Autowired
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Before
+    public void setUp() {
+        entityManager.clear();
+        jobExecutionManager.init();
+        assertThat(jobExecutionManager.hasRunningJobs(), is(false));
+        assertThat(jobRepository.count(), is(0L));
+        assertThat(documentRepository.count(), is(0L));
+        assertThat(pageRepository.count(), is(0L));
+    }
+
+    @After
+    public void tearDown() {
+        jobRepository.deleteAll();
+        pageRepository.deleteAll();
+        documentRepository.deleteAll();
+    }
 
     // See https://github.com/Keybird/beagle/issues/1
     @Test(timeout=15000)
@@ -61,36 +109,79 @@ public class JobExecutionManagerTest {
         assertThat(jobExecutionManager.hasRunningJobs(), is(false));
 
         // Submit dummy job
-        final DummyJobExecution dummyJobExecution = new DummyJobExecution();
-        applicationContext.getAutowireCapableBeanFactory().autowireBean(dummyJobExecution);
+        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
+        jobExecutionContext.setJobEntity(new DetectJobEntity());
+        final JobRunner dummyJobExecution = new JobRunner<>(jobExecutionContext, context -> Thread.sleep(5000));
         jobExecutionManager.submit(dummyJobExecution);
 
         // Verify execution is in progress
         assertThat(jobExecutionManager.hasRunningJobs(), is(true));
-        assertThat(jobExecutionManager.getExecutions(JobType.Detect), Matchers.hasSize(1));
+        assertThat(jobExecutionManager.getExecutions(JobType.Detect), hasSize(1));
 
         // Wait until finished
         await().atMost(10, SECONDS).until(() -> !jobExecutionManager.hasRunningJobs());
-        assertThat(jobExecutionManager.getExecutions(JobType.Detect), Matchers.hasSize(0));
-
+        assertThat(jobExecutionManager.getExecutions(JobType.Detect), hasSize(0));
     }
 
-    // Simulates a long running execution
-    private static class DummyJobExecution extends AbstractJobExecution<DetectJobEntity> {
+    @Test(timeout=60000)
+    public void verifyCanImport() throws Exception {
+        // Add file to import
+        inboxDirectory.addFile(TestConfig.BEAGLE_EN_PDF_URL);
 
-        private DummyJobExecution() {
-            setJobEntity(new DetectJobEntity());
-        }
+        // Start detecting
+        final CompletableFuture submittedJob = jobExecutionManager.submit(jobExecutionFactory.createDetectJobRunner());
+        submittedJob.get();
 
-        @Override
-        protected void executeInternal() throws Exception {
-            Thread.sleep(5000);
-        }
+        // Now Import and Index Jobs should run, we wait for them to finish
+        await().atMost(30, SECONDS).until(() -> jobRepository.count() == 3);
 
-        @Override
-        public String getDescription() {
-            return "Long running dummy job";
-        }
+        // Detect + Import + Index jobs should have run
+        assertThat(jobRepository.count(), is(3L));
+
+        // Verify Import Job
+        final List<JobEntity> importJobs = jobRepository.findAll().stream().filter(job -> job.getType() == JobType.Import).collect(Collectors.toList());
+        assertThat(importJobs, hasSize(1));
+        assertThat(importJobs.get(0), instanceOf(ImportJobEntity.class));
+        ImportJobEntity importJob = (ImportJobEntity) importJobs.get(0);
+        assertThat(importJob.getState(), is(JobState.Completed));
+        assertThat(importJob.getErrorMessage(), nullValue());
+        assertThat(importJob.getDocument().getFilename(), is(TestConfig.BEAGLE_EN_PDF_NAME));
+        assertThat(importJob.getDocument().getPageCount(), is(15));
+        assertThat(importJob.getCompleteTime(), notNullValue());
+        assertThat(importJob.getStartTime(), notNullValue());
+        assertThat(importJob.getCreateTime(), notNullValue());
+        assertThat(importJob.getStartTime(), greaterThanOrEqualTo(importJob.getCreateTime()));
+        assertThat(importJob.getCompleteTime(), greaterThanOrEqualTo(importJob.getStartTime()));
+
+        // Verify Document and Page verify briefly
+        assertThat(documentRepository.count(), is(1L));
+        assertThat(pageRepository.count(), is(15L));
+    }
+
+    @Test(timeout=20000)
+    public void verifyJobRemovedProperlyOnSuccess() throws InterruptedException {
+        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
+        jobExecutionContext.setJobEntity(new DetectJobEntity());
+        final JobRunner<DetectJobEntity> runner = new JobRunner<>(jobExecutionContext, context -> {
+
+        });
+        jobExecutionManager.submit(runner);
+        jobExecutionManager.shutdown();
+        jobExecutionManager.awaitTermination(5, SECONDS);
+        assertThat(jobExecutionManager.getExecutions(), hasSize(0));
+    }
+
+    @Test(timeout=20000)
+    public void verifyJobRemovedProperlyOnError() throws InterruptedException {
+        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
+        jobExecutionContext.setJobEntity(new DetectJobEntity());
+        final JobRunner<DetectJobEntity> runner = new JobRunner<>(jobExecutionContext, context -> {
+            throw new IllegalStateException("Some random exception");
+        });
+        jobExecutionManager.submit(runner);
+        jobExecutionManager.shutdown();
+        jobExecutionManager.awaitTermination(5, SECONDS);
+        assertThat(jobExecutionManager.getExecutions(), hasSize(0));
     }
 }
 

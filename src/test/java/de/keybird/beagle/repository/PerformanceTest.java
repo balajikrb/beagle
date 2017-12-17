@@ -41,7 +41,7 @@ import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
-import de.keybird.beagle.jobs.JobState;
+import de.keybird.beagle.jobs.persistence.JobState;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.LogEntity;
 import de.keybird.beagle.jobs.persistence.LogLevel;

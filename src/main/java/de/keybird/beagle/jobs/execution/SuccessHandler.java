@@ -18,9 +18,9 @@
 
 package de.keybird.beagle.jobs.execution;
 
-public enum JobType {
-    Detect,
-    Import,
-    Index,
-    Sync
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
+import de.keybird.beagle.jobs.persistence.JobEntity;
+
+public interface SuccessHandler<J extends JobEntity> {
+    void handle(JobExecutionContext<J> context);
 }

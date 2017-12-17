@@ -16,18 +16,10 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.persistence;
+package de.keybird.beagle.jobs.execution;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import de.keybird.beagle.jobs.persistence.JobEntity;
 
-import de.keybird.beagle.jobs.execution.JobType;
-
-@Entity
-@DiscriminatorValue("sync")
-public class SyncJobEntity extends JobEntity {
-    @Override
-    public JobType getType() {
-        return JobType.Sync;
-    }
+public interface JobExecution<J extends JobEntity> {
+    void execute(JobExecutionContext<J> context) throws Exception;
 }

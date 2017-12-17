@@ -26,7 +26,6 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
 import de.keybird.beagle.api.Document;
-import de.keybird.beagle.jobs.execution.JobType;
 
 @Entity
 @DiscriminatorValue("import")
@@ -54,5 +53,10 @@ public class ImportJobEntity extends JobEntity {
     @Override
     public JobType getType() {
         return JobType.Import;
+    }
+
+    @Override
+    public String getDescription() {
+        return String.format("Importing '%s'", getDocument().getFilename());
     }
 }
