@@ -104,10 +104,10 @@ nav.sidebar .nav-item {
 /**
  * Forms
  */
-.form-control.ng-invalid {
+.userForm .form-control.ng-invalid {
     border-color: #dc3545
 }
 
-.form-control.ng-valid {
+.userForm .form-control.ng-valid {
     border-color: #28a745;
 }
