@@ -50,7 +50,7 @@ public class JobExecutionContext<J extends JobEntity> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${working.directory:~/.beagle}")
+    @Value("${working.directory}")
     private String workingDirectory;
 
     @Autowired

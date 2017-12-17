@@ -57,13 +57,16 @@
 			<artifactId>guava</artifactId>
 			<version>21.0</version>
 		</dependency>
-
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+		<!-- This should only be on the classpath if test or profile dev is active -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.4.192</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.jayway.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
@@ -134,7 +137,7 @@
 						<owner>Markus von Rüden</owner>
 					</properties>
 					<excludes>
-						<exclude>**/application.properties</exclude>
+						<exclude>**/*.properties</exclude>
 						<exclude>**/js/vendor/**</exclude>
 						<exclude>**/fonts/**</exclude>
 						<exclude>**/*.html</exclude>

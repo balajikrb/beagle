@@ -61,7 +61,7 @@ public class JobExecutionManager {
     @Autowired
     private EventBus eventBus;
 
-    @Value("${jobmanager.pool.size:5}")
+    @Value("${jobmanager.pool.size}")
     private int poolSize;
 
     @Autowired
