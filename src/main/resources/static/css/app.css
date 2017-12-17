@@ -21,13 +21,6 @@ body {
 /*
  * Main Navigation
  */
-.beagle-header .nav-link .indicator {
-    position: relative;
-    top: -27px;
-    left: 12px;
-    font-size: 10px;
-}
-
 .beagle-header .img-avatar {
     height: 35px;
     width: 35px;
