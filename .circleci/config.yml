@@ -73,9 +73,25 @@ jobs:
       # Startup application
       - run: |
           export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_PREVIOUS_BUILD_NUM}
-          docker run -p 8080:8080 --name beagle -d keybird/beagle:${DOCKERHUB_TAG}
-          sleep 30
-          docker exec beagle curl http://localhost:8080
+
+          # Override settings for e2e testing
+          cat > docker-compose.override.yml <<EOF
+          version: '2.2'
+          services:
+            app:
+              image: keybird/beagle:${DOCKERHUB_TAG}
+              container_name: beagle
+          EOF
+          cat docker-compose.override.yml
+
+          # Startup environment
+          docker-compose up -d
+
+          # Wait for container
+          NEXT_WAIT_TIME=0
+          until $( docker exec beagle curl http://localhost:8080 > /dev/null 2>&1 ) || [ $NEXT_WAIT_TIME -eq 20 ]; do
+             sleep $(( NEXT_WAIT_TIME++ ))
+          done
 
       # Prepare e2e tests
       - run: |

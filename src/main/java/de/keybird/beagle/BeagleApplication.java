@@ -18,8 +18,6 @@
 
 package de.keybird.beagle;
 
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,24 +25,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
-import de.keybird.beagle.repository.UserRepository;
-import de.keybird.beagle.security.User;
-import de.keybird.beagle.security.UserState;
 
 @SpringBootApplication
 @EnableScheduling
 public class BeagleApplication implements CommandLineRunner {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private JobExecutionContext jobContext;
@@ -58,36 +46,6 @@ public class BeagleApplication implements CommandLineRunner {
 		logger.info("Working directory: {}", jobContext.getWorkingPath());
 		logger.info("Inbox directory: {}", jobContext.getInboxPath());
 		logger.info("Archive directory: {}", jobContext.getArchivePath());
-
-
-		// Create dummy user(s) for now
-		// TODO MVR remove later
-		final User test = new User();
-		test.setEmail("test@keybird.de");
-		test.setName("Test User");
-		test.setState(UserState.Active);
-		test.setRegisterDate(new Date());
-		test.setPassword(passwordEncoder.encode("test"));
-
-		// TODO MVR remove later
-		final User mvr = new User();
-		mvr.setEmail("m.v.rueden@keybird.de");
-		mvr.setName("Markus von Rüden");
-		mvr.setState(UserState.Active);
-		mvr.setRegisterDate(new Date());
-		mvr.setPassword(passwordEncoder.encode("test"));
-
-		// TODO MVR remove later
-		final User fs = new User();
-		fs.setEmail("f.singer@keybird.de");
-		fs.setName("Florian Singer");
-		fs.setState(UserState.Active);
-		fs.setRegisterDate(new Date());
-		fs.setPassword(passwordEncoder.encode("test"));
-
-		userRepository.save(mvr);
-		userRepository.save(fs);
-		userRepository.save(test);
 	}
 
 }

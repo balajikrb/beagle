@@ -40,13 +40,13 @@ import io.searchbox.client.config.HttpClientConfig;
 @Configuration
 public class JestClientConfiguration {
 
-    @Value("${elastic.urls:http://localhost:9200}")
+    @Value("${elastic.urls}")
     private String elasticUrls;
 
-    @Value("${elastic.username:}")
+    @Value("${elastic.username}")
     private String username;
 
-    @Value("${elastic.password:}")
+    @Value("${elastic.password}")
     private String password;
 
     @Bean
