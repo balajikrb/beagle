@@ -26,6 +26,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -50,6 +52,7 @@ public abstract class JobEntity {
 
     private String errorMessage;
 
+    @Enumerated(EnumType.STRING)
     private JobState state = JobState.Pending;
 
     @Temporal(TemporalType.TIMESTAMP)

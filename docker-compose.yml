@@ -16,35 +16,33 @@ services:
       ports:
         - "9200:9200"
         - "9300:9300"
-  mysql:
-    image: mysql:5.7.20
-    command: mysqld --max_allowed_packet=25M
+  beagledb:
+    image: postgres:9.6.7
     ports:
-      - "3306:3306"
+      - "5432:5432"
     environment:
-      - MYSQL_ROOT_PASSWORD=p4SSW0rd
-      - MYSQL_DATABASE=beagle
-      - MYSQL_USER=beagleuser
-      - MYSQL_PASSWORD=beaglepassword
+      - POSTGRES_DB=beagle
+      - POSTGRES_USER=beagleuser
+      - POSTGRES_PASSWORD=beaglepassword
   # TODO MVR allow/figure out how to define more ram
   app:
     image: keybird/beagle:latest
     depends_on:
-      - mysql
+      - beagledb
     volumes:
       - beagledata:/opt/beagle
     ports:
       - "8080:8080"
     links:
-      - mysql
+      - beagledb
       - elasticsearch
     environment:
       - "SPRING_PROFILES_ACTIVE=container,test"
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=beagledb
       - DATABASE_USER=beagleuser
       - DATABASE_PASSWORD=beaglepassword
       - DATABASE_NAME=beagle
-      - DATABASE_PORT=3306
+      - DATABASE_PORT=5432
       - ELASTIC_URLS=http://elasticsearch:9200
       - ELASTIC_USERNAME=elastic
       - ELASTIC_PASSWORD=changeme
