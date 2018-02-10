@@ -138,6 +138,7 @@
 					</properties>
 					<excludes>
 						<exclude>**/*.properties</exclude>
+						<exclude>**/*.sql</exclude>
 						<exclude>**/js/vendor/**</exclude>
 						<exclude>**/fonts/**</exclude>
 						<exclude>**/*.html</exclude>
