@@ -58,9 +58,9 @@
 			<version>21.0</version>
 		</dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+		</dependency>
 		<!-- This should only be on the classpath if test or profile dev is active -->
 		<dependency>
 			<groupId>com.h2database</groupId>
