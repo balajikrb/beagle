@@ -34,7 +34,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -68,9 +67,7 @@ public abstract class JobEntity {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size=100)
-    @JoinTable(name="logs",
-            joinColumns={@JoinColumn(name="job_id")},
-            inverseJoinColumns={@JoinColumn(name="id")})
+    @JoinColumn(name="job_id")
     private List<LogEntity> logs = new ArrayList<>();
 
     public Long getId() {

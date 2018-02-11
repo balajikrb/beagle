@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionOperations;
@@ -37,18 +36,19 @@ import org.springframework.transaction.support.TransactionOperations;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 
+import de.keybird.beagle.BeagleTest;
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
-import de.keybird.beagle.jobs.persistence.JobState;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
+import de.keybird.beagle.jobs.persistence.JobState;
 import de.keybird.beagle.jobs.persistence.LogEntity;
 import de.keybird.beagle.jobs.persistence.LogLevel;
 
 // See https://github.com/keybird/beagle/issues/5
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@BeagleTest
 public class PerformanceTest {
 
     private static final long EXPECTED_RUNTIME = 150; // ms
