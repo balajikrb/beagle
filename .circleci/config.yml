@@ -99,7 +99,19 @@ jobs:
           docker cp . source:/repo
 
       # Run e2e tests
-      - run: docker run --network container:beagle --volumes-from source keybird/beagle-e2e:latest --troubleshoot true --baseUrl='http://localhost:8080' /repo/src/test/javascript/conf.js
+      - run: |
+          docker run --network container:beagle --volumes-from source -w /repo keybird/beagle-e2e:latest .circleci/e2e.sh
+
+      # Copy test results back
+      - run:
+          command: |
+            mkdir -p target/e2e
+            docker cp source:/repo/target/screenshots target/e2e
+          when: always
+
+      # Finally collect artifacts
+      - store_artifacts:
+          path: target/e2e/**
 
 workflows:
   version: 2
