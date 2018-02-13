@@ -44,7 +44,7 @@ jobs:
       # build the application image
       - run: |
             docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-            export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_BUILD_NUM}
+            export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_SHA1}
             case "${CIRCLE_BRANCH}" in
                 master)
                   echo "Building docker image with tag ${DOCKERHUB_TAG} and latest."
@@ -72,7 +72,7 @@ jobs:
 
       # Startup application
       - run: |
-          export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_PREVIOUS_BUILD_NUM}
+          export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_SHA1}
 
           # Override settings for e2e testing
           cat > docker-compose.override.yml <<EOF
