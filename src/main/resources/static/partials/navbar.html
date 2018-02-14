@@ -20,14 +20,14 @@
             </button>
         </form>
 
-        <ul class="navbar-nav ml-auto d-md-down-none">
+        <ul class="navbar-nav ml-auto d-md-down-none" id="user-controls">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     <img src="{{profile.image}}" class="img-avatar" alt="{{profile.email}}">
                     <span class="d-md-down-none">{{profile.name}}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="#!/page"><i class="fa fa-user"></i> Profile</a>
+                    <a class="dropdown-item" href="#!/profile"><i class="fa fa-user"></i> Profile</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" ng-click="logout()"><i class="fa fa-lock"></i> Logout</a>
                 </div>
