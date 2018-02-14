@@ -111,7 +111,7 @@ jobs:
 
       # Finally collect artifacts
       - store_artifacts:
-          path: target/e2e/**
+          path: target/e2e
 
 workflows:
   version: 2
