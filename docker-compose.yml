@@ -37,7 +37,7 @@ services:
       - beagledb
       - elasticsearch
     environment:
-      - "SPRING_PROFILES_ACTIVE=container,test"
+      - "SPRING_PROFILES_ACTIVE=container"
       - DATABASE_HOST=beagledb
       - DATABASE_USER=beagleuser
       - DATABASE_PASSWORD=beaglepassword

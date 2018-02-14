@@ -61,6 +61,10 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
 		<!-- This should only be on the classpath if test or profile dev is active -->
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -138,6 +142,7 @@
 					</properties>
 					<excludes>
 						<exclude>**/*.properties</exclude>
+						<exclude>**/*.sql</exclude>
 						<exclude>**/js/vendor/**</exclude>
 						<exclude>**/fonts/**</exclude>
 						<exclude>**/*.html</exclude>

@@ -25,7 +25,7 @@ import de.keybird.beagle.api.DocumentState;
 
 public class DocumentDTO {
 
-    private Integer id;
+    private Long id;
 
     private String filename;
 
@@ -53,11 +53,11 @@ public class DocumentDTO {
         setState(document.getState());
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

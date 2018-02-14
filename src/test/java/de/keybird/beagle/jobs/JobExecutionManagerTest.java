@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import de.keybird.beagle.BeagleTest;
 import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
@@ -58,6 +59,7 @@ import de.keybird.beagle.repository.JobRepository;
 import de.keybird.beagle.repository.PageRepository;
 
 @RunWith(SpringRunner.class)
+@BeagleTest
 @SpringBootTest(properties = { "working.directory=" + TestConfig.WORKING_DIRECTORY })
 public class JobExecutionManagerTest {
 

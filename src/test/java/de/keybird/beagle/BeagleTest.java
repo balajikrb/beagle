@@ -15,19 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
+
 package de.keybird.beagle;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ActiveProfiles;
 
-@RunWith(SpringRunner.class)
+@Inherited
 @SpringBootTest
-public class BeagleApplicationTests {
-
-	@Test
-	public void contextLoads() {
-	}
-
+@ActiveProfiles("test")
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BeagleTest {
 }

@@ -15,38 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
+package de.keybird.beagle;
 
-package de.keybird.beagle.security;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+@RunWith(SpringRunner.class)
+@BeagleTest
+public class BeagleApplicationTest {
 
-@Entity
-@Table(name="roles")
-public class Role {
+	@Test
+	public void contextLoads() {
+	}
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String name;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
