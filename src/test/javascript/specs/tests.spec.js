@@ -20,17 +20,32 @@
 
 describe('Beagle Tests', function() {
     describe('login page', function() {
-        it('should load', function() {
-            browser.get(browser.baseUrl);
 
+        beforeEach(function() {
+            browser.get(browser.baseUrl);
+        });
+
+        it('should load', function() {
             // Verify login page
             expect(element(by.name('loginBtn')).getText()).toBe("Login");
             expect(element(by.xpath("//h2")).getText()).toContain("Project Beagle");
         });
 
-        it('login works', function() {
-            browser.get(browser.baseUrl);
+        it ('login button is disabled if form is not filled out', function() {
+            element(by.id("inputEmail")).clear();
+            element(by.id("inputPassword")).clear();
+            expect(element(by.name("loginBtn")).isEnabled()).toBe(false);
+        });
 
+        it ('shows error when credentials not valid', function() {
+            element(by.id("inputEmail")).clear().sendKeys("dummy");
+            element(by.id("inputPassword")).clear().sendKeys("dummy");
+            element(by.name("loginBtn")).click();
+
+            expect(element(by.id("error")).getText()).toContain("There was a problem logging in");
+        });
+
+        it('works', function() {
             // Login
             element(by.id("inputEmail")).clear().sendKeys("test@keybird.de");
             element(by.id("inputPassword")).clear().sendKeys("test");
