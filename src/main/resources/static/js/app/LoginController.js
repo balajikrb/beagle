@@ -25,13 +25,10 @@ angular.module('beagleApp')
             $scope.credentials = {};
             $scope.login = function() {
                 AuthService.authenticate($scope.credentials, function() {
-                    console.log("Callback called", AuthService);
                     if (AuthService.authenticated === true) {
                         $scope.error = false;
-                        console.log("go home");
                         $state.go('home');
                     } else {
-                        console.log("authentication error");
                         $scope.error = true;
                     }
                 })
