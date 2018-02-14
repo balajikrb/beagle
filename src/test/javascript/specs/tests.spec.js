@@ -19,6 +19,14 @@
 'use strict';
 
 describe('Beagle Tests', function() {
+
+    var doLogin = function() {
+        browser.get(browser.baseUrl);
+        element(by.id("inputEmail")).clear().sendKeys("test@keybird.de");
+        element(by.id("inputPassword")).clear().sendKeys("test");
+        element(by.name("loginBtn")).click();
+    };
+
     describe('login page', function() {
 
         beforeEach(function() {
@@ -47,13 +55,24 @@ describe('Beagle Tests', function() {
 
         it('works', function() {
             // Login
-            element(by.id("inputEmail")).clear().sendKeys("test@keybird.de");
-            element(by.id("inputPassword")).clear().sendKeys("test");
-            element(by.name("loginBtn")).click();
+            doLogin();
 
             // Verify logged in
             expect(element(by.xpath("//main/h2")).getText()).toBe("Home");
         });
+    });
+
+    describe('profile page', function() {
+        it('should load', function() {
+            doLogin();
+
+            // go to profile page
+            element(by.id("user-controls")).click(); // toggle actions
+            element(by.xpath("//div/ul/li/div/a[contains(text(), 'Profile')]")).click();
+
+            // Verify
+            expect(element(by.xpath("//main//div/h3[text()='Test User']")));
+        })
     });
 
     describe('Detect Job', function() {
