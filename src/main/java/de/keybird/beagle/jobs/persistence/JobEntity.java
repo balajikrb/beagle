@@ -33,7 +33,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -65,9 +64,8 @@ public abstract class JobEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date completeTime;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "job")
     @BatchSize(size=100)
-    @JoinColumn(name="job_id")
     private List<LogEntity> logs = new ArrayList<>();
 
     public Long getId() {
@@ -110,8 +108,14 @@ public abstract class JobEntity {
         this.logs = logs;
     }
 
-    public void addLogEntry(LogEntity item) {
-        logs.add(item);
+    public void addLogEntry(LogEntity log) {
+        logs.add(log);
+        log.setJob(this);
+    }
+
+    public void removeLogEntry(LogEntity log) {
+        logs.remove(log);
+        log.setJob(null);
     }
 
     public String getErrorMessage() {

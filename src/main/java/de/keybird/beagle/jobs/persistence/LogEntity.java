@@ -24,14 +24,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.BatchSize;
 
 @Table(name="logs")
 @Entity
@@ -52,6 +57,11 @@ public class LogEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LogLevel level;
+
+    @ManyToOne(fetch= FetchType.LAZY)
+    @JoinColumn(name = "job_id")
+    @BatchSize(size=100)
+    private JobEntity job;
 
     public Long getId() {
         return id;
@@ -83,5 +93,13 @@ public class LogEntity {
 
     public void setLevel(LogLevel level) {
         this.level = level;
+    }
+
+    public JobEntity getJob() {
+        return job;
+    }
+
+    public void setJob(JobEntity job) {
+        this.job = job;
     }
 }
