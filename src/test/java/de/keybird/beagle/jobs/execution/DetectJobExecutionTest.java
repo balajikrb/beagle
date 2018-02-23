@@ -123,6 +123,9 @@ public class DetectJobExecutionTest {
         // import the same file multiple times
         int N = 2;
         for (int i=0; i<N; i++) {
+            // Manually create new entity, otherwise it is shared the 2nd time
+            context.setJobEntity(new DetectJobEntity());
+
             // Add a document to the inbox directory
             inboxDirectory.addFile(TestConfig.BEAGLE_DE_PDF_URL);
 
@@ -136,8 +139,8 @@ public class DetectJobExecutionTest {
         // Ensure it is only available once
         assertEquals(1, documentRepository.count());
 
-        // jobs executed ideally would be 2, but we execute the same job multiple times, therefore the job count is 1
-        assertEquals(1, jobRepository.count());
+        // Jobs should be 2
+        assertEquals(2, jobRepository.count());
     }
 
     @Test

@@ -70,6 +70,7 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.4.192</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.awaitility</groupId>
@@ -156,6 +157,7 @@
 						<exclude>todo.adoc</exclude>
 						<exclude>LICENSE</exclude>
 						<exclude>**/Dockerfile</exclude>
+						<exclude>node_modules/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
