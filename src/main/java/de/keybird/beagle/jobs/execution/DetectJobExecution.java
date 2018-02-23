@@ -51,6 +51,7 @@ public class DetectJobExecution implements JobExecution<DetectJobEntity> {
     @Autowired
     private DocumentRepository documentRepository;
 
+    // TODO MVR the file size should be checked and too big files should be rejected
     @Override
     public void execute(JobExecutionContext<DetectJobEntity> context) throws ExecutionException {
         try {

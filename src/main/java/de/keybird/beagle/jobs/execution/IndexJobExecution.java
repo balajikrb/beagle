@@ -53,6 +53,7 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
     @Autowired
     private PageRepository pageRepository;
 
+    // TODO MVR we should update this using batch update. Maybe only 250/500/1000 at a time
     public void execute(JobExecutionContext<IndexJobEntity> context) {
         final List<Page> importedPages = pageRepository.findByState(PageState.Imported);
         final AtomicInteger index = new AtomicInteger(0);
