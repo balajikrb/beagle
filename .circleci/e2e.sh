@@ -24,4 +24,4 @@ echo "Running UI tests"
 protractor --troubleshoot true --baseUrl='http://localhost:8080' src/test/javascript/conf.js || exit 1
 
 echo "Running Java tests"
-mvn test -Dgroups=de.keybird.beagle.E2ETest
+mvn test -P e2e
