@@ -20,10 +20,8 @@ sleep 5
 yarn
 
 # run test
-echo "Running tests"
-protractor --troubleshoot true --baseUrl='http://localhost:8080' src/test/javascript/conf.js
+echo "Running UI tests"
+protractor --troubleshoot true --baseUrl='http://localhost:8080' src/test/javascript/conf.js || exit 1
 
-# Have it quit correctly
-RESULT=$?
-echo "Done running test: ${RESULT}"
-exit ${RESULT}
+echo "Running Java tests"
+mvn test -P e2e

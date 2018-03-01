@@ -67,6 +67,9 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          key: beagle-repository-{{ checksum "pom.xml" }}
+
       # enable docker in docker
       - setup_remote_docker
 
@@ -95,6 +98,7 @@ jobs:
 
       # Prepare e2e tests
       - run: |
+          mvn clean install -DskipTests
           docker create -v /repo --name source alpine:3.4 /bin/true
           docker cp . source:/repo
 
@@ -107,11 +111,16 @@ jobs:
           command: |
             mkdir -p target/e2e
             docker cp source:/repo/target/screenshots target/e2e
+            docker cp source:/repo/target/surefire-reports target/surefire-reports
           when: always
 
       # Finally collect artifacts
+      - store_test_results:
+          path: target/surefire-reports
       - store_artifacts:
           path: target/e2e
+      - store_artifacts:
+          path: target/surefire-reports
 
 workflows:
   version: 2
