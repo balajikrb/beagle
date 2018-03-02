@@ -16,21 +16,19 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.repository;
+package de.keybird.beagle.rest;
 
-import java.util.List;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+public abstract class ResponseUtils {
 
-import de.keybird.beagle.api.Document;
-import de.keybird.beagle.api.DocumentState;
-
-@Repository
-public interface DocumentRepository extends CrudRepository<Document, Long> {
-
-    Document findByChecksum(String checksum);
-
-    List<Document> findByState(DocumentState state);
+    public static <T> ResponseEntity<T> noContent() {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
+    }
 
 }

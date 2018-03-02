@@ -78,13 +78,7 @@ jobs:
           export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_SHA1}
 
           # Override settings for e2e testing
-          cat > docker-compose.override.yml <<EOF
-          version: '2.2'
-          services:
-            app:
-              image: keybird/beagle:${DOCKERHUB_TAG}
-              container_name: beagle
-          EOF
+          cp .circleci/docker-compose.override.yml ./
           cat docker-compose.override.yml
 
           # Startup environment
@@ -98,7 +92,6 @@ jobs:
 
       # Prepare e2e tests
       - run: |
-          mvn clean install -DskipTests
           docker create -v /repo --name source alpine:3.4 /bin/true
           docker cp . source:/repo
 

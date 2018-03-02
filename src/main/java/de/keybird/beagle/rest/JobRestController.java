@@ -29,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.keybird.beagle.api.DocumentState;
@@ -62,7 +63,7 @@ public class JobRestController {
     public ResponseEntity listJobs() {
         final Iterable<JobEntity> all = jobRepository.findAll();
         if (!all.iterator().hasNext()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseUtils.noContent();
         }
         // Convert entities to DTOs (let's us fine-tune what to expose)
         final List<JobDTO> entities = StreamSupport.stream(all.spliterator(), false)
@@ -75,7 +76,7 @@ public class JobRestController {
     public ResponseEntity<List<JobExecutionDTO>> showProgress() {
         final List<JobExecutionContext> executions = jobExecutionManager.getExecutions();
         if (executions.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseUtils.noContent();
         }
         final List<JobExecutionDTO> jobDTOList = executions.stream().map(jobExecution -> createFrom(jobExecution)).collect(Collectors.toList());
         jobDTOList.sort(Comparator.comparing(JobExecutionDTO::getId).reversed());
@@ -101,6 +102,12 @@ public class JobRestController {
     public ResponseEntity startIndex() {
         jobExecutionManager.submit(jobFactory.createIndexJobRunner());
         return ResponseEntity.accepted().build();
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAll() {
+        jobRepository.deleteAll();
     }
 
     public static JobExecutionDTO createFrom(JobExecutionContext context) {

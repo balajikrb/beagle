@@ -16,17 +16,14 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle;
+package de.keybird.beagle.utils;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import de.keybird.beagle.rest.model.JobDTO;
+import io.restassured.specification.RequestSpecification;
 
-@Category(E2ETest.class)
-public class E2EDummyTest {
-    @Test
-    public void verifyA() {
-        Assert.assertThat(true, Matchers.is(true));
+public class JobEndpoint extends AbstractEndpoint {
+    public JobEndpoint(RequestSpecification spec) {
+        super(spec, JobDTO.class);
+        spec.basePath("jobs");
     }
 }
