@@ -61,11 +61,11 @@ public class JobExecutionManager {
     @Autowired
     private EventBus eventBus;
 
-    @Value("${jobmanager.pool.size}")
-    private int poolSize;
-
     @Autowired
     private JobService jobService;
+
+    @Value("${jobmanager.pool.minSize}")
+    private int minPoolSize;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -76,7 +76,14 @@ public class JobExecutionManager {
 
     @PostConstruct
     public void init() {
-        LOG.info("INIT");
+        // Each import job requires ~ 1 GB RAM, therefore we determine the pool size
+        // relative to the available max heap size, but at least 1
+        final long maxHeapSize = Runtime.getRuntime().maxMemory();
+        final int maxPoolSize = Math.round(maxHeapSize / 1024f / 1024f / 1024f);
+        int poolSize = Math.max(minPoolSize, maxPoolSize);
+
+        // Initialize execution Manager
+        LOG.info("Pool Size of JobExecutionManager is: {}", poolSize);
         executorService = Executors.newFixedThreadPool(
                 poolSize,
                 new ThreadFactoryBuilder()
