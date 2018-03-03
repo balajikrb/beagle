@@ -16,25 +16,24 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.repository;
+package de.keybird.beagle.elastic;
 
-import java.util.List;
+import java.util.Objects;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+public class FailedItem<T> {
+    private final T item;
+    private final Exception cause;
 
-import de.keybird.beagle.api.Page;
-import de.keybird.beagle.api.PageState;
+    public FailedItem(T failedItem, Exception cause) {
+        this.item = Objects.requireNonNull(failedItem);
+        this.cause = cause;
+    }
 
-@Repository
-public interface PageRepository extends CrudRepository<Page, Long> {
+    public T getItem() {
+        return item;
+    }
 
-    List<Page> findByState(PageState state);
-
-    List<Page> findByState(PageState state, Pageable page);
-
-    long countByState(PageState state);
-
-    Page findByChecksum(String checksum);
+    public Exception getCause() {
+        return cause;
+    }
 }

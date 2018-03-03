@@ -33,4 +33,5 @@ public interface DocumentRepository extends CrudRepository<Document, Long> {
 
     List<Document> findByState(DocumentState state);
 
+    long countByState(DocumentState state);
 }

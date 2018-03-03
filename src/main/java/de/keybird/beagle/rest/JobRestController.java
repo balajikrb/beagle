@@ -42,6 +42,7 @@ import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
 import de.keybird.beagle.rest.model.JobDTO;
 import de.keybird.beagle.rest.model.JobExecutionDTO;
+import de.keybird.beagle.services.JobService;
 
 @RestController
 @RequestMapping("/jobs")
@@ -58,6 +59,9 @@ public class JobRestController {
 
     @Autowired
     private JobRepository jobRepository;
+
+    @Autowired
+    private JobService jobService;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity listJobs() {
@@ -100,7 +104,7 @@ public class JobRestController {
 
     @RequestMapping(path="/index", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startIndex() {
-        jobExecutionManager.submit(jobFactory.createIndexJobRunner());
+        jobService.indexPagesIfNecessary();
         return ResponseEntity.accepted().build();
     }
 

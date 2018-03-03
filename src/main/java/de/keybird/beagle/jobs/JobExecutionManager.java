@@ -29,11 +29,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -64,24 +64,19 @@ public class JobExecutionManager {
     @Autowired
     private JobService jobService;
 
-    @Value("${jobmanager.pool.minSize}")
-    private int minPoolSize;
-
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    @Named("poolSize")
+    private int poolSize;
+
     private ExecutorService executorService;
 
-    private List<JobRunner> jobRunnerList = new CopyOnWriteArrayList<>();
+    private final List<JobRunner> jobRunnerList = new CopyOnWriteArrayList<>();
 
     @PostConstruct
     public void init() {
-        // Each import job requires ~ 1 GB RAM, therefore we determine the pool size
-        // relative to the available max heap size, but at least 1
-        final long maxHeapSize = Runtime.getRuntime().maxMemory();
-        final int maxPoolSize = Math.round(maxHeapSize / 1024f / 1024f / 1024f);
-        int poolSize = Math.max(minPoolSize, maxPoolSize);
-
         // Initialize execution Manager
         LOG.info("Pool Size of JobExecutionManager is: {}", poolSize);
         executorService = Executors.newFixedThreadPool(

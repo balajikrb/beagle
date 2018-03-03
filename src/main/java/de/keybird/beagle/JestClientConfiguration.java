@@ -49,6 +49,12 @@ public class JestClientConfiguration {
     @Value("${elastic.password}")
     private String password;
 
+    @Value("${elastic.readTimeout}")
+    private int readTimeout;
+
+    @Value("${elastic.connTimeout}")
+    private int connTimeout;
+
     @Bean
     @Scope("singleton")
     public JestClient getJestClient() {
@@ -61,8 +67,13 @@ public class JestClientConfiguration {
             throw new IllegalStateException("No urls have been defined. Please provide a valid ${elastic.urls} property.");
         }
 
-        // Apply additional username and password if set
+        // Create builder
         final HttpClientConfig.Builder configBuilder = new HttpClientConfig.Builder(urls);
+        configBuilder.multiThreaded(true);
+        configBuilder.readTimeout(readTimeout);
+        configBuilder.connTimeout(connTimeout);
+
+        // Apply additional username and password if set
         if (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)) {
             final Set<HttpHost> targetHosts = urls.stream()
                 .map(url -> {

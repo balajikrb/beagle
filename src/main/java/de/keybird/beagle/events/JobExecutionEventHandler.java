@@ -58,10 +58,8 @@ public class JobExecutionEventHandler {
             // Kick of import of documents
             if (event.getSource().getJobEntity().getType() == JobType.Detect) {
                 jobService.importDocuments();
-                jobService.indexPagesIfNecessary();
-            } else if (event.getSource().getJobEntity().getType() == JobType.Import) {
-                jobService.indexPagesIfNecessary();
             }
+            jobService.indexPagesIfNecessary();
         }
     }
 }
