@@ -29,11 +29,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -61,22 +61,24 @@ public class JobExecutionManager {
     @Autowired
     private EventBus eventBus;
 
-    @Value("${jobmanager.pool.size}")
-    private int poolSize;
-
     @Autowired
     private JobService jobService;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    @Named("poolSize")
+    private int poolSize;
+
     private ExecutorService executorService;
 
-    private List<JobRunner> jobRunnerList = new CopyOnWriteArrayList<>();
+    private final List<JobRunner> jobRunnerList = new CopyOnWriteArrayList<>();
 
     @PostConstruct
     public void init() {
-        LOG.info("INIT");
+        // Initialize execution Manager
+        LOG.info("Pool Size of JobExecutionManager is: {}", poolSize);
         executorService = Executors.newFixedThreadPool(
                 poolSize,
                 new ThreadFactoryBuilder()

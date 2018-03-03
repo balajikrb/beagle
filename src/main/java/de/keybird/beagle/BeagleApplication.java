@@ -24,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
@@ -48,4 +50,14 @@ public class BeagleApplication implements CommandLineRunner {
 		logger.info("Archive directory: {}", jobContext.getArchivePath());
 	}
 
+	@Scheduled(fixedRate = 20000, initialDelay = 5000)
+	@ConditionalOnProperty(prefix = "log.memoryUsage", value = "true")
+	private void logMemoryUsage() {
+		final Runtime runtime = Runtime.getRuntime();
+		final long mega = 1024 * 1024;
+		logger.info("Max memory: {} MB. Allocated memory: {} MB. Free memory: {} MB",
+				runtime.maxMemory() / mega,
+				runtime.totalMemory() / mega,
+				runtime.freeMemory() / mega);
+	}
 }

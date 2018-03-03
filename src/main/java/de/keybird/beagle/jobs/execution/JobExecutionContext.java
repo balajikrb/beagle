@@ -184,6 +184,10 @@ public class JobExecutionContext<J extends JobEntity> {
         getEventBus().post(new JobExecutionProgressChangedEvent(this, oldProgress, getProgress()));
     }
 
+    protected void updateProgress(int currentProgress) {
+        updateProgress(currentProgress, getProgress().getTotalProgress());
+    }
+
     protected void onSuccess() {
         if (successHandler != null) {
             successHandler.handle(this);

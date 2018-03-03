@@ -21,6 +21,7 @@ package de.keybird.beagle.jobs;
 import javax.inject.Provider;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import de.keybird.beagle.api.Document;
@@ -62,8 +63,9 @@ public class JobExecutionFactory {
         return new JobRunner<>(jobExecutionContext, execution);
     }
 
-    public JobRunner<IndexJobEntity> createIndexJobRunner() {
+    public JobRunner<IndexJobEntity> createIndexJobRunner(Pageable pageRequest) {
         final IndexJobExecution execution = indexJobExecutionProvider.get();
+        execution.setPage(pageRequest);
         final JobExecutionContext<IndexJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
         jobExecutionContext.setJobEntity(new IndexJobEntity());
 
