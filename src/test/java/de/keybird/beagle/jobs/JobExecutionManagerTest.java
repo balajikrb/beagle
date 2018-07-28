@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -82,17 +81,13 @@ public class JobExecutionManagerTest {
     public void setUp() {
         entityManager.clear();
         jobExecutionManager.init();
+        jobRepository.deleteAll();
+        pageRepository.deleteAll();
+        documentRepository.deleteAll();
         assertThat(jobExecutionManager.hasRunningJobs(), is(false));
         assertThat(jobRepository.count(), is(0L));
         assertThat(documentRepository.count(), is(0L));
         assertThat(pageRepository.count(), is(0L));
-    }
-
-    @After
-    public void tearDown() {
-        jobRepository.deleteAll();
-        pageRepository.deleteAll();
-        documentRepository.deleteAll();
     }
 
     // See https://github.com/Keybird/beagle/issues/1
@@ -161,7 +156,7 @@ public class JobExecutionManagerTest {
     @Test(timeout=20000)
     public void verifyJobRemovedProperlyOnError() throws InterruptedException {
         jobExecutionManager.submit(new DetectJobEntity(), context -> {
-            throw new IllegalStateException("Some random exception");
+            throw new IllegalStateException("Some random (expected) exception");
         });
         jobExecutionManager.shutdown();
         jobExecutionManager.awaitTermination(5, SECONDS);

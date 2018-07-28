@@ -57,6 +57,7 @@ public class JobExecutionFactory implements JobVisitor<JobExecution> {
     @Override
     public JobExecution<IndexJobEntity> visit(IndexJobEntity jobEntity) {
         IndexJobExecution execution = indexJobExecutionProvider.get();
+        execution.setPageRequest(jobEntity.getPage());
         return execution;
     }
 

@@ -46,7 +46,6 @@ import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.jobs.persistence.JobState;
 import de.keybird.beagle.jobs.persistence.LogEntity;
 import de.keybird.beagle.jobs.persistence.LogLevel;
-import de.keybird.beagle.repository.JobRepository;
 
 // TODO MVR es wird jetzt zwar geloggt, welche dokumente usw. abgewiesen wurden, aber ein übergeordneter status für die dokumente, pages fehlt noch
 // Das muss noch eingeführt werden, damit die queries funktionieren
@@ -93,7 +92,11 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
 
         try {
             // JobEntity is very likely detached here, so we re-attach it
-            this.jobEntity = entityManager.merge(jobEntity);
+            if (jobEntity.getId() != null) {
+                this.jobEntity = (T) entityManager.find(jobEntity.getClass(), jobEntity.getId());
+            } else {
+                this.jobEntity = entityManager.merge(jobEntity);
+            }
             setState(JobState.Initializing);
             start();
 

@@ -75,6 +75,10 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
 
     private Pageable pageRequest;
 
+    public void setPageRequest(Pageable pageRequest) {
+        this.pageRequest = pageRequest;
+    }
+
     public void execute(JobExecutionContext<IndexJobEntity> context) {
         final List<Page> importedPages = pageRepository.findByState(PageState.Imported, pageRequest);
         final int totalSize = importedPages.size() == pageRequest.getPageSize() ? pageRequest.getPageSize() : importedPages.size();
@@ -91,9 +95,7 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
             for (List<Page> partition : partitions) {
                 indexBatch(context, partition, offset, partition.size());
 
-                pageRepository.save(partition);
                 entityManager.flush();
-                importedPages.removeAll(partition);
 
                 offset += partition.size();
                 context.updateProgress(offset);
@@ -199,9 +201,5 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
             return SLEEP_TIME[SLEEP_TIME.length - 1];
         }
         return SLEEP_TIME[retry - 1];
-    }
-
-    public void setPage(Pageable pageRequest) {
-        this.pageRequest = pageRequest;
     }
 }
