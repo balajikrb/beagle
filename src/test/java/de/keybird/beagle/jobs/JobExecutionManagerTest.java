@@ -104,9 +104,11 @@ public class JobExecutionManagerTest {
         // Submit dummy job
         jobExecutionManager.submit(new DetectJobEntity(), context -> Thread.sleep(5000));
 
-        // Verify execution is in progress
-        assertThat(jobExecutionManager.hasRunningJobs(), is(true));
-        assertThat(jobExecutionManager.getExecutions(JobType.Detect), hasSize(1));
+        // Verify execution is in progress, but we have to wait, as it takes some time to submit the job
+        await().atMost(1, SECONDS).until(() -> {
+            assertThat(jobExecutionManager.hasRunningJobs(), is(true));
+            assertThat(jobExecutionManager.getExecutions(JobType.Detect), hasSize(1));
+        });
 
         // Wait until finished
         await().atMost(10, SECONDS).until(() -> !jobExecutionManager.hasRunningJobs());
@@ -166,7 +168,3 @@ public class JobExecutionManagerTest {
         assertThat(jobExecutionManager.getExecutions(), hasSize(0));
     }
 }
-
-
-
-

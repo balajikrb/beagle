@@ -51,7 +51,7 @@ import de.keybird.beagle.jobs.persistence.LogLevel;
 @BeagleTest
 public class PerformanceTest {
 
-    private static final long EXPECTED_RUNTIME = 150; // ms
+    private static final long EXPECTED_RUNTIME = 300; // ms
 
     @Autowired
     private DocumentRepository documentRepository;

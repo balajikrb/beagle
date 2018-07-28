@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,9 +63,6 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
     private EventBus eventBus;
 
     @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
     private EntityManager entityManager;
 
     @Value("${working.directory}")
@@ -88,6 +86,7 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
         this.archivePath = workingPath.resolve("2_archive");
     }
 
+    @Transactional
     public void execute(T jobEntity, JobExecution<T> execution) {
         Objects.requireNonNull(jobEntity);
         Objects.requireNonNull(execution);
@@ -185,9 +184,7 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
     }
 
     protected void complete() {
-        if (jobRepository != null && jobEntity != null) {
-            jobRepository.save(jobEntity); // Update job entity
-        }
+
     }
 
     public void logEntry(LogLevel logLevel, String message, Object... args) {
