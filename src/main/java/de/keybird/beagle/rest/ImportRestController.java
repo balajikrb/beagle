@@ -39,7 +39,6 @@ import de.keybird.beagle.api.source.ByteDocumentSource;
 import de.keybird.beagle.api.source.DocumentSource;
 import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
-import de.keybird.beagle.jobs.execution.JobRunner;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.rest.model.DocumentDTO;
@@ -75,8 +74,7 @@ public class ImportRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void createDocument(@RequestParam(value = "name") String filename, HttpEntity<byte[]> requestEntity) {
         final DocumentSource source = new ByteDocumentSource(() -> requestEntity.getBody(), () -> filename);
-        final JobRunner<DetectJobEntity> detectJobRunner = jobExecutionFactory.createDetectJobRunner(source);
-        jobExecutionManager.submit(detectJobRunner);
+        jobExecutionManager.submit(new DetectJobEntity(source));
     }
 
     @RequestMapping(method = RequestMethod.DELETE)

@@ -24,6 +24,7 @@ import javax.persistence.Transient;
 
 import de.keybird.beagle.api.source.DocumentSource;
 import de.keybird.beagle.api.source.FileSystemSource;
+import de.keybird.beagle.jobs.JobVisitor;
 
 @Entity
 @DiscriminatorValue("detect")
@@ -55,4 +56,8 @@ public class DetectJobEntity extends JobEntity {
         return documentSource;
     }
 
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 }

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import javax.inject.Provider;
 import javax.persistence.EntityManager;
 
 import org.junit.After;
@@ -47,8 +46,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import de.keybird.beagle.BeagleTest;
 import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
-import de.keybird.beagle.jobs.execution.JobExecutionContext;
-import de.keybird.beagle.jobs.execution.JobRunner;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.ImportJobEntity;
 import de.keybird.beagle.jobs.persistence.JobEntity;
@@ -68,12 +65,6 @@ public class JobExecutionManagerTest {
 
     @Autowired
     private JobExecutionManager jobExecutionManager;
-
-    @Autowired
-    private JobExecutionFactory jobExecutionFactory;
-
-    @Autowired
-    private Provider<JobExecutionContext> jobExecutionContextProvider;
 
     @Autowired
     private JobRepository jobRepository;
@@ -111,10 +102,7 @@ public class JobExecutionManagerTest {
         assertThat(jobExecutionManager.hasRunningJobs(), is(false));
 
         // Submit dummy job
-        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
-        jobExecutionContext.setJobEntity(new DetectJobEntity());
-        final JobRunner dummyJobExecution = new JobRunner<>(jobExecutionContext, context -> Thread.sleep(5000));
-        jobExecutionManager.submit(dummyJobExecution);
+        jobExecutionManager.submit(new DetectJobEntity(), context -> Thread.sleep(5000));
 
         // Verify execution is in progress
         assertThat(jobExecutionManager.hasRunningJobs(), is(true));
@@ -131,7 +119,7 @@ public class JobExecutionManagerTest {
         inboxDirectory.addFile(TestConfig.BEAGLE_EN_PDF_URL);
 
         // Start detecting
-        final CompletableFuture submittedJob = jobExecutionManager.submit(jobExecutionFactory.createDetectJobRunner());
+        final CompletableFuture submittedJob = jobExecutionManager.submit(new DetectJobEntity());
         submittedJob.get();
 
         // Now Import and Index Jobs should run, we wait for them to finish
@@ -162,12 +150,7 @@ public class JobExecutionManagerTest {
 
     @Test(timeout=20000)
     public void verifyJobRemovedProperlyOnSuccess() throws InterruptedException {
-        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
-        jobExecutionContext.setJobEntity(new DetectJobEntity());
-        final JobRunner<DetectJobEntity> runner = new JobRunner<>(jobExecutionContext, context -> {
-
-        });
-        jobExecutionManager.submit(runner);
+        jobExecutionManager.submit(new DetectJobEntity(), context -> {});
         jobExecutionManager.shutdown();
         jobExecutionManager.awaitTermination(5, SECONDS);
         assertThat(jobExecutionManager.getExecutions(), hasSize(0));
@@ -175,12 +158,9 @@ public class JobExecutionManagerTest {
 
     @Test(timeout=20000)
     public void verifyJobRemovedProperlyOnError() throws InterruptedException {
-        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
-        jobExecutionContext.setJobEntity(new DetectJobEntity());
-        final JobRunner<DetectJobEntity> runner = new JobRunner<>(jobExecutionContext, context -> {
+        jobExecutionManager.submit(new DetectJobEntity(), context -> {
             throw new IllegalStateException("Some random exception");
         });
-        jobExecutionManager.submit(runner);
         jobExecutionManager.shutdown();
         jobExecutionManager.awaitTermination(5, SECONDS);
         assertThat(jobExecutionManager.getExecutions(), hasSize(0));

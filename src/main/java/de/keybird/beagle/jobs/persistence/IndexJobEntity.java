@@ -20,10 +20,27 @@ package de.keybird.beagle.jobs.persistence;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
+
+import org.springframework.data.domain.Pageable;
+
+import de.keybird.beagle.jobs.JobVisitor;
 
 @Entity
 @DiscriminatorValue("index")
 public class IndexJobEntity extends JobEntity {
+
+    // TODO MVR do we want to persist this?
+    @Transient
+    private Pageable page;
+
+    public IndexJobEntity() {
+
+    }
+
+    public IndexJobEntity(Pageable page) {
+        this.page = page;
+    }
 
     @Override
     public JobType getType() {
@@ -33,5 +50,14 @@ public class IndexJobEntity extends JobEntity {
     @Override
     public String getDescription() {
         return "Indexing pages";
+    }
+
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    public Pageable getPage() {
+        return page;
     }
 }

@@ -40,23 +40,23 @@ public class JobExecutionEventHandler {
 
     @Subscribe
     public void onJobSubmitted(JobExecutionSubmittedEvent event) {
-        LOG.info("Job of type {} submitted", event.getSource().getJobEntity().getType());
+        LOG.info("Job of type {} submitted", event.getSource().getType());
     }
 
     @Subscribe
     public void onJobStarted(JobExecutionStartedEvent event) {
-        LOG.info("Job of type {} started", event.getSource().getJobEntity().getType());
+        LOG.info("Job of type {} started", event.getSource().getType());
     }
 
     @Subscribe
     public void onJobFinished(JobExecutionFinishedEvent event) {
-        LOG.info("Execution of {} job completed {}", event.getSource().getJobEntity().getType(), event.isFailed() ? "with error" : "successful");
+        LOG.info("Execution of {} job completed {}", event.getSource().getType(), event.isFailed() ? "with error" : "successful");
         if (event.isFailed()) {
             LOG.error("Reason: {}", event.getException().getMessage(), event.getException());
         }
         if (event.isSuccess()) {
             // Kick of import of documents
-            if (event.getSource().getJobEntity().getType() == JobType.Detect) {
+            if (event.getSource().getType() == JobType.Detect) {
                 jobService.importDocuments();
             }
             jobService.indexPagesIfNecessary();

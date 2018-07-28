@@ -69,7 +69,7 @@ public class DetectJobExecutionTest {
     private JobRepository jobRepository;
 
     @Autowired
-    private JobExecutionContext<DetectJobEntity> context;
+    private JobRunner jobRunner;
 
     @Before
     public void setUp() {
@@ -77,9 +77,6 @@ public class DetectJobExecutionTest {
 
         assertEquals(0, documentRepository.count());
         assertEquals(0, jobRepository.count());
-
-        context.setJobEntity(new DetectJobEntity());
-        context.updateProgress(0, 0);
     }
 
     @After
@@ -90,8 +87,7 @@ public class DetectJobExecutionTest {
 
     @Test
     public void verifyJobExecution() throws Exception {
-        detectJobExecution.execute(context);
-        context.complete();
+        jobRunner.execute(new DetectJobEntity(), detectJobExecution);
 
         assertEquals(0, documentRepository.count());
         assertEquals(1, jobRepository.count());
@@ -103,10 +99,7 @@ public class DetectJobExecutionTest {
         inboxDirectory.addFile(TestConfig.BEAGLE_DE_PDF_URL);
 
         // Detect new files
-        detectJobExecution.execute(context);
-
-        // Manually invoke save as the execution does not do that anymore, but the runner
-        context.complete();
+        jobRunner.execute(new DetectJobEntity(), detectJobExecution);
 
         // Ensure the document was imported
         assertEquals(1, jobRepository.count());
@@ -123,17 +116,11 @@ public class DetectJobExecutionTest {
         // import the same file multiple times
         int N = 2;
         for (int i=0; i<N; i++) {
-            // Manually create new entity, otherwise it is shared the 2nd time
-            context.setJobEntity(new DetectJobEntity());
-
             // Add a document to the inbox directory
             inboxDirectory.addFile(TestConfig.BEAGLE_DE_PDF_URL);
 
             // Detect new files
-            detectJobExecution.execute(context);
-
-            // Manually invoke save as the execution does not do that anymore, but the runner
-            context.complete();
+            jobRunner.execute(new DetectJobEntity(), detectJobExecution);
         }
 
         // Ensure it is only available once
@@ -146,8 +133,7 @@ public class DetectJobExecutionTest {
     @Test
     public void verifyIgnoresNonPdfFiles() throws Exception {
         inboxDirectory.addFile(getClass().getResource("/static/img/beagles/beagle1.jpg"));
-        detectJobExecution.execute(context);
-        context.complete(); // Manually invoke save as the execution does not do that anymore, but the runner
+        jobRunner.execute(new DetectJobEntity(), detectJobExecution);
         assertEquals(0, documentRepository.count());
         assertEquals(1, jobRepository.count());
     }

@@ -40,6 +40,8 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.BatchSize;
 
+import de.keybird.beagle.jobs.JobVisitor;
+
 @Entity
 @Table(name="jobs")
 @Inheritance(strategy= InheritanceType.SINGLE_TABLE)
@@ -137,4 +139,6 @@ public abstract class JobEntity {
     public abstract JobType getType();
 
     public abstract String getDescription();
+
+    public abstract <T> T accept(JobVisitor<T> visitor);
 }

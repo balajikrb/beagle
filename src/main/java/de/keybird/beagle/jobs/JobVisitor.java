@@ -16,13 +16,20 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.events;
+package de.keybird.beagle.jobs;
 
-import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.persistence.ArchiveJobEntity;
+import de.keybird.beagle.jobs.persistence.DetectJobEntity;
+import de.keybird.beagle.jobs.persistence.ImportJobEntity;
+import de.keybird.beagle.jobs.persistence.IndexJobEntity;
 
-public class JobExecutionSubmittedEvent extends JobExecutionEvent {
+public interface JobVisitor<T> {
 
-    public JobExecutionSubmittedEvent(JobEntity source) {
-        super(source);
-    }
+    T visit(DetectJobEntity jobEntity);
+
+    T visit(IndexJobEntity jobEntity);
+
+    T visit(ImportJobEntity jobEntity);
+
+    T visit(ArchiveJobEntity archiveJobEntity);
 }

@@ -29,7 +29,7 @@ import com.google.common.eventbus.Subscribe;
 
 import de.keybird.beagle.events.JobExecutionEvent;
 import de.keybird.beagle.jobs.JobExecutionManager;
-import de.keybird.beagle.jobs.execution.JobExecutionContext;
+import de.keybird.beagle.jobs.execution.JobExecutionInfo;
 import de.keybird.beagle.jobs.persistence.JobState;
 import de.keybird.beagle.rest.JobRestController;
 import de.keybird.beagle.rest.model.JobExecutionDTO;
@@ -48,7 +48,7 @@ public class JobProgressSocket {
     // Otherwise, we only see jobs when they are created AFTER we have connected.
     // We may miss ones already kicked off by another user
     public void onJobExecutionChange(JobExecutionEvent event) {
-        final List<JobExecutionContext> jobs = jobManager.getExecutions();
+        final List<JobExecutionInfo> jobs = jobManager.getExecutions();
 
         // Return all jobs except success ones.
         // They are only returned, if they finished within the last n seconds
