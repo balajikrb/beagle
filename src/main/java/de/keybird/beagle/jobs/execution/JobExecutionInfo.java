@@ -16,13 +16,12 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.events;
+package de.keybird.beagle.jobs.execution;
 
+import de.keybird.beagle.jobs.Progress;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 
-public class JobExecutionSubmittedEvent extends JobExecutionEvent {
-
-    public JobExecutionSubmittedEvent(JobEntity source) {
-        super(source);
-    }
+public interface JobExecutionInfo<J extends JobEntity> {
+    J getJobEntity();
+    Progress getProgress();
 }

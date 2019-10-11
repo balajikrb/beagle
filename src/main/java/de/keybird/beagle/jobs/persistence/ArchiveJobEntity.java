@@ -21,6 +21,8 @@ package de.keybird.beagle.jobs.persistence;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import de.keybird.beagle.jobs.JobVisitor;
+
 @Entity
 @DiscriminatorValue("archive")
 public class ArchiveJobEntity extends JobEntity {
@@ -32,5 +34,10 @@ public class ArchiveJobEntity extends JobEntity {
     @Override
     public String getDescription() {
         return "Archiving indexed pages";
+    }
+
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

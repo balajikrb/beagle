@@ -21,23 +21,21 @@ package de.keybird.beagle.jobs;
 import javax.inject.Provider;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import de.keybird.beagle.api.Document;
-import de.keybird.beagle.api.source.DocumentSource;
-import de.keybird.beagle.api.source.FileSystemSource;
+import de.keybird.beagle.jobs.execution.ArchiveJobExecution;
 import de.keybird.beagle.jobs.execution.DetectJobExecution;
 import de.keybird.beagle.jobs.execution.ImportJobExecution;
 import de.keybird.beagle.jobs.execution.IndexJobExecution;
-import de.keybird.beagle.jobs.execution.JobExecutionContext;
-import de.keybird.beagle.jobs.execution.JobRunner;
+import de.keybird.beagle.jobs.execution.JobExecution;
+import de.keybird.beagle.jobs.persistence.ArchiveJobEntity;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.ImportJobEntity;
 import de.keybird.beagle.jobs.persistence.IndexJobEntity;
+import de.keybird.beagle.jobs.persistence.JobEntity;
 
 @Service
-public class JobExecutionFactory {
+public class JobExecutionFactory implements JobVisitor<JobExecution> {
 
     @Autowired
     private Provider<DetectJobExecution> detectJobExecutionProvider;
@@ -49,35 +47,31 @@ public class JobExecutionFactory {
     private Provider<IndexJobExecution> indexJobExecutionProvider;
 
     @Autowired
-    private Provider<JobExecutionContext> jobExecutionContextProvider;
+    private Provider<ArchiveJobExecution> archiveJobExecutionProvider;
 
-    public JobRunner<DetectJobEntity> createDetectJobRunner() {
-      return createDetectJobRunner(new FileSystemSource());
+    @Override
+    public JobExecution<DetectJobEntity> visit(DetectJobEntity jobEntity) {
+        return detectJobExecutionProvider.get();
     }
 
-    public JobRunner<DetectJobEntity> createDetectJobRunner(DocumentSource documentSource) {
-        final DetectJobExecution execution = detectJobExecutionProvider.get();
-        final JobExecutionContext<DetectJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
-        jobExecutionContext.setJobEntity(new DetectJobEntity(documentSource));
-
-        return new JobRunner<>(jobExecutionContext, execution);
+    @Override
+    public JobExecution<IndexJobEntity> visit(IndexJobEntity jobEntity) {
+        IndexJobExecution execution = indexJobExecutionProvider.get();
+        execution.setPageRequest(jobEntity.getPage());
+        return execution;
     }
 
-    public JobRunner<IndexJobEntity> createIndexJobRunner(Pageable pageRequest) {
-        final IndexJobExecution execution = indexJobExecutionProvider.get();
-        execution.setPage(pageRequest);
-        final JobExecutionContext<IndexJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
-        jobExecutionContext.setJobEntity(new IndexJobEntity());
-
-        return new JobRunner<>(jobExecutionContext, execution);
+    @Override
+    public JobExecution<ImportJobEntity> visit(ImportJobEntity jobEntity) {
+        return importJobExecutionProvider.get();
     }
 
-    public JobRunner<ImportJobEntity> createImportJobRunner(Document document) {
-        final ImportJobExecution execution = importJobExecutionProvider.get();
-        final JobExecutionContext<ImportJobEntity> jobExecutionContext = jobExecutionContextProvider.get();
-        jobExecutionContext.setJobEntity(new ImportJobEntity(document));
-
-        return new JobRunner<>(jobExecutionContext, execution);
+    @Override
+    public JobExecution visit(ArchiveJobEntity archiveJobEntity) {
+        return archiveJobExecutionProvider.get();
     }
 
+    public JobExecution getJobExecution(JobEntity jobEntity) {
+        return jobEntity.accept(this);
+    }
 }

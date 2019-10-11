@@ -33,10 +33,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.keybird.beagle.api.DocumentState;
-import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.execution.JobExecutionContext;
+import de.keybird.beagle.jobs.execution.JobExecutionInfo;
+import de.keybird.beagle.jobs.persistence.DetectJobEntity;
+import de.keybird.beagle.jobs.persistence.ImportJobEntity;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
@@ -47,9 +48,6 @@ import de.keybird.beagle.services.JobService;
 @RestController
 @RequestMapping("/jobs")
 public class JobRestController {
-
-    @Autowired
-    private JobExecutionFactory jobFactory;
 
     @Autowired
     private JobExecutionManager jobExecutionManager;
@@ -78,7 +76,7 @@ public class JobRestController {
 
     @RequestMapping(path="/running", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<JobExecutionDTO>> showProgress() {
-        final List<JobExecutionContext> executions = jobExecutionManager.getExecutions();
+        final List<JobExecutionInfo> executions = jobExecutionManager.getExecutions();
         if (executions.isEmpty()) {
             return ResponseUtils.noContent();
         }
@@ -89,7 +87,7 @@ public class JobRestController {
 
     @RequestMapping(path="/detect", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startDetect() {
-        jobExecutionManager.submit(jobFactory.createDetectJobRunner());
+        jobExecutionManager.submit(new DetectJobEntity());
         return ResponseEntity.accepted().build();
     }
 
@@ -98,7 +96,7 @@ public class JobRestController {
         // TODO MVR use service for this?
         documentRepository
             .findByState(DocumentState.New)
-            .forEach(theImport -> jobExecutionManager.submit(jobFactory.createImportJobRunner(theImport)));
+            .forEach(theImport -> jobExecutionManager.submit(new ImportJobEntity(theImport)));
         return ResponseEntity.accepted().build();
     }
 
@@ -114,15 +112,15 @@ public class JobRestController {
         jobRepository.deleteAll();
     }
 
-    public static JobExecutionDTO createFrom(JobExecutionContext context) {
-        final JobEntity jobEntity = context.getJobEntity();
+    public static JobExecutionDTO createFrom(JobExecutionInfo info) {
+        final JobEntity jobEntity = info.getJobEntity();
         final JobExecutionDTO jobInfoDTO = new JobExecutionDTO();
         jobInfoDTO.setDescription(jobEntity.getDescription());
         jobInfoDTO.setCompleteTime(jobEntity.getCompleteTime());
         jobInfoDTO.setStartTime(jobEntity.getStartTime());
         jobInfoDTO.setErrorMessage(jobEntity.getErrorMessage());
         jobInfoDTO.setState(jobEntity.getState());
-        jobInfoDTO.setProgress(new Progress(context.getProgress()));
+        jobInfoDTO.setProgress(new Progress(info.getProgress()));
         if (jobEntity.getId() != null) { // TODO MVR the id should not be null here
             jobInfoDTO.setId(jobInfoDTO.getId());
         }

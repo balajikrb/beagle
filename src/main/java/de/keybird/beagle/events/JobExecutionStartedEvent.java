@@ -18,10 +18,10 @@
 
 package de.keybird.beagle.events;
 
-import de.keybird.beagle.jobs.execution.JobExecutionContext;
+import de.keybird.beagle.jobs.persistence.JobEntity;
 
 public class JobExecutionStartedEvent extends JobExecutionEvent {
-    public JobExecutionStartedEvent(JobExecutionContext context) {
-        super(context);
+    public JobExecutionStartedEvent(JobEntity source) {
+        super(source);
     }
 }
