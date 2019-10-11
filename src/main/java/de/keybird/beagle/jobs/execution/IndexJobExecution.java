@@ -145,7 +145,8 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
                             .build();
                     return action;
                 }).collect(Collectors.toList());
-        Bulk bulk = new Bulk.Builder().addAction(elasticActions).build();
+        // TODO MVR write test for this
+        Bulk bulk = new Bulk.Builder().addAction(elasticActions).setParameter("pipeline", "attachment").build();
         try {
             BulkResult bulkResult = client.execute(bulk);
             BulkResultWrapper bulkResultWrapper = new BulkResultWrapper(bulkResult);
