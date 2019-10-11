@@ -16,6 +16,7 @@ yarn
 echo "Starting selenium server"
 webdriver-manager update
 webdriver-manager start &
+sleep 5 # wait for the driver to fully start
 webdriver-manager status
 
 echo "Running UI tests"
