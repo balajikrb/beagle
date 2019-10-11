@@ -104,7 +104,7 @@ jobs:
       - run:
           command: |
             mkdir -p target/e2e
-            docker cp source:/repo/target/screenshots target/e2e
+            docker cp source:/repo/target/screenshots target/e2e || exit 0
             docker cp source:/repo/target/surefire-reports target/surefire-reports
           when: always
 
