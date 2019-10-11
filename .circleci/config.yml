@@ -42,20 +42,21 @@ jobs:
       - setup_remote_docker
 
       # build the application image
+      # TODO MVR find version automatically from pom.xml
       - run: |
             docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
             export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_SHA1}
             case "${CIRCLE_BRANCH}" in
                 master)
                   echo "Building docker image with tag ${DOCKERHUB_TAG} and latest."
-                  docker build --build-arg JAR_FILE=target/beagle-0.0.1-SNAPSHOT.jar -t keybird/beagle:${DOCKERHUB_TAG} .
+                  docker build --build-arg JAR_FILE=target/beagle-0.1.0-SNAPSHOT.jar -t keybird/beagle:${DOCKERHUB_TAG} .
                   docker tag keybird/beagle:${DOCKERHUB_TAG} keybird/beagle:latest
                   docker push keybird/beagle:${DOCKERHUB_TAG}
                   docker push keybird/beagle:latest
                   ;;
                 *)
                   echo "Building docker image with tag ${DOCKERHUB_TAG}."
-                  docker build --build-arg JAR_FILE=target/beagle-0.0.1-SNAPSHOT.jar -t keybird/beagle:${DOCKERHUB_TAG} .
+                  docker build --build-arg JAR_FILE=target/beagle-0.1.0-SNAPSHOT.jar -t keybird/beagle:${DOCKERHUB_TAG} .
                   docker push keybird/beagle:${DOCKERHUB_TAG}
                   ;;
               esac
