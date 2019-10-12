@@ -35,6 +35,7 @@ services:
       - beagledata:/opt/beagle
     ports:
       - "8080:8080"
+      - "1044:1044"
     links:
       - beagledb
       - elasticsearch
