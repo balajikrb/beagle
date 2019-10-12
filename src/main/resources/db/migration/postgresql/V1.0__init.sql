@@ -13,6 +13,17 @@ create table if not exists documents
 )
 ;
 
+create table if not exists document_sources
+(
+    id bigserial not null
+        constraint document_sources_pkey
+            primary key,
+	type varchar(255) not null,
+	name varchar(255),
+	payload oid
+)
+;
+
 create table if not exists jobs
 (
 	id bigserial not null
@@ -24,6 +35,9 @@ create table if not exists jobs
 	error_message text,
 	start_time timestamp,
 	state varchar(255),
+	document_source_id bigint
+	    constraint fk_documents_sources_jobs_document_source_id
+	        references document_sources,
 	document_id bigint
 		constraint fk_documents_jobs_document_id
 			references documents

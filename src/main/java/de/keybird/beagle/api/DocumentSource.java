@@ -26,6 +26,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Table;
 
 import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
 
@@ -33,6 +34,7 @@ import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
  * The source of the document, e.g. Inbox folder.
  */
 @Entity
+@Table(name="document_sources")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="type", discriminatorType = DiscriminatorType.STRING)
 public abstract class DocumentSource {
