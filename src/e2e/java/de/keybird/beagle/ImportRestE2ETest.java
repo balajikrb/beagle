@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,7 +41,6 @@ public class ImportRestE2ETest {
     public RestClient client = new RestClient();
 
     @Before
-    @After
     public void deleteAll() {
         client.jobs().delete();
         client.documents().delete();
