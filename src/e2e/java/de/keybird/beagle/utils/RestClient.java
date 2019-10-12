@@ -63,7 +63,7 @@ public class RestClient implements TestRule {
         if (sessionId == null) {
             final Response response = RestAssured.given()
                     .auth()
-                        .preemptive().basic("test@keybird.de", "test")
+                        .preemptive().basic("test@test.de", "test")
                     .contentType(ContentType.JSON)
                     .get("/user");
             if (response.getSessionId() == null) {
