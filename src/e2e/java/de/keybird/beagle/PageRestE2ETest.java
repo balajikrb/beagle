@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,7 +46,6 @@ public class PageRestE2ETest {
     public RestClient client = new RestClient();
 
     @Before
-    @After
     public void deleteAll() {
         client.jobs().delete();
         client.documents().delete();
