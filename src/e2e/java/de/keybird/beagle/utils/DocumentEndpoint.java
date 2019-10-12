@@ -56,7 +56,7 @@ public class DocumentEndpoint extends AbstractEndpoint<DocumentDTO> {
     public void doImport(InputStream inputStream, String name, int expectedDocumentCount) {
         Import(inputStream, name);
         await().atMost(5, MINUTES)
-                .pollInterval(30, SECONDS)
+                .pollInterval(5, SECONDS)
                 .until(() -> {
                     final List<DocumentDTO> documents = list();
                     assertThat(documents, hasSize(expectedDocumentCount));

@@ -58,6 +58,7 @@ public class JobExecutionEventHandler {
             // Kick of import of documents
             if (event.getSource().getType() == JobType.Detect) {
                 jobService.importDocuments();
+                return;
             }
             jobService.indexPagesIfNecessary();
         }
