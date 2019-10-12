@@ -22,7 +22,7 @@ describe('Beagle Tests', function() {
 
     var doLogin = function() {
         browser.get(browser.baseUrl);
-        element(by.id("inputEmail")).clear().sendKeys("test@keybird.de");
+        element(by.id("inputEmail")).clear().sendKeys("test@test.de");
         element(by.id("inputPassword")).clear().sendKeys("test");
         element(by.name("loginBtn")).click();
     };
