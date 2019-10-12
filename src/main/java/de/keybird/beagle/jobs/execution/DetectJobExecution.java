@@ -61,7 +61,7 @@ public class DetectJobExecution implements JobExecution<DetectJobEntity> {
 
                 final Document theDocument = new Document();
                 theDocument.setState(DocumentState.New);
-                theDocument.setFilename(entry.getName().toString());
+                theDocument.setFilename(entry.getName());
 
                 try {
                     final byte[] payload = entry.getPayload();
