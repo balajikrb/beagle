@@ -16,11 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.source;
+package de.keybird.beagle.repository;
 
-import java.io.IOException;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface DocumentEntry {
-    String getName();
-    byte[] getPayload() throws IOException;
+import de.keybird.beagle.api.DocumentSource;
+
+public interface DocumentSourceRepository extends JpaRepository<DocumentSource, Long> {
 }

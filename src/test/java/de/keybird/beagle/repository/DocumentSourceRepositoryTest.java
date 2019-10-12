@@ -18,7 +18,6 @@
 
 package de.keybird.beagle.repository;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -30,34 +29,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.keybird.beagle.BeagleTest;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.api.DocumentSource;
+import de.keybird.beagle.api.sources.InboxFileSystemSource;
 
 @BeagleTest
 @RunWith(SpringRunner.class)
-public class JobRepositoryTest {
+public class DocumentSourceRepositoryTest {
 
     @Autowired
-    private JobRepository jobRepository;
+    private DocumentSourceRepository documentSourceRepository;
 
     @Test
-    public void verifyPersistSimple() {
-        final DetectJobEntity jobEntity = new DetectJobEntity();
-        final DetectJobEntity save = jobRepository.save(jobEntity);
-        assertThat(save.getId(), is(not(nullValue())));
-    }
-
-    @Test
-    public void verifyPersistWithLogs() {
-        final DetectJobEntity jobEntity = new DetectJobEntity();
-        final LogEntity logEntity = new LogEntity();
-        logEntity.setLevel(LogLevel.Info);
-        logEntity.setMessage("Wiu wiu wiu");
-        jobEntity.addLogEntry(logEntity);
-
-        final DetectJobEntity save = jobRepository.save(jobEntity);
-        assertThat(save.getId(), is(not(nullValue())));
-        assertThat(save.getLogs(), hasSize(1));
+    public void verifyPersist() {
+        assertThat(documentSourceRepository.count(), is(0L));
+        final DocumentSource documentSourceEntity = new InboxFileSystemSource();
+        final DocumentSource saved = documentSourceRepository.save(documentSourceEntity);
+        assertThat(saved.getId(), is(not(nullValue())));
+        assertThat(documentSourceRepository.count(), is(1L));
     }
 }
