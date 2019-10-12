@@ -20,13 +20,14 @@ package de.keybird.beagle.utils;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static io.restassured.RestAssured.given;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.rest.model.DocumentDTO;
@@ -54,13 +55,13 @@ public class DocumentEndpoint extends AbstractEndpoint<DocumentDTO> {
 
     public void doImport(InputStream inputStream, String name, int expectedDocumentCount) {
         Import(inputStream, name);
-        await().atMost(30, TimeUnit.SECONDS)
-                .pollInterval(5, TimeUnit.SECONDS)
+        await().atMost(5, MINUTES)
+                .pollInterval(30, SECONDS)
                 .until(() -> {
                     final List<DocumentDTO> documents = list();
                     assertThat(documents, hasSize(expectedDocumentCount));
                     for (int i=0;i<expectedDocumentCount; i++) {
-                        assertThat(DocumentState.Imported, is(documents.get(i).getState()));
+                        assertThat(documents.get(i).getState(), is(DocumentState.Imported));
                     }
                 });
     }
