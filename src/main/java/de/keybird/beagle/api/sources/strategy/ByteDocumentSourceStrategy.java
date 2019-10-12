@@ -16,7 +16,7 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.source;
+package de.keybird.beagle.api.sources.strategy;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,12 +29,12 @@ import de.keybird.beagle.jobs.execution.JobExecutionContext;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.jobs.persistence.LogLevel;
 
-public class ByteDocumentSource implements DocumentSource {
+public class ByteDocumentSourceStrategy implements DocumentSourceStrategy {
 
     private final Supplier<byte[]> byteSupplier;
     private final Supplier<String> nameSupplier;
 
-    public ByteDocumentSource(Supplier<byte[]> byteSupplier, Supplier<String> nameSupplier) {
+    public ByteDocumentSourceStrategy(Supplier<byte[]> byteSupplier, Supplier<String> nameSupplier) {
         this.byteSupplier = Objects.requireNonNull(byteSupplier);
         this.nameSupplier = Objects.requireNonNull(nameSupplier);
     }

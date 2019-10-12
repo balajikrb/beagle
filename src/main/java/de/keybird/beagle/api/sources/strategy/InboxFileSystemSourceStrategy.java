@@ -16,19 +16,20 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.source;
+package de.keybird.beagle.api.sources.strategy;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.jobs.persistence.LogLevel;
 
-// TODO MVR name is "FileSystemSource" but reads hard coded from "InboxPath". Either make it configurable or name it to "InboxSource"
-public class FileSystemSource implements DocumentSource {
+public class InboxFileSystemSourceStrategy implements DocumentSourceStrategy {
     @Override
     public List<DocumentEntry> getEntries(JobExecutionContext<? extends JobEntity> context) throws IOException {
         Files.createDirectories(context.getInboxPath());
@@ -45,6 +46,36 @@ public class FileSystemSource implements DocumentSource {
     public void cleanUp(DocumentEntry entry) {
         if (entry instanceof FileSystemDocument) {
             ((FileSystemDocument) entry).delete();
+        }
+    }
+
+    static class FileSystemDocument implements DocumentEntry {
+
+        private final Path path;
+
+        protected FileSystemDocument(Path path) {
+            this.path = Objects.requireNonNull(path);
+            if (Files.isDirectory(path)) {
+                throw new IllegalArgumentException("Path '" + path + "' must be a file, but was a directory");
+            }
+        }
+
+        @Override
+        public String getName() {
+            return path.getFileName().toString();
+        }
+
+        @Override
+        public byte[] getPayload() throws IOException {
+            return Files.readAllBytes(path);
+        }
+
+        void delete() {
+            try {
+                Files.delete(path);
+            } catch (Exception ex) {
+                // swallow it
+            }
         }
     }
 }

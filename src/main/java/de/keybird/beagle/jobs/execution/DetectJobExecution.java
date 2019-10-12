@@ -35,8 +35,8 @@ import com.google.common.hash.Hashing;
 
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
-import de.keybird.beagle.api.source.DocumentEntry;
-import de.keybird.beagle.api.source.DocumentSource;
+import de.keybird.beagle.api.sources.strategy.DocumentEntry;
+import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.LogLevel;
 import de.keybird.beagle.repository.DocumentRepository;
@@ -54,14 +54,14 @@ public class DetectJobExecution implements JobExecution<DetectJobEntity> {
     // TODO MVR the file size should be checked and too big files should be rejected
     @Override
     public void execute(JobExecutionContext<DetectJobEntity> context) throws ExecutionException {
-        final DocumentSource documentSource = context.getJobEntity().getDocumentSource();
+        final DocumentSourceStrategy documentSourceStrategy = context.getJobEntity().getDocumentSource().getStrategy();
         try {
-            for (DocumentEntry entry : documentSource.getEntries(context)) {
+            for (DocumentEntry entry : documentSourceStrategy.getEntries(context)) {
                 context.logEntry(LogLevel.Info,"Handling document '{}'", entry.toString());
 
                 final Document theDocument = new Document();
                 theDocument.setState(DocumentState.New);
-                theDocument.setFilename(entry.getName().toString());
+                theDocument.setFilename(entry.getName());
 
                 try {
                     final byte[] payload = entry.getPayload();
@@ -86,7 +86,7 @@ public class DetectJobExecution implements JobExecution<DetectJobEntity> {
                 }
                 if (theDocument.getPayload() != null) {
                     context.logEntry(LogLevel.Info,"Deleting file '{}'", entry);
-                    documentSource.cleanUp(entry);
+                    documentSourceStrategy.cleanUp(entry);
                 }
             }
         } catch (IOException e) {

@@ -35,8 +35,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.keybird.beagle.api.Document;
-import de.keybird.beagle.api.source.ByteDocumentSource;
-import de.keybird.beagle.api.source.DocumentSource;
+import de.keybird.beagle.api.DocumentSource;
+import de.keybird.beagle.api.sources.ByteDocumentSource;
 import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
@@ -73,7 +73,7 @@ public class ImportRestController {
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void createDocument(@RequestParam(value = "name") String filename, HttpEntity<byte[]> requestEntity) {
-        final DocumentSource source = new ByteDocumentSource(() -> requestEntity.getBody(), () -> filename);
+        final DocumentSource source = new ByteDocumentSource(filename, requestEntity.getBody());
         jobExecutionManager.submit(new DetectJobEntity(source));
     }
 

@@ -18,21 +18,27 @@
 
 package de.keybird.beagle.jobs.persistence;
 
+import java.util.Objects;
+
+import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Transient;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 
-import de.keybird.beagle.api.source.DocumentSource;
-import de.keybird.beagle.api.source.FileSystemSource;
+import org.hibernate.annotations.BatchSize;
+
+import de.keybird.beagle.api.DocumentSource;
+import de.keybird.beagle.api.sources.InboxFileSystemSource;
 import de.keybird.beagle.jobs.JobVisitor;
 
 @Entity
 @DiscriminatorValue("detect")
 public class DetectJobEntity extends JobEntity {
 
-    // TODO MVR do we want to persist this?
-    @Transient
-    private DocumentSource documentSource = new FileSystemSource();
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size=10)
+    private DocumentSource documentSource = new InboxFileSystemSource();
 
     @Override
     public JobType getType() {
@@ -48,8 +54,8 @@ public class DetectJobEntity extends JobEntity {
 
     }
 
-    public DetectJobEntity(DocumentSource source) {
-        this.documentSource = source;
+    public DetectJobEntity(final DocumentSource source) {
+        this.documentSource = Objects.requireNonNull(source);
     }
 
     public DocumentSource getDocumentSource() {
