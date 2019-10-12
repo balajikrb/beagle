@@ -41,10 +41,8 @@ public class DocumentSourceRepositoryTest {
 
     @Test
     public void verifyPersist() {
-        assertThat(documentSourceRepository.count(), is(0L));
         final DocumentSource documentSourceEntity = new InboxFileSystemSource();
         final DocumentSource saved = documentSourceRepository.save(documentSourceEntity);
         assertThat(saved.getId(), is(not(nullValue())));
-        assertThat(documentSourceRepository.count(), is(1L));
     }
 }
