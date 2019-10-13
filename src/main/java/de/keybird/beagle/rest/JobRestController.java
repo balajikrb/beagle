@@ -110,6 +110,10 @@ public class JobRestController {
     @RequestMapping(method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAll() {
+        // TODO MVR this is ugly but for now we keep it
+        if (jobExecutionManager.hasRunningJobs()) {
+            throw new IllegalStateException("Cannot delete jobs while jobs are running");
+        }
         jobRepository.deleteAll();
     }
 

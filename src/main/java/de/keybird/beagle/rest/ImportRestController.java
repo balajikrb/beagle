@@ -80,6 +80,10 @@ public class ImportRestController {
     @RequestMapping(method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAll() {
+        // TODO MVR this is ugly, but for now we kee it
+        if (jobExecutionManager.hasRunningJobs()) {
+            throw new IllegalStateException("Cannot delete documents while jobs are running");
+        }
         documentRepository.deleteAll();
     }
 
@@ -88,6 +92,10 @@ public class ImportRestController {
         final Document document = documentRepository.findOne(documentId);
         if (document == null) {
             return ResponseEntity.notFound().build();
+        }
+        // TODO MVR this is ugly, but for now we kee it
+        if (jobExecutionManager.hasRunningJobs()) {
+            throw new IllegalStateException("Cannot delete documents while jobs are running");
         }
         documentRepository.delete(document);
         return ResponseUtils.noContent();

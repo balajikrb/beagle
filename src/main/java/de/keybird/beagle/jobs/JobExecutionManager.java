@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -52,6 +54,9 @@ import de.keybird.beagle.jobs.execution.JobRunner;
 import de.keybird.beagle.jobs.xxxx.JobState;
 import de.keybird.beagle.jobs.xxxx.JobType;
 import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.repository.DocumentRepository;
+import de.keybird.beagle.repository.JobRepository;
+import de.keybird.beagle.services.JobService;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -116,6 +121,16 @@ public class JobExecutionManager {
 
         // First handle error/success
         completableFuture.handle((result, exception) -> {
+            // Ensure that if there is no exception, but an error message, it is considered a failed run
+            if (exception == null && !Strings.isNullOrEmpty(job.getErrorMessage())) {
+                exception = new ExecutionException() {
+                    @Override
+                    public String getMessage() {
+                        return job.getErrorMessage();
+                    }
+                };
+            }
+
             // Send event
             final JobResult jobResult = new JobResult(result, (Throwable) exception);
             eventBus.post(new JobExecutionFinishedEvent(job, jobResult));

@@ -97,11 +97,13 @@ class AbstractEndpoint<T> {
     public void delete() {
         LOG.info("Delete entities {}", type.getSimpleName());
         acquireXsrfToken();
-        spec.delete().then().assertThat().statusCode(204);
 
         // Wait until it is actually deleted
         await().atMost(30, TimeUnit.SECONDS)
                 .pollInterval(5, TimeUnit.SECONDS)
-                .until(() -> assertThat(list(), hasSize(0)));
+                .until(() -> {
+                    spec.delete().then().assertThat().statusCode(204);
+                    assertThat(list(), hasSize(0));
+                });
     }
 }

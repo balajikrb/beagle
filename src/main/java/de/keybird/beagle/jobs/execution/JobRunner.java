@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -66,6 +67,8 @@ import de.keybird.beagle.repository.JobRepository;
 public class JobRunner<T extends Job> implements JobExecutionContext<T> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private static AtomicInteger atomicInteger = new AtomicInteger(1);
 
     @Value("${working.directory}")
     private String workingDirectory;
@@ -183,21 +186,22 @@ public class JobRunner<T extends Job> implements JobExecutionContext<T> {
         job.setCompleteTime(completeTime);
     }
 
+    @Override
     public void setErrorMessage(String errorMessage) {
         job.setErrorMessage(errorMessage);
     }
 
     protected void start() {
         getEventBus().post(new JobExecutionStartedEvent(job));
-//        Thread.currentThread().setName(getClass().getName() + " - " + job.getId()); // TODO MVR we need a unique id ...
+        Thread.currentThread().setName(getClass().getName() + " - " + job.getType() + " - " + atomicInteger.getAndIncrement());
         setStartTime(new Date());
         setState(JobState.Running);
     }
 
     protected void success() {
         setCompleteTime(new Date());
-        setErrorMessage(null);
         setState(JobState.Completed);
+        // DO NOT set the errorMessage to null here
     }
 
     protected void error(Throwable t) {
@@ -277,11 +281,6 @@ public class JobRunner<T extends Job> implements JobExecutionContext<T> {
 
     public void updateProgress(int currentProgress) {
         updateProgress(currentProgress, getProgress().getTotalProgress());
-    }
-
-    @Override
-    public void submit(Job job) {
-
     }
 
     public void onSuccess() {

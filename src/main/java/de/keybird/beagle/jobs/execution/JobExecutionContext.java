@@ -49,5 +49,5 @@ public interface JobExecutionContext<J extends Job> extends JobExecutionInfo<J> 
 
     void updateProgress(int currentProgress);
 
-    void submit(Job job);
+    void setErrorMessage(String s);
 }

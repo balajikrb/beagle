@@ -55,7 +55,7 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexJobExecution.class);
 
-    private static final int[] SLEEP_TIME = new int[]{5000, 15000, 30000, 60000};
+    private static final int[] SLEEP_TIME = new int[] { 5000, 5000, 5000, 5000 };
 
     @Autowired
     private JestClient client;
@@ -128,6 +128,9 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
                 page.setErrorMessage(eachItem.getCause().getMessage());
                 context.logEntry(LogLevel.Error, "Page {}/{} could not be indexed. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), eachItem.getCause().getMessage());
             });
+            if (!failedItems.isEmpty()) {
+                context.setErrorMessage("At least one page was not indexed properly");
+            }
             successPages.forEach(page -> {
                 page.setState(PageState.Indexed);
                 page.setErrorMessage(null);
@@ -139,6 +142,7 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
                 page.setErrorMessage(e.getMessage());
                 context.logEntry(LogLevel.Error, "Page {}/{} could not be indexed. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
             });
+            context.setErrorMessage("All pages were not indexed properly: " + e.getMessage());
         }
     }
 
