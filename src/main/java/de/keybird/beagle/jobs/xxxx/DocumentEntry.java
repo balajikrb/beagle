@@ -23,4 +23,5 @@ import java.io.IOException;
 public interface DocumentEntry {
     String getName();
     byte[] getPayload() throws IOException;
+    void delete() throws IOException;
 }

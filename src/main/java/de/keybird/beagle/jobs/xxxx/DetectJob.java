@@ -54,7 +54,7 @@ public class DetectJob extends Job {
         return "Detecting new files";
     }
 
-    public DocumentSource<DocumentEntry> getDocumentSource() {
+    public DocumentSource getDocumentSource() {
         return source;
     }
 

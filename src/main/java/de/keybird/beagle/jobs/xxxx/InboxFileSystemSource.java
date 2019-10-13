@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import de.keybird.beagle.api.DocumentSource;
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
-public class InboxFileSystemSource implements DocumentSource<InboxFileSystemSource.FileSystemDocument> {
+public class InboxFileSystemSource implements DocumentSource {
 
     @Override
     public List<DocumentEntry> getEntries(JobExecutionContext<? extends Job> context) throws IOException {
@@ -43,8 +43,8 @@ public class InboxFileSystemSource implements DocumentSource<InboxFileSystemSour
     }
 
     @Override
-    public void cleanUp(FileSystemDocument entry) {
-        entry.delete();
+    public String getDescription() {
+        return "Inbox";
     }
 
     static class FileSystemDocument implements DocumentEntry {
@@ -68,11 +68,12 @@ public class InboxFileSystemSource implements DocumentSource<InboxFileSystemSour
             return Files.readAllBytes(path);
         }
 
-        void delete() {
+        @Override
+        public void delete() throws IOException {
             try {
                 Files.delete(path);
             } catch (Exception ex) {
-                // swallow it
+                throw ex;
             }
         }
     }

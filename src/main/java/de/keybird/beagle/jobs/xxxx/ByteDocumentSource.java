@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
 import de.keybird.beagle.api.DocumentSource;
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
-public class ByteDocumentSource implements DocumentSource<DocumentEntry> {
+public class ByteDocumentSource implements DocumentSource {
 
     private final Supplier<byte[]> byteSupplier;
     private final Supplier<String> nameSupplier;
@@ -45,12 +45,13 @@ public class ByteDocumentSource implements DocumentSource<DocumentEntry> {
                 new DocumentEntry() {
                     @Override public String getName() { return nameSupplier.get(); }
                     @Override public byte[] getPayload() throws IOException { return byteSupplier.get(); }
+                    @Override public void delete() {}  // nothing to do
                 }
         );
     }
 
     @Override
-    public void cleanUp(DocumentEntry entry) {
-        // nothing to do
+    public String getDescription() {
+        return "SingleInMemory:" + nameSupplier.get();
     }
 }

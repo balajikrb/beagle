@@ -28,7 +28,7 @@ import de.keybird.beagle.jobs.execution.JobExecutionContext;
 /**
  * The source of the document, e.g. Inbox folder.
  */
-public interface DocumentSource<X extends DocumentEntry> {
+public interface DocumentSource {
     List<DocumentEntry> getEntries(JobExecutionContext<? extends Job> context) throws IOException;
-    void cleanUp(X entry);
+    String getDescription();
 }

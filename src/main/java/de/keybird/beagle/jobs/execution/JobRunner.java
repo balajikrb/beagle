@@ -230,7 +230,7 @@ public class JobRunner<T extends Job> implements JobExecutionContext<T> {
                     public JobEntity visit(DetectJob detectJob) {
                         final DetectJobEntity detectJobEntity = new DetectJobEntity();
                         applyDefaults(detectJobEntity);
-                        detectJobEntity.setSource(detectJob.getDocumentSource().getClass().getSimpleName());
+                        detectJobEntity.setSource(detectJob.getDocumentSource().getDescription());
                         return detectJobEntity;
                     }
 
