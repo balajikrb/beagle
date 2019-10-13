@@ -40,7 +40,8 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.BatchSize;
 
-import de.keybird.beagle.jobs.JobVisitor;
+import de.keybird.beagle.jobs.xxxx.JobState;
+import de.keybird.beagle.jobs.xxxx.JobType;
 
 @Entity
 @Table(name="jobs")
@@ -110,16 +111,6 @@ public abstract class JobEntity {
         this.logs = logs;
     }
 
-    public void addLogEntry(LogEntity log) {
-        logs.add(log);
-        log.setJob(this);
-    }
-
-    public void removeLogEntry(LogEntity log) {
-        logs.remove(log);
-        log.setJob(null);
-    }
-
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -136,9 +127,6 @@ public abstract class JobEntity {
         this.state = state;
     }
 
-    public abstract JobType getType();
+    abstract public JobType getType();
 
-    public abstract String getDescription();
-
-    public abstract <T> T accept(JobVisitor<T> visitor);
 }

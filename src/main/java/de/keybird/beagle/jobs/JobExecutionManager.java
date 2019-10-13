@@ -40,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
@@ -50,10 +49,9 @@ import de.keybird.beagle.events.JobExecutionFinishedEvent;
 import de.keybird.beagle.jobs.execution.JobExecution;
 import de.keybird.beagle.jobs.execution.JobExecutionInfo;
 import de.keybird.beagle.jobs.execution.JobRunner;
-import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.JobState;
-import de.keybird.beagle.jobs.persistence.JobType;
-import de.keybird.beagle.services.JobService;
+import de.keybird.beagle.jobs.xxxx.JobState;
+import de.keybird.beagle.jobs.xxxx.JobType;
+import de.keybird.beagle.jobs.xxxx.Job;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -63,12 +61,6 @@ public class JobExecutionManager {
 
     @Autowired
     private EventBus eventBus;
-
-    @Autowired
-    private JobService jobService;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Autowired
     @Named("poolSize")
@@ -82,7 +74,7 @@ public class JobExecutionManager {
 
     private ExecutorService executorService;
 
-    private final List<JobEntity> pendingJobs = new CopyOnWriteArrayList<>();
+    private final List<Job> pendingJobs = new CopyOnWriteArrayList<>();
 
     private final List<JobRunner> jobRunnerList = new CopyOnWriteArrayList<>();
 
@@ -107,18 +99,17 @@ public class JobExecutionManager {
         }
     }
 
-    public <T extends JobEntity> CompletableFuture submit(final T jobEntity, final JobExecution<T> jobExecution) {
-        return this.submit(jobEntity, () -> jobExecution);
+    public <T extends Job> CompletableFuture submit(final T job, final JobExecution<T> jobExecution) {
+        return this.submit(job, () -> jobExecution);
     }
 
-    public <T extends JobEntity> CompletableFuture submit(final T jobEntity) {
-        return submit(jobEntity, () -> jobExecutionFactory.getJobExecution(jobEntity));
+    public <T extends Job> CompletableFuture submit(final T job) {
+        return submit(job, () -> jobExecutionFactory.getJobExecution(job));
     }
 
     // TODO MVR this is not very clean, but we leave it for now
-    public <T extends JobEntity> CompletableFuture submit(final T jobEntity, final Supplier<JobExecution<T>> executionSupplier) {
-        jobService.save(jobEntity);
-        pendingJobs.add(jobEntity);
+    public <T extends Job> CompletableFuture submit(final T job, final Supplier<JobExecution<T>> executionSupplier) {
+        pendingJobs.add(job);
 
         // Make the job execution completable
         final CompletableFuture completableFuture = new CompletableFuture();
@@ -127,7 +118,7 @@ public class JobExecutionManager {
         completableFuture.handle((result, exception) -> {
             // Send event
             final JobResult jobResult = new JobResult(result, (Throwable) exception);
-            eventBus.post(new JobExecutionFinishedEvent(jobEntity, jobResult));
+            eventBus.post(new JobExecutionFinishedEvent(job, jobResult));
             return jobResult;
         });
 
@@ -138,12 +129,8 @@ public class JobExecutionManager {
 
             try {
                 jobRunnerList.add(jobRunner);
-                pendingJobs.remove(jobEntity);
-
-                transactionTemplate.execute((status) -> {
-                    jobRunner.execute(jobEntity, jobExecution);
-                    return null;
-                });
+                pendingJobs.remove(job);
+                jobRunner.execute(job, jobExecution);
                 completableFuture.complete(null);
             } catch (Throwable t) {
                 completableFuture.completeExceptionally(t);
@@ -168,18 +155,18 @@ public class JobExecutionManager {
 
     public List<JobExecutionInfo> getRunningInfo(JobType... types) {
         if (types == null || types.length == 0) {
-            return jobRunnerList.stream().filter(context -> context.getJobEntity() != null).collect(Collectors.toList());
+            return jobRunnerList.stream().filter(context -> context.getJob() != null).collect(Collectors.toList());
         }
         final List<JobType> typeList = Arrays.asList(types);
-        return jobRunnerList.stream().filter(runner -> runner.getJobEntity() != null && typeList.contains(runner.getJobEntity().getType()))
-                .filter(execution -> !Lists.newArrayList(JobState.Completed).contains(execution.getJobEntity().getState()))
+        return jobRunnerList.stream().filter(runner -> runner.getJob() != null && typeList.contains(runner.getJob().getType()))
+                .filter(execution -> !Lists.newArrayList(JobState.Completed).contains(execution.getJob().getState()))
                 .collect(Collectors.toList());
     }
 
     private List<JobExecutionInfo> getPendingInfo() {
         return pendingJobs.stream().map(job -> new JobExecutionInfo() {
             @Override
-            public JobEntity getJobEntity() {
+            public Job getJob() {
                 return job;
             }
 

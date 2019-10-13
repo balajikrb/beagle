@@ -32,6 +32,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -42,31 +43,37 @@ import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
-import de.keybird.beagle.jobs.persistence.ImportJobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.xxxx.ImportJob;
+import de.keybird.beagle.jobs.xxxx.LogLevel;
+import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.services.PdfManager;
 
 // Imports files to database
 @Service
 @Scope("prototype")
-public class ImportJobExecution implements JobExecution<ImportJobEntity> {
+public class ImportJobExecution implements JobExecution<ImportJob> {
 
     private final Logger logger = LoggerFactory.getLogger(ImportJobExecution.class);
 
+    @Autowired
+    private DocumentRepository documentRepository;
+
     @Override
-    public void execute(JobExecutionContext<ImportJobEntity> context) throws Exception {
-        context.logEntry(LogLevel.Info, "Importing '{}'", context.getJobEntity().getDocument().getFilename());
+    public void execute(JobExecutionContext<ImportJob> context) throws Exception {
+        context.logEntry(LogLevel.Info, "Importing '{}'", context.getJob().getDocument().getFilename());
 
-        context.setSuccessHandler((SuccessHandler<ImportJobEntity>) context1 -> {
-            context1.getJobEntity().getDocument().setState(DocumentState.Imported);
-            context1.getJobEntity().getDocument().setErrorMessage(null);
+        context.setSuccessHandler(theContext -> {
+            theContext.getJob().getDocument().setState(DocumentState.Imported);
+            theContext.getJob().getDocument().setErrorMessage(null);
+            documentRepository.save(theContext.getJob().getDocument());
         });
 
-        context.setErrorHandler((ErrorHandler<ImportJobEntity>) (context12, throwable) -> {
-            context12.getJobEntity().getDocument().setErrorMessage(throwable.getMessage());
+        context.setErrorHandler((theContext, throwable) -> {
+            theContext.getJob().getDocument().setErrorMessage(throwable.getMessage());
+            documentRepository.save(theContext.getJob().getDocument());
         });
 
-        final Document importDocument = context.getJobEntity().getDocument();
+        final Document importDocument = context.getJob().getDocument();
         final PDDocument pdfDocument = PdfManager.load(importDocument.getPayload());
         final Splitter splitter = new Splitter();
         final List<PDDocument> splitDocuments = splitter.split(pdfDocument);

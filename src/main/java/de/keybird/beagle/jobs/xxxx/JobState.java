@@ -16,11 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.repository;
+package de.keybird.beagle.jobs.xxxx;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import de.keybird.beagle.api.DocumentSource;
-
-public interface DocumentSourceRepository extends JpaRepository<DocumentSource, Long> {
+public enum JobState {
+    Pending,
+    Initializing,
+    Running,
+    Completed
 }

@@ -30,7 +30,7 @@ import com.google.common.eventbus.Subscribe;
 import de.keybird.beagle.events.JobExecutionEvent;
 import de.keybird.beagle.jobs.JobExecutionManager;
 import de.keybird.beagle.jobs.execution.JobExecutionInfo;
-import de.keybird.beagle.jobs.persistence.JobState;
+import de.keybird.beagle.jobs.xxxx.JobState;
 import de.keybird.beagle.rest.JobRestController;
 import de.keybird.beagle.rest.model.JobExecutionDTO;
 
@@ -54,8 +54,8 @@ public class JobProgressSocket {
         // They are only returned, if they finished within the last n seconds
         final List<JobExecutionDTO> jobData = jobs.stream()
                 .filter(execution -> {
-                    if (execution.getJobEntity().getState() == JobState.Completed) {
-                        long completedSinceMs = System.currentTimeMillis() - execution.getJobEntity().getCompleteTime().getTime();
+                    if (execution.getJob().getState() == JobState.Completed) {
+                        long completedSinceMs = System.currentTimeMillis() - execution.getJob().getCompleteTime().getTime();
                         return completedSinceMs <= 8 * 1000;
                     }
                     return true;

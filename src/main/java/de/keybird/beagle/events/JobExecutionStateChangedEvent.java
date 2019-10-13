@@ -20,16 +20,16 @@ package de.keybird.beagle.events;
 
 import java.util.Objects;
 
-import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.JobState;
+import de.keybird.beagle.jobs.xxxx.JobState;
+import de.keybird.beagle.jobs.xxxx.Job;
 
 public class JobExecutionStateChangedEvent extends JobExecutionEvent {
 
     private final JobState oldState;
     private final JobState newState;
 
-    public JobExecutionStateChangedEvent(JobEntity jobEntity, JobState oldState, JobState state) {
-        super(jobEntity);
+    public JobExecutionStateChangedEvent(Job job, JobState oldState, JobState state) {
+        super(job);
         this.oldState = Objects.requireNonNull(oldState);
         this.newState = Objects.requireNonNull(state);
     }

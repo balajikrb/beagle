@@ -20,16 +20,16 @@ package de.keybird.beagle.events;
 
 import java.util.Objects;
 
-import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.xxxx.Job;
 
 public class JobExecutionEvent {
-    private final JobEntity source;
+    private final Job source;
 
-    public JobExecutionEvent(JobEntity source) {
+    public JobExecutionEvent(Job source) {
         this.source = Objects.requireNonNull(source);
     }
 
-    public JobEntity getSource() {
+    public Job getSource() {
         return source;
     }
 }

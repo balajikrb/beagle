@@ -16,21 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.sources;
+package de.keybird.beagle.jobs.xxxx;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
-import de.keybird.beagle.api.DocumentSource;
-import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
-import de.keybird.beagle.api.sources.strategy.InboxFileSystemSourceStrategy;
-
-@Entity
-@DiscriminatorValue("Inbox")
-public class InboxFileSystemSource extends DocumentSource {
-
-    @Override
-    public DocumentSourceStrategy getStrategy() {
-        return new InboxFileSystemSourceStrategy();
-    }
+public enum LogLevel {
+    Info,
+    Success,
+    Warn,
+    Error
 }

@@ -36,6 +36,8 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.BatchSize;
 
+import de.keybird.beagle.jobs.xxxx.LogLevel;
+
 @Table(name="logs")
 @Entity
 public class LogEntity {

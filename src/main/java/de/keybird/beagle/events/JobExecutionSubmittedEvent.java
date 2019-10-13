@@ -18,11 +18,11 @@
 
 package de.keybird.beagle.events;
 
-import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.xxxx.Job;
 
 public class JobExecutionSubmittedEvent extends JobExecutionEvent {
 
-    public JobExecutionSubmittedEvent(JobEntity source) {
+    public JobExecutionSubmittedEvent(Job source) {
         super(source);
     }
 }

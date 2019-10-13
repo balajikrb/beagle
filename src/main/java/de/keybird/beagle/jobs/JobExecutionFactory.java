@@ -28,11 +28,11 @@ import de.keybird.beagle.jobs.execution.DetectJobExecution;
 import de.keybird.beagle.jobs.execution.ImportJobExecution;
 import de.keybird.beagle.jobs.execution.IndexJobExecution;
 import de.keybird.beagle.jobs.execution.JobExecution;
-import de.keybird.beagle.jobs.persistence.ArchiveJobEntity;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.persistence.ImportJobEntity;
-import de.keybird.beagle.jobs.persistence.IndexJobEntity;
-import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.xxxx.ArchiveJob;
+import de.keybird.beagle.jobs.xxxx.DetectJob;
+import de.keybird.beagle.jobs.xxxx.ImportJob;
+import de.keybird.beagle.jobs.xxxx.IndexJob;
+import de.keybird.beagle.jobs.xxxx.Job;
 
 @Service
 public class JobExecutionFactory implements JobVisitor<JobExecution> {
@@ -50,28 +50,28 @@ public class JobExecutionFactory implements JobVisitor<JobExecution> {
     private Provider<ArchiveJobExecution> archiveJobExecutionProvider;
 
     @Override
-    public JobExecution<DetectJobEntity> visit(DetectJobEntity jobEntity) {
+    public JobExecution<DetectJob> visit(DetectJob job) {
         return detectJobExecutionProvider.get();
     }
 
     @Override
-    public JobExecution<IndexJobEntity> visit(IndexJobEntity jobEntity) {
+    public JobExecution<IndexJob> visit(IndexJob job) {
         IndexJobExecution execution = indexJobExecutionProvider.get();
-        execution.setPageRequest(jobEntity.getPage());
+        execution.setPageRequest(job.getPage());
         return execution;
     }
 
     @Override
-    public JobExecution<ImportJobEntity> visit(ImportJobEntity jobEntity) {
-        return importJobExecutionProvider.get();
-    }
-
-    @Override
-    public JobExecution visit(ArchiveJobEntity archiveJobEntity) {
+    public JobExecution visit(ArchiveJob job) {
         return archiveJobExecutionProvider.get();
     }
 
-    public JobExecution getJobExecution(JobEntity jobEntity) {
-        return jobEntity.accept(this);
+    @Override
+    public JobExecution<ImportJob> visit(ImportJob job) {
+        return importJobExecutionProvider.get();
+    }
+
+    public JobExecution getJobExecution(Job job) {
+        return job.accept(this);
     }
 }

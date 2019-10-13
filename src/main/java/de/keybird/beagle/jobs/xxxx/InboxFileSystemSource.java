@@ -16,7 +16,7 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.sources.strategy;
+package de.keybird.beagle.jobs.xxxx;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import de.keybird.beagle.api.DocumentSource;
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
-import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
 
-public class InboxFileSystemSourceStrategy implements DocumentSourceStrategy {
+public class InboxFileSystemSource implements DocumentSource<InboxFileSystemSource.FileSystemDocument> {
+
     @Override
-    public List<DocumentEntry> getEntries(JobExecutionContext<? extends JobEntity> context) throws IOException {
+    public List<DocumentEntry> getEntries(JobExecutionContext<? extends Job> context) throws IOException {
         Files.createDirectories(context.getInboxPath());
         context.logEntry(LogLevel.Info,"Reading contents from directory '{}'", context.getInboxPath());
 
@@ -43,10 +43,8 @@ public class InboxFileSystemSourceStrategy implements DocumentSourceStrategy {
     }
 
     @Override
-    public void cleanUp(DocumentEntry entry) {
-        if (entry instanceof FileSystemDocument) {
-            ((FileSystemDocument) entry).delete();
-        }
+    public void cleanUp(FileSystemDocument entry) {
+        entry.delete();
     }
 
     static class FileSystemDocument implements DocumentEntry {

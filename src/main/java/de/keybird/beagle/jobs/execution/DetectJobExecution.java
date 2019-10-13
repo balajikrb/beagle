@@ -21,6 +21,7 @@ package de.keybird.beagle.jobs.execution;
 import static de.keybird.beagle.Utils.closeSilently;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -30,21 +31,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
 import de.keybird.beagle.api.Document;
+import de.keybird.beagle.api.DocumentSource;
 import de.keybird.beagle.api.DocumentState;
-import de.keybird.beagle.api.sources.strategy.DocumentEntry;
-import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.xxxx.DetectJob;
+import de.keybird.beagle.jobs.xxxx.DocumentEntry;
+import de.keybird.beagle.jobs.xxxx.LogLevel;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.services.PdfManager;
 
 @Service
 @Scope("prototype")
-public class DetectJobExecution implements JobExecution<DetectJobEntity> {
+public class DetectJobExecution implements JobExecution<DetectJob> {
 
     private final Logger logger = LoggerFactory.getLogger(DetectJobExecution.class);
 
@@ -53,10 +55,22 @@ public class DetectJobExecution implements JobExecution<DetectJobEntity> {
 
     // TODO MVR the file size should be checked and too big files should be rejected
     @Override
-    public void execute(JobExecutionContext<DetectJobEntity> context) throws ExecutionException {
-        final DocumentSourceStrategy documentSourceStrategy = context.getJobEntity().getDocumentSource().getStrategy();
+    public void execute(JobExecutionContext<DetectJob> context) throws ExecutionException {
+        final List<Document> documents = Lists.newArrayList();
+        final DocumentSource<DocumentEntry> documentSourceStrategy = context.getJob().getDocumentSource();
         try {
-            for (DocumentEntry entry : documentSourceStrategy.getEntries(context)) {
+            final List<DocumentEntry> entries = documentSourceStrategy.getEntries(context);
+
+            context.setSuccessHandler(theContext -> {
+                documentRepository.save(documents);
+
+                for (DocumentEntry entry : entries) {
+                    theContext.logEntry(LogLevel.Info,"Deleting file '{}'", entry);
+                    documentSourceStrategy.cleanUp(entry);
+                }
+            });
+
+            for (DocumentEntry entry : entries) {
                 context.logEntry(LogLevel.Info,"Handling document '{}'", entry.toString());
 
                 final Document theDocument = new Document();
@@ -77,16 +91,14 @@ public class DetectJobExecution implements JobExecution<DetectJobEntity> {
                     // Ensure it is not already persisted
                     if (documentRepository.findByChecksum(hashCode.toString()) != null) {
                         context.logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Document already exists.", entry);
+                    } else if (payload == null || payload.length == 0) {
+                        context.logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Payload is null or empty.", entry);
                     } else {
                         context.logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
-                        documentRepository.save(theDocument);
+                        documents.add(theDocument);
                     }
                 } catch (IOException ex) {
                     context.logEntry(LogLevel.Error, "Document '{}' was rejected. Reason: {}", entry, ex.getMessage());
-                }
-                if (theDocument.getPayload() != null) {
-                    context.logEntry(LogLevel.Info,"Deleting file '{}'", entry);
-                    documentSourceStrategy.cleanUp(entry);
                 }
             }
         } catch (IOException e) {

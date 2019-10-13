@@ -175,45 +175,45 @@
 				</executions>
 			</plugin>
 
-			<plugin>
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<version>3.0</version>
-				<configuration>
-					<header>src/license/header.txt</header>
-					<properties>
-						<project.inceptionYear>2017</project.inceptionYear>
-						<owner>Markus von Rüden</owner>
-					</properties>
-					<excludes>
-						<exclude>**/*.properties</exclude>
-						<exclude>**/*.sql</exclude>
-						<exclude>**/js/vendor/**</exclude>
-						<exclude>**/fonts/**</exclude>
-						<exclude>**/*.html</exclude>
-						<exclude>**/*.css</exclude>
-						<exclude>**/*.map</exclude>
-						<exclude>**/pom.xml</exclude>
-						<exclude>**/*.yml</exclude>
-						<exclude>**/*.sh</exclude>
-						<exclude>README.adoc</exclude>
-						<exclude>images.adoc</exclude>
-						<exclude>todo.adoc</exclude>
-						<exclude>LICENSE</exclude>
-						<exclude>yarn.lock</exclude>
-						<exclude>**/Dockerfile</exclude>
-						<exclude>node_modules/**</exclude>
-						<exclude>**/logback.xml</exclude>
-					</excludes>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+<!--			<plugin>-->
+<!--				<groupId>com.mycila</groupId>-->
+<!--				<artifactId>license-maven-plugin</artifactId>-->
+<!--				<version>3.0</version>-->
+<!--				<configuration>-->
+<!--					<header>src/license/header.txt</header>-->
+<!--					<properties>-->
+<!--						<project.inceptionYear>2017</project.inceptionYear>-->
+<!--						<owner>Markus von Rüden</owner>-->
+<!--					</properties>-->
+<!--					<excludes>-->
+<!--						<exclude>**/*.properties</exclude>-->
+<!--						<exclude>**/*.sql</exclude>-->
+<!--						<exclude>**/js/vendor/**</exclude>-->
+<!--						<exclude>**/fonts/**</exclude>-->
+<!--						<exclude>**/*.html</exclude>-->
+<!--						<exclude>**/*.css</exclude>-->
+<!--						<exclude>**/*.map</exclude>-->
+<!--						<exclude>**/pom.xml</exclude>-->
+<!--						<exclude>**/*.yml</exclude>-->
+<!--						<exclude>**/*.sh</exclude>-->
+<!--						<exclude>README.adoc</exclude>-->
+<!--						<exclude>images.adoc</exclude>-->
+<!--						<exclude>todo.adoc</exclude>-->
+<!--						<exclude>LICENSE</exclude>-->
+<!--						<exclude>yarn.lock</exclude>-->
+<!--						<exclude>**/Dockerfile</exclude>-->
+<!--						<exclude>node_modules/**</exclude>-->
+<!--						<exclude>**/logback.xml</exclude>-->
+<!--					</excludes>-->
+<!--				</configuration>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<goals>-->
+<!--							<goal>check</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
 		</plugins>
 	</build>
 	<profiles>

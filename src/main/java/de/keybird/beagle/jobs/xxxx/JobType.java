@@ -16,11 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.persistence;
+package de.keybird.beagle.jobs.xxxx;
 
-public enum JobState {
-    Pending,
-    Initializing,
-    Running,
-    Completed
+public enum JobType {
+    Detect,
+    Import,
+    Index,
+    Archive
 }

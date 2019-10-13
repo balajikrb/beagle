@@ -16,7 +16,7 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.sources.strategy;
+package de.keybird.beagle.jobs.xxxx;
 
 import java.io.IOException;
 

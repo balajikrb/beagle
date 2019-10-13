@@ -18,10 +18,10 @@
 
 package de.keybird.beagle.jobs.execution;
 
+import de.keybird.beagle.jobs.xxxx.Job;
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.persistence.JobEntity;
 
-public interface JobExecutionInfo<J extends JobEntity> {
-    J getJobEntity();
+public interface JobExecutionInfo<J extends Job> {
+    J getJob();
     Progress getProgress();
 }
