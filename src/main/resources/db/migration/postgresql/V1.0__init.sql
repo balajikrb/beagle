@@ -38,7 +38,7 @@ create table if not exists logs
 			primary key,
 	date timestamp not null,
 	level varchar(255) not null,
-	message varchar(255) not null,
+	message text not null,
 	job_id bigint not null
 		constraint fk_job_logs_job_id
 			references jobs
