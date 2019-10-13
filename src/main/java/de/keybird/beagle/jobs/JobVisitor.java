@@ -18,18 +18,14 @@
 
 package de.keybird.beagle.jobs;
 
-import de.keybird.beagle.jobs.persistence.ArchiveJobEntity;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.persistence.ImportJobEntity;
-import de.keybird.beagle.jobs.persistence.IndexJobEntity;
-
 public interface JobVisitor<T> {
 
-    T visit(DetectJobEntity jobEntity);
+    T visit(DetectJob job);
 
-    T visit(IndexJobEntity jobEntity);
+    T visit(IndexJob job);
 
-    T visit(ImportJobEntity jobEntity);
+    T visit(ImportJob job);
 
-    T visit(ArchiveJobEntity archiveJobEntity);
+    T visit(ArchiveJob job);
+
 }

@@ -16,21 +16,40 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.sources;
+package de.keybird.beagle.jobs;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import java.util.Objects;
 
 import de.keybird.beagle.api.DocumentSource;
-import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
-import de.keybird.beagle.api.sources.strategy.InboxFileSystemSourceStrategy;
+import de.keybird.beagle.jobs.source.InboxFileSystemSource;
 
-@Entity
-@DiscriminatorValue("Inbox")
-public class InboxFileSystemSource extends DocumentSource {
+public class DetectJob extends Job {
+
+    private final DocumentSource source;
+
+    public DetectJob() {
+        this(new InboxFileSystemSource());
+    }
+
+    public DetectJob(DocumentSource source) {
+        this.source = Objects.requireNonNull(source);
+    }
 
     @Override
-    public DocumentSourceStrategy getStrategy() {
-        return new InboxFileSystemSourceStrategy();
+    public JobType getType() {
+        return JobType.Detect;
+    }
+
+    public String getDescription() {
+        return "Detecting new files";
+    }
+
+    public DocumentSource getDocumentSource() {
+        return source;
+    }
+
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

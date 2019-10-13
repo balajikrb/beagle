@@ -40,7 +40,6 @@ public class JobExecutionManagerConfig {
         final long maxHeapSize = Runtime.getRuntime().maxMemory();
         final int preferredPoolSize = Math.round(maxHeapSize / 1024f / 1024f / 1024f);
         int poolSize = Math.min(Math.max(minPoolSize, preferredPoolSize), maxPoolSize);
-//        return poolSize;
-        return 1; // TODO MVR for now always return 1 as it causes issues :(
+        return poolSize;
     }
 }

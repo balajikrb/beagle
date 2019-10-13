@@ -16,11 +16,34 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.sources.strategy;
+package de.keybird.beagle.jobs;
 
-import java.io.IOException;
+import org.springframework.data.domain.Pageable;
 
-public interface DocumentEntry {
-    String getName();
-    byte[] getPayload() throws IOException;
+public class IndexJob extends Job {
+
+    private Pageable page;
+
+    public IndexJob(Pageable page) {
+        this.page = page;
+    }
+
+    @Override
+    public JobType getType() {
+        return JobType.Index;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Indexing pages";
+    }
+
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    public Pageable getPage() {
+        return page;
+    }
 }

@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionOperations;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
@@ -41,8 +40,8 @@ import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.elastic.BulkResultWrapper;
 import de.keybird.beagle.elastic.FailedItem;
-import de.keybird.beagle.jobs.persistence.IndexJobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.IndexJob;
+import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.repository.PageRepository;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Bulk;
@@ -52,20 +51,20 @@ import io.searchbox.core.Index;
 // Syncs database content with elastic
 @Service
 @Scope("prototype")
-public class IndexJobExecution implements JobExecution<IndexJobEntity> {
+public class IndexJobExecution implements JobExecution<IndexJob> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexJobExecution.class);
 
-    private static final int[] SLEEP_TIME = new int[]{5000, 15000, 30000, 60000};
-
-    @Autowired
-    private EntityManager entityManager;
+    private static final int[] SLEEP_TIME = new int[] { 5000, 5000, 5000, 5000 };
 
     @Autowired
     private JestClient client;
 
     @Autowired
     private PageRepository pageRepository;
+
+    @Autowired
+    private TransactionOperations transactionTemplate;
 
     @Value("${index.bulkSize}")
     private int bulkSize;
@@ -79,8 +78,8 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
         this.pageRequest = pageRequest;
     }
 
-    public void execute(JobExecutionContext<IndexJobEntity> context) {
-        final List<Page> importedPages = pageRepository.findByState(PageState.Imported, pageRequest);
+    public void execute(JobExecutionContext<IndexJob> context) {
+        final List<Long> importedPages = pageRepository.findByState(PageState.Imported, pageRequest).stream().map(p -> p.getId()).collect(Collectors.toList());
         final int totalSize = importedPages.size() == pageRequest.getPageSize() ? pageRequest.getPageSize() : importedPages.size();
         context.updateProgress(0, totalSize);
 
@@ -90,12 +89,24 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
                 LOG.warn("No pages are available for indexing.");
                 return;
             }
-            final List<List<Page>> partitions = Lists.partition(importedPages, bulkSize);
+            final List<List<Long>> partitions = Lists.partition(importedPages, bulkSize);
             int offset = 0;
-            for (List<Page> partition : partitions) {
-                indexBatch(context, partition, offset, partition.size());
+            for (List<Long> partition : partitions) {
+                // Initialize all pages of transaction
+                List<Page> pagesToImport = transactionTemplate.execute(status -> partition.stream().map(id -> {
+                    final Page page = pageRepository.findOne(id);
+                    page.getPayload();
+                    return page;
+                }).collect(Collectors.toList()));
 
-                entityManager.flush();
+                // Perform Indexing
+                indexBatch(context, pagesToImport, offset, partition.size());
+
+                // Flush the data
+                transactionTemplate.execute(status -> {
+                    pageRepository.save(pagesToImport);
+                    return null;
+                });
 
                 offset += partition.size();
                 context.updateProgress(offset);
@@ -105,7 +116,7 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
         }
     }
 
-    private void indexBatch(JobExecutionContext<IndexJobEntity> context, List<Page> partition, int offset, int batchSize) {
+    private void indexBatch(JobExecutionContext<IndexJob> context, List<Page> partition, int offset, int batchSize) {
         context.logEntry(LogLevel.Info, "{}/{}", offset == 0 ? offset : offset + 1, offset + batchSize);
 
         try {
@@ -117,6 +128,9 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
                 page.setErrorMessage(eachItem.getCause().getMessage());
                 context.logEntry(LogLevel.Error, "Page {}/{} could not be indexed. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), eachItem.getCause().getMessage());
             });
+            if (!failedItems.isEmpty()) {
+                context.setErrorMessage("At least one page was not indexed properly");
+            }
             successPages.forEach(page -> {
                 page.setState(PageState.Indexed);
                 page.setErrorMessage(null);
@@ -128,6 +142,7 @@ public class IndexJobExecution implements JobExecution<IndexJobEntity> {
                 page.setErrorMessage(e.getMessage());
                 context.logEntry(LogLevel.Error, "Page {}/{} could not be indexed. Reason: {}", page.getDocument().getFilename(), page.getPageNumber(), e.getMessage());
             });
+            context.setErrorMessage("All pages were not indexed properly: " + e.getMessage());
         }
     }
 

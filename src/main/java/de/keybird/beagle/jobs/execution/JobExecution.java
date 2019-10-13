@@ -18,8 +18,8 @@
 
 package de.keybird.beagle.jobs.execution;
 
-import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.Job;
 
-public interface JobExecution<J extends JobEntity> {
+public interface JobExecution<J extends Job> {
     void execute(JobExecutionContext<J> context) throws Exception;
 }

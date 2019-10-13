@@ -16,49 +16,25 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.rest.model;
+package de.keybird.beagle.jobs;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-import de.keybird.beagle.jobs.JobState;
-import de.keybird.beagle.jobs.JobType;
-import de.keybird.beagle.jobs.persistence.JobEntity;
+import com.google.common.collect.Lists;
 
-public class JobDTO {
+public abstract class Job {
 
     private Long id;
-
     private String errorMessage;
-
     private JobState state = JobState.Pending;
-
     private Date startTime;
-
     private Date createTime = new Date();
-
     private Date completeTime;
+    private Progress progress = new Progress();
 
-    private List<LogDTO> logs = new ArrayList<>();
-
-    private JobType type;
-
-    public JobDTO() {
-
-    }
-
-    public JobDTO(JobEntity jobEntity) {
-        setId(jobEntity.getId());
-        setCompleteTime(jobEntity.getCompleteTime());
-        setCreateTime(jobEntity.getCreateTime());
-        setErrorMessage(jobEntity.getErrorMessage());
-        setStartTime(jobEntity.getStartTime());
-        setState(jobEntity.getState());
-        setType(jobEntity.getType());
-        setLogs(jobEntity.getLogs().stream().map(le -> new LogDTO(le)).collect(Collectors.toList()));
-    }
+    private List<LogEntry> logs = Lists.newArrayList();
 
     public Long getId() {
         return id;
@@ -104,23 +80,31 @@ public class JobDTO {
         return completeTime;
     }
 
+    public List<LogEntry> getLogs() {
+        return logs;
+    }
+
     public void setCompleteTime(Date completeTime) {
         this.completeTime = completeTime;
     }
 
-    public List<LogDTO> getLogs() {
-        return logs;
+    public void updateProgress(int currentProgress, int totalProgress) {
+        getProgress().setIndeterminate(false);
+        getProgress().setProgress(currentProgress);
+        getProgress().setTotalProgress(totalProgress);
     }
 
-    public void setLogs(List<LogDTO> logs) {
-        this.logs = logs;
+    public Progress getProgress() {
+        return progress;
     }
 
-    public JobType getType() {
-        return type;
+    public void addLog(LogEntry logEntry) {
+        logs.add(Objects.requireNonNull(logEntry));
     }
 
-    public void setType(JobType type) {
-        this.type = type;
-    }
+    public abstract JobType getType();
+
+    public abstract String getDescription();
+
+    public abstract <T> T accept(JobVisitor<T> visitor);
 }

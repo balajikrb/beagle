@@ -16,11 +16,12 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.persistence;
+package de.keybird.beagle.jobs.source;
 
-public enum JobState {
-    Pending,
-    Initializing,
-    Running,
-    Completed
+import java.io.IOException;
+
+public interface DocumentEntry {
+    String getName();
+    byte[] getPayload() throws IOException;
+    void delete() throws IOException;
 }

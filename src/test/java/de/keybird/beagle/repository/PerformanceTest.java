@@ -42,9 +42,9 @@ import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.persistence.JobState;
+import de.keybird.beagle.jobs.JobState;
 import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.LogLevel;
 
 // See https://github.com/keybird/beagle/issues/5
 @RunWith(SpringRunner.class)
@@ -105,7 +105,8 @@ public class PerformanceTest {
                     logEntity.setMessage("Dummy entry " + a);
                     logEntity.setLevel(LogLevel.Info);
                     logEntity.setDate(new Date());
-                    jobEntity.addLogEntry(logEntity);
+                    logEntity.setJob(jobEntity);
+                    jobEntity.getLogs().add(logEntity);
                 }
                 jobRepository.save(jobEntity);
             }

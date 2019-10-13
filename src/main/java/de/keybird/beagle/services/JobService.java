@@ -36,10 +36,10 @@ import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
-import de.keybird.beagle.jobs.persistence.ImportJobEntity;
-import de.keybird.beagle.jobs.persistence.IndexJobEntity;
 import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.JobType;
+import de.keybird.beagle.jobs.ImportJob;
+import de.keybird.beagle.jobs.IndexJob;
+import de.keybird.beagle.jobs.JobType;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
 import de.keybird.beagle.repository.PageRepository;
@@ -83,7 +83,7 @@ public class JobService {
                 .findByState(DocumentState.New)
                 .forEach(document -> {
                     document.getPayload(); // lazy load property
-                    jobManager.submit(new ImportJobEntity(document));
+                    jobManager.submit(new ImportJob(document));
                 });
         indexPagesIfNecessary();
     }
@@ -109,7 +109,7 @@ public class JobService {
                     if (i > 0) {
                         pageRequest = pageRequest.next();
                     }
-                    jobManager.submit(new IndexJobEntity(pageRequest));
+                    jobManager.submit(new IndexJob(pageRequest));
                 }
             }
         }

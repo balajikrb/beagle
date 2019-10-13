@@ -45,11 +45,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import de.keybird.beagle.BeagleTest;
 import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.ImportJobEntity;
 import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.JobState;
-import de.keybird.beagle.jobs.persistence.JobType;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
 import de.keybird.beagle.repository.PageRepository;
@@ -97,7 +94,7 @@ public class JobExecutionManagerTest {
         assertThat(jobExecutionManager.hasRunningJobs(), is(false));
 
         // Submit dummy job
-        jobExecutionManager.submit(new DetectJobEntity(), context -> Thread.sleep(5000));
+        jobExecutionManager.submit(new DetectJob(), context -> Thread.sleep(5000));
 
         // Verify execution is in progress, but we have to wait, as it takes some time to submit the job
         await().atMost(1, SECONDS).until(() -> {
@@ -116,11 +113,11 @@ public class JobExecutionManagerTest {
         inboxDirectory.addFile(TestConfig.BEAGLE_EN_PDF_URL);
 
         // Start detecting
-        final CompletableFuture submittedJob = jobExecutionManager.submit(new DetectJobEntity());
+        final CompletableFuture submittedJob = jobExecutionManager.submit(new DetectJob());
         submittedJob.get();
 
         // Now Import and Index Jobs should run, we wait for them to finish
-        await().atMost(30, SECONDS).pollInterval(5, SECONDS).until(() -> jobRepository.count() == 3);
+        await().atMost(120, SECONDS).pollInterval(5, SECONDS).until(() -> jobRepository.count() == 3);
 
         // Detect + Import + Index jobs should have run
         assertThat(jobRepository.count(), is(3L));
@@ -147,7 +144,7 @@ public class JobExecutionManagerTest {
 
     @Test(timeout=20000)
     public void verifyJobRemovedProperlyOnSuccess() throws InterruptedException {
-        jobExecutionManager.submit(new DetectJobEntity(), context -> {});
+        jobExecutionManager.submit(new DetectJob(), context -> {});
         jobExecutionManager.shutdown();
         jobExecutionManager.awaitTermination(5, SECONDS);
         assertThat(jobExecutionManager.getExecutions(), hasSize(0));
@@ -155,7 +152,7 @@ public class JobExecutionManagerTest {
 
     @Test(timeout=20000)
     public void verifyJobRemovedProperlyOnError() throws InterruptedException {
-        jobExecutionManager.submit(new DetectJobEntity(), context -> {
+        jobExecutionManager.submit(new DetectJob(), context -> {
             throw new IllegalStateException("Some random (expected) exception");
         });
         jobExecutionManager.shutdown();

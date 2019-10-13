@@ -21,7 +21,7 @@ package de.keybird.beagle.rest.model;
 import java.util.Date;
 
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.persistence.JobState;
+import de.keybird.beagle.jobs.JobState;
 
 public class JobExecutionDTO {
 

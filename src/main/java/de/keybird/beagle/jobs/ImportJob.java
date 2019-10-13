@@ -16,11 +16,36 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.repository;
+package de.keybird.beagle.jobs;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Objects;
 
-import de.keybird.beagle.api.DocumentSource;
+import de.keybird.beagle.api.Document;
 
-public interface DocumentSourceRepository extends JpaRepository<DocumentSource, Long> {
+public class ImportJob extends Job {
+
+    private final Document document;
+
+    public ImportJob(Document theDocument) {
+        this.document = Objects.requireNonNull(theDocument);
+    }
+
+    @Override
+    public JobType getType() {
+        return JobType.Import;
+    }
+
+    @Override
+    public String getDescription() {
+        return String.format("Importing '%s'", getDocument().getFilename());
+    }
+
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    public Document getDocument() {
+        return document;
+    }
 }

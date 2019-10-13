@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.keybird.beagle.jobs.persistence.JobType;
+import de.keybird.beagle.jobs.JobType;
 import de.keybird.beagle.services.JobService;
 
 @Component

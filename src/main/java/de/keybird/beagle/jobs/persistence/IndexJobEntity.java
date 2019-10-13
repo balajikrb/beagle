@@ -24,7 +24,7 @@ import javax.persistence.Transient;
 
 import org.springframework.data.domain.Pageable;
 
-import de.keybird.beagle.jobs.JobVisitor;
+import de.keybird.beagle.jobs.JobType;
 
 @Entity
 @DiscriminatorValue("index")
@@ -42,22 +42,12 @@ public class IndexJobEntity extends JobEntity {
         this.page = page;
     }
 
+    public Pageable getPage() {
+        return page;
+    }
+
     @Override
     public JobType getType() {
         return JobType.Index;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Indexing pages";
-    }
-
-    @Override
-    public <T> T accept(JobVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
-
-    public Pageable getPage() {
-        return page;
     }
 }

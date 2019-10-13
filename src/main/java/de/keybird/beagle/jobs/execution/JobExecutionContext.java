@@ -21,16 +21,16 @@ package de.keybird.beagle.jobs.execution;
 import java.nio.file.Path;
 
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.LogLevel;
+import de.keybird.beagle.jobs.Job;
 
-public interface JobExecutionContext<J extends JobEntity> extends JobExecutionInfo<J> {
+public interface JobExecutionContext<J extends Job> extends JobExecutionInfo<J> {
 
     @Override
     Progress getProgress();
 
     @Override
-    J getJobEntity();
+    J getJob();
 
     Path getInboxPath();
 
@@ -38,9 +38,9 @@ public interface JobExecutionContext<J extends JobEntity> extends JobExecutionIn
 
     Path getWorkingPath();
 
-    void setErrorHandler(ErrorHandler errorHandler);
+    void setErrorHandler(ErrorHandler<J> errorHandler);
 
-    void setSuccessHandler(SuccessHandler successHandler);
+    void setSuccessHandler(SuccessHandler<J> successHandler);
 
     // TODO MVR rename to addLogEntry
     void logEntry(LogLevel logLevel, String message, Object... args);
@@ -48,4 +48,6 @@ public interface JobExecutionContext<J extends JobEntity> extends JobExecutionIn
     void updateProgress(int currentProgress, int totalProgress);
 
     void updateProgress(int currentProgress);
+
+    void setErrorMessage(String s);
 }

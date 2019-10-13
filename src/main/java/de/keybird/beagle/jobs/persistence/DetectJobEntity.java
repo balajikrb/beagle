@@ -18,52 +18,31 @@
 
 package de.keybird.beagle.jobs.persistence;
 
-import java.util.Objects;
-
-import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
 
-import org.hibernate.annotations.BatchSize;
-
-import de.keybird.beagle.api.DocumentSource;
-import de.keybird.beagle.api.sources.InboxFileSystemSource;
-import de.keybird.beagle.jobs.JobVisitor;
+import de.keybird.beagle.jobs.JobType;
 
 @Entity
 @DiscriminatorValue("detect")
 public class DetectJobEntity extends JobEntity {
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @BatchSize(size=10)
-    private DocumentSource documentSource = new InboxFileSystemSource();
-
-    @Override
-    public JobType getType() {
-        return JobType.Detect;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Detecting new files";
-    }
+    private String source;
 
     public DetectJobEntity() {
 
     }
 
-    public DetectJobEntity(final DocumentSource source) {
-        this.documentSource = Objects.requireNonNull(source);
+    public void setSource(String source) {
+        this.source = source;
     }
 
-    public DocumentSource getDocumentSource() {
-        return documentSource;
+    public String getSource() {
+        return source;
     }
 
     @Override
-    public <T> T accept(JobVisitor<T> visitor) {
-        return visitor.visit(this);
+    public JobType getType() {
+        return JobType.Detect;
     }
 }

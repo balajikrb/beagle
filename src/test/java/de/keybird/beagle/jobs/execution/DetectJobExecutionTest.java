@@ -40,7 +40,7 @@ import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
+import de.keybird.beagle.jobs.DetectJob;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
 
@@ -87,7 +87,7 @@ public class DetectJobExecutionTest {
 
     @Test
     public void verifyJobExecution() throws Exception {
-        jobRunner.execute(new DetectJobEntity(), detectJobExecution);
+        jobRunner.execute(new DetectJob(), detectJobExecution);
 
         assertEquals(0, documentRepository.count());
         assertEquals(1, jobRepository.count());
@@ -99,7 +99,7 @@ public class DetectJobExecutionTest {
         inboxDirectory.addFile(TestConfig.BEAGLE_DE_PDF_URL);
 
         // Detect new files
-        jobRunner.execute(new DetectJobEntity(), detectJobExecution);
+        jobRunner.execute(new DetectJob(), detectJobExecution);
 
         // Ensure the document was imported
         assertEquals(1, jobRepository.count());
@@ -120,7 +120,7 @@ public class DetectJobExecutionTest {
             inboxDirectory.addFile(TestConfig.BEAGLE_DE_PDF_URL);
 
             // Detect new files
-            jobRunner.execute(new DetectJobEntity(), detectJobExecution);
+            jobRunner.execute(new DetectJob(), detectJobExecution);
         }
 
         // Ensure it is only available once
@@ -133,7 +133,7 @@ public class DetectJobExecutionTest {
     @Test
     public void verifyIgnoresNonPdfFiles() throws Exception {
         inboxDirectory.addFile(getClass().getResource("/static/img/beagles/beagle1.jpg"));
-        jobRunner.execute(new DetectJobEntity(), detectJobExecution);
+        jobRunner.execute(new DetectJob(), detectJobExecution);
         assertEquals(0, documentRepository.count());
         assertEquals(1, jobRepository.count());
     }

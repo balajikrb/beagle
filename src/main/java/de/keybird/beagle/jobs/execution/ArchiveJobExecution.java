@@ -29,20 +29,20 @@ import org.springframework.stereotype.Service;
 
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
-import de.keybird.beagle.jobs.persistence.ArchiveJobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.LogLevel;
+import de.keybird.beagle.jobs.ArchiveJob;
 import de.keybird.beagle.repository.PageRepository;
 
 // Sync database with filesystem
 @Service
 @Scope("prototype")
-public class ArchiveJobExecution implements JobExecution<ArchiveJobEntity> {
+public class ArchiveJobExecution implements JobExecution<ArchiveJob> {
 
     @Autowired
     private PageRepository pageRepository;
 
     @Override
-    public void execute(JobExecutionContext<ArchiveJobEntity> context) throws Exception {
+    public void execute(JobExecutionContext<ArchiveJob> context) throws Exception {
         Files.createDirectories(context.getArchivePath());
         context.logEntry(LogLevel.Info, "Archiving pages ...");
         final Path archivePath = context.getArchivePath();

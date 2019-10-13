@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import de.keybird.beagle.BeagleTest;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.LogLevel;
 
 @BeagleTest
 @RunWith(SpringRunner.class)
@@ -54,7 +54,7 @@ public class JobRepositoryTest {
         final LogEntity logEntity = new LogEntity();
         logEntity.setLevel(LogLevel.Info);
         logEntity.setMessage("Wiu wiu wiu");
-        jobEntity.addLogEntry(logEntity);
+        jobEntity.getLogs().add(logEntity);
 
         final DetectJobEntity save = jobRepository.save(jobEntity);
         assertThat(save.getId(), is(not(nullValue())));

@@ -22,10 +22,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,25 +35,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionOperations;
 
 import com.google.common.eventbus.EventBus;
 
 import de.keybird.beagle.events.JobExecutionProgressChangedEvent;
 import de.keybird.beagle.events.JobExecutionStartedEvent;
 import de.keybird.beagle.events.JobExecutionStateChangedEvent;
+import de.keybird.beagle.jobs.JobVisitor;
 import de.keybird.beagle.jobs.Progress;
+import de.keybird.beagle.jobs.persistence.ArchiveJobEntity;
+import de.keybird.beagle.jobs.persistence.DetectJobEntity;
+import de.keybird.beagle.jobs.persistence.ImportJobEntity;
+import de.keybird.beagle.jobs.persistence.IndexJobEntity;
 import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.JobState;
 import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.ArchiveJob;
+import de.keybird.beagle.jobs.DetectJob;
+import de.keybird.beagle.jobs.ImportJob;
+import de.keybird.beagle.jobs.IndexJob;
+import de.keybird.beagle.jobs.Job;
+import de.keybird.beagle.jobs.JobState;
+import de.keybird.beagle.jobs.LogEntry;
+import de.keybird.beagle.jobs.LogLevel;
+import de.keybird.beagle.repository.JobRepository;
 
 // TODO MVR es wird jetzt zwar geloggt, welche dokumente usw. abgewiesen wurden, aber ein übergeordneter status für die dokumente, pages fehlt noch
 // Das muss noch eingeführt werden, damit die queries funktionieren
 @Service
 @Scope("prototype")
-public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
+public class JobRunner<T extends Job> implements JobExecutionContext<T> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private static AtomicInteger atomicInteger = new AtomicInteger(1);
 
     @Value("${working.directory}")
     private String workingDirectory;
@@ -62,20 +77,21 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
     private EventBus eventBus;
 
     @Autowired
-    private EntityManager entityManager;
+    private JobRepository jobRepository;
+
+    @Autowired
+    private TransactionOperations transactionTemplate;
 
     @Value("${working.directory}")
     private Path workingPath;
     private Path inboxPath;
     private Path archivePath;
 
-    private T jobEntity;
+    private T job;
 
     private ErrorHandler errorHandler;
 
     private SuccessHandler successHandler;
-
-    private Progress progress = new Progress();
 
     @PostConstruct
     public void init() {
@@ -85,28 +101,30 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
         this.archivePath = workingPath.resolve("2_archive");
     }
 
-    @Transactional
-    public void execute(T jobEntity, JobExecution<T> execution) {
-        Objects.requireNonNull(jobEntity);
+    public void execute(T job, JobExecution<T> execution) {
+        this.job = Objects.requireNonNull(job);
         Objects.requireNonNull(execution);
 
         try {
-            // JobEntity is very likely detached here, so we re-attach it
-            if (jobEntity.getId() != null) {
-                this.jobEntity = (T) entityManager.find(jobEntity.getClass(), jobEntity.getId());
-            } else {
-                this.jobEntity = entityManager.merge(jobEntity);
-            }
             setState(JobState.Initializing);
             start();
 
             execution.execute(this);
 
             success();
-            onSuccess();
+
+            transactionTemplate.execute((status) -> {
+                onSuccess();
+                return null;
+            });
         } catch (Throwable t) {
             error(t);
-            onError(t);
+
+            transactionTemplate.execute((status) -> {
+                onError(t);
+                return null;
+            });
+
             // We want to propagate properly without having to add Exception to the signature
             if (t instanceof RuntimeException) {
                 throw (RuntimeException) t;
@@ -115,16 +133,19 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
             }
             throw new RuntimeException(t);
         } finally {
-            complete();
+            transactionTemplate.execute((status) -> {
+                complete();
+                return null;
+            });
         }
     }
 
     public Progress getProgress() {
-        return progress;
+        return job.getProgress();
     }
 
-    public T getJobEntity() {
-        return this.jobEntity;
+    public T getJob() {
+        return this.job;
     }
 
     public Path getInboxPath() {
@@ -153,33 +174,34 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
 
     public void setState(JobState state) {
         JobState oldState = state;
-        jobEntity.setState(state);
-        getEventBus().post(new JobExecutionStateChangedEvent(jobEntity, oldState, state));
+        job.setState(state);
+        getEventBus().post(new JobExecutionStateChangedEvent(job, oldState, state));
     }
 
     void setStartTime(Date startTime) {
-        jobEntity.setStartTime(startTime);
+        job.setStartTime(startTime);
     }
 
     void setCompleteTime(Date completeTime) {
-        jobEntity.setCompleteTime(completeTime);
+        job.setCompleteTime(completeTime);
     }
 
+    @Override
     public void setErrorMessage(String errorMessage) {
-        jobEntity.setErrorMessage(errorMessage);
+        job.setErrorMessage(errorMessage);
     }
 
     protected void start() {
-        getEventBus().post(new JobExecutionStartedEvent(jobEntity));
-        Thread.currentThread().setName(getClass().getName() + " - " + getJobEntity().getId());
+        getEventBus().post(new JobExecutionStartedEvent(job));
+        Thread.currentThread().setName(getClass().getName() + " - " + job.getType() + " - " + atomicInteger.getAndIncrement());
         setStartTime(new Date());
         setState(JobState.Running);
     }
 
     protected void success() {
         setCompleteTime(new Date());
-        setErrorMessage(null);
         setState(JobState.Completed);
+        // DO NOT set the errorMessage to null here
     }
 
     protected void error(Throwable t) {
@@ -187,33 +209,74 @@ public class JobRunner<T extends JobEntity> implements JobExecutionContext<T> {
     }
 
     protected void complete() {
+        final JobEntity entity = job.accept(
+                new JobVisitor<JobEntity>() {
+                    void applyDefaults(JobEntity input) {
+                        input.setCompleteTime(job.getCompleteTime());
+                        input.setErrorMessage(job.getErrorMessage());
+                        input.setStartTime(job.getStartTime());
+                        input.setState(job.getState());
+                        input.setCreateTime(job.getCreateTime());
+                        input.setLogs(job.getLogs().stream().map(log -> {
+                            final LogEntity logEntity = new LogEntity();
+                            logEntity.setLevel(log.getLogLevel());
+                            logEntity.setMessage(log.getMessage());
+                            logEntity.setDate(log.getDate());
+                            return logEntity;
+                        }).collect(Collectors.toList()));
+                    }
 
+                    @Override
+                    public JobEntity visit(DetectJob detectJob) {
+                        final DetectJobEntity detectJobEntity = new DetectJobEntity();
+                        applyDefaults(detectJobEntity);
+                        detectJobEntity.setSource(detectJob.getDocumentSource().getDescription());
+                        return detectJobEntity;
+                    }
+
+                    @Override
+                    public JobEntity visit(IndexJob indexJob) {
+                        final IndexJobEntity indexJobEntity = new IndexJobEntity(indexJob.getPage());
+                        applyDefaults(indexJobEntity);
+                        return indexJobEntity;
+                    }
+
+                    @Override
+                    public JobEntity visit(ImportJob importJob) {
+                        final ImportJobEntity importJobEntity = new ImportJobEntity(importJob.getDocument());
+                        applyDefaults(importJobEntity);
+                        return importJobEntity;
+                    }
+
+                    @Override
+                    public JobEntity visit(ArchiveJob job) {
+                        final ArchiveJobEntity jobEntity = new ArchiveJobEntity();
+                        applyDefaults(jobEntity);
+                        return jobEntity;
+                    }
+                });
+        jobRepository.save(entity);
     }
 
     public void logEntry(LogLevel logLevel, String message, Object... args) {
         // Log the message to console, to see what is going on. However if multiple jobs are running in parallel it is hard to determine
         // Where the job is coming from, therefore we append the description of the job, but only if it is not identical to the message
-        if (!jobEntity.getDescription().equals(message)) {
-            logger.info(jobEntity.getDescription() + ": " + message, args);
+        if (!job.getDescription().equals(message)) {
+            logger.info(job.getDescription() + ": " + message, args);
         } else {
             logger.info(message, args);
         }
 
         // Append log entry to job entity
         final FormattingTuple formattingTuple = MessageFormatter.arrayFormat(message, args);
-        final LogEntity logEntity = new LogEntity();
-        logEntity.setLevel(logLevel);
-        logEntity.setMessage(formattingTuple.getMessage());
-        logEntity.setJob(jobEntity);
-        jobEntity.getLogs().add(logEntity);
+        final LogEntry logEntry = new LogEntry(logLevel, formattingTuple.getMessage());
+        job.addLog(logEntry);
     }
 
     public void updateProgress(int currentProgress, int totalProgress) {
-        Progress oldProgress = new Progress(getProgress());
-        getProgress().setIndeterminate(false);
-        getProgress().setProgress(currentProgress);
-        getProgress().setTotalProgress(totalProgress);
-        getEventBus().post(new JobExecutionProgressChangedEvent(jobEntity, oldProgress, getProgress()));
+        final Progress oldProgress = new Progress(job.getProgress());
+        job.updateProgress(currentProgress, totalProgress);
+        getEventBus().post(new JobExecutionProgressChangedEvent(job, oldProgress, getProgress()));
     }
 
     public void updateProgress(int currentProgress) {

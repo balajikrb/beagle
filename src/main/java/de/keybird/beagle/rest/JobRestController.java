@@ -36,9 +36,10 @@ import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.jobs.JobExecutionManager;
 import de.keybird.beagle.jobs.Progress;
 import de.keybird.beagle.jobs.execution.JobExecutionInfo;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.persistence.ImportJobEntity;
 import de.keybird.beagle.jobs.persistence.JobEntity;
+import de.keybird.beagle.jobs.DetectJob;
+import de.keybird.beagle.jobs.ImportJob;
+import de.keybird.beagle.jobs.Job;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
 import de.keybird.beagle.rest.model.JobDTO;
@@ -87,7 +88,7 @@ public class JobRestController {
 
     @RequestMapping(path="/detect", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity startDetect() {
-        jobExecutionManager.submit(new DetectJobEntity());
+        jobExecutionManager.submit(new DetectJob());
         return ResponseEntity.accepted().build();
     }
 
@@ -96,7 +97,7 @@ public class JobRestController {
         // TODO MVR use service for this?
         documentRepository
             .findByState(DocumentState.New)
-            .forEach(theImport -> jobExecutionManager.submit(new ImportJobEntity(theImport)));
+            .forEach(theImport -> jobExecutionManager.submit(new ImportJob(theImport)));
         return ResponseEntity.accepted().build();
     }
 
@@ -109,19 +110,24 @@ public class JobRestController {
     @RequestMapping(method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAll() {
+        // TODO MVR this is ugly but for now we keep it
+        if (jobExecutionManager.hasRunningJobs()) {
+            throw new IllegalStateException("Cannot delete jobs while jobs are running");
+        }
         jobRepository.deleteAll();
     }
 
     public static JobExecutionDTO createFrom(JobExecutionInfo info) {
-        final JobEntity jobEntity = info.getJobEntity();
+        final Job job = info.getJob();
         final JobExecutionDTO jobInfoDTO = new JobExecutionDTO();
-        jobInfoDTO.setDescription(jobEntity.getDescription());
-        jobInfoDTO.setCompleteTime(jobEntity.getCompleteTime());
-        jobInfoDTO.setStartTime(jobEntity.getStartTime());
-        jobInfoDTO.setErrorMessage(jobEntity.getErrorMessage());
-        jobInfoDTO.setState(jobEntity.getState());
+        jobInfoDTO.setDescription(job.getDescription());
+        jobInfoDTO.setCompleteTime(job.getCompleteTime());
+        jobInfoDTO.setStartTime(job.getStartTime());
+        jobInfoDTO.setErrorMessage(job.getErrorMessage());
+        jobInfoDTO.setState(job.getState());
         jobInfoDTO.setProgress(new Progress(info.getProgress()));
-        if (jobEntity.getId() != null) { // TODO MVR the id should not be null here
+        // TODO MVR with the latest changes the ID is alwways null :D
+        if (job.getId() != null) { // TODO MVR the id should not be null here
             jobInfoDTO.setId(jobInfoDTO.getId());
         }
         return jobInfoDTO;

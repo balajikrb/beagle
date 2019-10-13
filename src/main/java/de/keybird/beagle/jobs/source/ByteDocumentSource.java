@@ -16,7 +16,7 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.api.sources.strategy;
+package de.keybird.beagle.jobs.source;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,33 +25,35 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.Lists;
 
+import de.keybird.beagle.api.DocumentSource;
+import de.keybird.beagle.jobs.Job;
+import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
-import de.keybird.beagle.jobs.persistence.JobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
 
-public class ByteDocumentSourceStrategy implements DocumentSourceStrategy {
+public class ByteDocumentSource implements DocumentSource {
 
     private final Supplier<byte[]> byteSupplier;
     private final Supplier<String> nameSupplier;
 
-    public ByteDocumentSourceStrategy(Supplier<byte[]> byteSupplier, Supplier<String> nameSupplier) {
+    public ByteDocumentSource(Supplier<String> nameSupplier, Supplier<byte[]> byteSupplier) {
         this.byteSupplier = Objects.requireNonNull(byteSupplier);
         this.nameSupplier = Objects.requireNonNull(nameSupplier);
     }
 
     @Override
-    public List<DocumentEntry> getEntries(JobExecutionContext<? extends JobEntity> context) throws IOException {
+    public List<DocumentEntry> getEntries(JobExecutionContext<? extends Job> context) throws IOException {
         context.logEntry(LogLevel.Info,"Reading contents from InputStream");
         return Lists.newArrayList(
                 new DocumentEntry() {
                     @Override public String getName() { return nameSupplier.get(); }
                     @Override public byte[] getPayload() throws IOException { return byteSupplier.get(); }
+                    @Override public void delete() {}  // nothing to do
                 }
         );
     }
 
     @Override
-    public void cleanUp(DocumentEntry entry) {
-        // nothing to do
+    public String getDescription() {
+        return "SingleInMemory:" + nameSupplier.get();
     }
 }

@@ -18,38 +18,17 @@
 
 package de.keybird.beagle.api;
 
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Table;
+import java.io.IOException;
+import java.util.List;
 
-import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
+import de.keybird.beagle.jobs.source.DocumentEntry;
+import de.keybird.beagle.jobs.Job;
+import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
 /**
  * The source of the document, e.g. Inbox folder.
  */
-@Entity
-@Table(name="document_sources")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="type", discriminatorType = DiscriminatorType.STRING)
-public abstract class DocumentSource {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public abstract DocumentSourceStrategy getStrategy();
+public interface DocumentSource {
+    List<DocumentEntry> getEntries(JobExecutionContext<? extends Job> context) throws IOException;
+    String getDescription();
 }

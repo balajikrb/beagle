@@ -21,6 +21,7 @@ package de.keybird.beagle.jobs.execution;
 import static de.keybird.beagle.Utils.closeSilently;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -34,17 +35,17 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
 import de.keybird.beagle.api.Document;
+import de.keybird.beagle.api.DocumentSource;
 import de.keybird.beagle.api.DocumentState;
-import de.keybird.beagle.api.sources.strategy.DocumentEntry;
-import de.keybird.beagle.api.sources.strategy.DocumentSourceStrategy;
-import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.persistence.LogLevel;
+import de.keybird.beagle.jobs.DetectJob;
+import de.keybird.beagle.jobs.source.DocumentEntry;
+import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.services.PdfManager;
 
 @Service
 @Scope("prototype")
-public class DetectJobExecution implements JobExecution<DetectJobEntity> {
+public class DetectJobExecution implements JobExecution<DetectJob> {
 
     private final Logger logger = LoggerFactory.getLogger(DetectJobExecution.class);
 
@@ -53,42 +54,52 @@ public class DetectJobExecution implements JobExecution<DetectJobEntity> {
 
     // TODO MVR the file size should be checked and too big files should be rejected
     @Override
-    public void execute(JobExecutionContext<DetectJobEntity> context) throws ExecutionException {
-        final DocumentSourceStrategy documentSourceStrategy = context.getJobEntity().getDocumentSource().getStrategy();
-        try {
-            for (DocumentEntry entry : documentSourceStrategy.getEntries(context)) {
-                context.logEntry(LogLevel.Info,"Handling document '{}'", entry.toString());
-
+    public void execute(JobExecutionContext<DetectJob> context) throws ExecutionException {
+        final List<DocumentEntry> entries = getEntries(context);
+        for (DocumentEntry entry : entries) {
+            try {
+                context.logEntry(LogLevel.Info, "Handling document '{}'", entry.toString());
                 final Document theDocument = new Document();
                 theDocument.setState(DocumentState.New);
                 theDocument.setFilename(entry.getName());
 
-                try {
-                    final byte[] payload = entry.getPayload();
-                    theDocument.setPayload(payload);
+                final byte[] payload = entry.getPayload();
+                theDocument.setPayload(payload);
 
-                    final HashCode hashCode = Hashing.sha256().hashBytes(payload);
-                    theDocument.setChecksum(hashCode.toString());
+                final HashCode hashCode = Hashing.sha256().hashBytes(payload);
+                theDocument.setChecksum(hashCode.toString());
 
-                    final PDDocument pdfDocument = PdfManager.load(payload);
-                    theDocument.setPageCount(pdfDocument.getPages().getCount());
-                    closeSilently(pdfDocument);
+                final PDDocument pdfDocument = PdfManager.load(payload);
+                theDocument.setPageCount(pdfDocument.getPages().getCount());
+                closeSilently(pdfDocument);
 
-                    // Ensure it is not already persisted
-                    if (documentRepository.findByChecksum(hashCode.toString()) != null) {
-                        context.logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Document already exists.", entry);
-                    } else {
-                        context.logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
-                        documentRepository.save(theDocument);
+                // Ensure it is not already persisted
+                if (documentRepository.findByChecksum(hashCode.toString()) != null) {
+                    context.logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Document already exists.", entry);
+                } else if (payload == null || payload.length == 0) {
+                    context.logEntry(LogLevel.Warn, "Document '{}' was rejected. Reason: Payload is null or empty.", entry);
+                } else {
+                    context.logEntry(LogLevel.Success, "Document '{}' was accepted.", entry);
+                    documentRepository.save(theDocument);
+
+                    // Cleanup
+                    try {
+                        entry.delete();
+                    } catch (IOException ex) {
+                        context.logEntry(LogLevel.Warn, "Document '{}' could not be deleted from source. Reason: {}", ex.getMessage(), ex);
                     }
-                } catch (IOException ex) {
-                    context.logEntry(LogLevel.Error, "Document '{}' was rejected. Reason: {}", entry, ex.getMessage());
                 }
-                if (theDocument.getPayload() != null) {
-                    context.logEntry(LogLevel.Info,"Deleting file '{}'", entry);
-                    documentSourceStrategy.cleanUp(entry);
-                }
+            } catch (IOException ex) {
+                context.logEntry(LogLevel.Error, "Document '{}' was rejected. Reason: {}", entry, ex.getMessage());
             }
+        }
+    }
+
+    private List<DocumentEntry> getEntries(JobExecutionContext<DetectJob> context) throws ExecutionException {
+        try {
+            final DocumentSource source = context.getJob().getDocumentSource();
+            final List<DocumentEntry> entries = source.getEntries(context);
+            return entries;
         } catch (IOException e) {
             logger.error("Error while listing files: {}", e.getMessage(), e);
             throw new ExecutionException(e);
