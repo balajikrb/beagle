@@ -21,8 +21,8 @@ package de.keybird.beagle.jobs.execution;
 import java.nio.file.Path;
 
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
-import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.jobs.LogLevel;
+import de.keybird.beagle.jobs.Job;
 
 public interface JobExecutionContext<J extends Job> extends JobExecutionInfo<J> {
 

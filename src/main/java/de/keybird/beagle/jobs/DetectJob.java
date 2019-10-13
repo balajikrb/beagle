@@ -16,36 +16,40 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs;
 
-import org.springframework.data.domain.Pageable;
+import java.util.Objects;
 
-import de.keybird.beagle.jobs.JobVisitor;
+import de.keybird.beagle.api.DocumentSource;
+import de.keybird.beagle.jobs.source.InboxFileSystemSource;
 
-public class IndexJob extends Job {
+public class DetectJob extends Job {
 
-    private Pageable page;
+    private final DocumentSource source;
 
-    public IndexJob(Pageable page) {
-        this.page = page;
+    public DetectJob() {
+        this(new InboxFileSystemSource());
+    }
+
+    public DetectJob(DocumentSource source) {
+        this.source = Objects.requireNonNull(source);
     }
 
     @Override
     public JobType getType() {
-        return JobType.Index;
+        return JobType.Detect;
     }
 
-    @Override
     public String getDescription() {
-        return "Indexing pages";
+        return "Detecting new files";
+    }
+
+    public DocumentSource getDocumentSource() {
+        return source;
     }
 
     @Override
     public <T> T accept(JobVisitor<T> visitor) {
         return visitor.visit(this);
-    }
-
-    public Pageable getPage() {
-        return page;
     }
 }

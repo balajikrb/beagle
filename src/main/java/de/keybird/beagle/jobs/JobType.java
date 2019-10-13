@@ -16,24 +16,11 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs;
 
-import de.keybird.beagle.jobs.JobVisitor;
-
-public class ArchiveJob extends Job {
-
-    @Override
-    public JobType getType() {
-        return JobType.Archive;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Archiving indexed pages";
-    }
-
-    @Override
-    public <T> T accept(JobVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+public enum JobType {
+    Detect,
+    Import,
+    Index,
+    Archive
 }

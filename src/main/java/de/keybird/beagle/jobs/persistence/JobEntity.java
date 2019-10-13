@@ -40,8 +40,8 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.BatchSize;
 
-import de.keybird.beagle.jobs.xxxx.JobState;
-import de.keybird.beagle.jobs.xxxx.JobType;
+import de.keybird.beagle.jobs.JobState;
+import de.keybird.beagle.jobs.JobType;
 
 @Entity
 @Table(name="jobs")

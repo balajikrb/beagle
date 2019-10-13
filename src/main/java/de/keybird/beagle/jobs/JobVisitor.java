@@ -18,11 +18,6 @@
 
 package de.keybird.beagle.jobs;
 
-import de.keybird.beagle.jobs.xxxx.ArchiveJob;
-import de.keybird.beagle.jobs.xxxx.DetectJob;
-import de.keybird.beagle.jobs.xxxx.ImportJob;
-import de.keybird.beagle.jobs.xxxx.IndexJob;
-
 public interface JobVisitor<T> {
 
     T visit(DetectJob job);

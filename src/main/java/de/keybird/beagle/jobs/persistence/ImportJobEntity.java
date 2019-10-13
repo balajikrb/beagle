@@ -26,7 +26,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
 import de.keybird.beagle.api.Document;
-import de.keybird.beagle.jobs.xxxx.JobType;
+import de.keybird.beagle.jobs.JobType;
 
 @Entity
 @DiscriminatorValue("import")

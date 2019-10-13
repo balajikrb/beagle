@@ -42,9 +42,9 @@ import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
-import de.keybird.beagle.jobs.xxxx.JobState;
+import de.keybird.beagle.jobs.JobState;
 import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
+import de.keybird.beagle.jobs.LogLevel;
 
 // See https://github.com/keybird/beagle/issues/5
 @RunWith(SpringRunner.class)

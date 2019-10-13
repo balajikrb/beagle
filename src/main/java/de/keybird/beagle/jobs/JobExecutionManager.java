@@ -51,12 +51,6 @@ import de.keybird.beagle.events.JobExecutionFinishedEvent;
 import de.keybird.beagle.jobs.execution.JobExecution;
 import de.keybird.beagle.jobs.execution.JobExecutionInfo;
 import de.keybird.beagle.jobs.execution.JobRunner;
-import de.keybird.beagle.jobs.xxxx.JobState;
-import de.keybird.beagle.jobs.xxxx.JobType;
-import de.keybird.beagle.jobs.xxxx.Job;
-import de.keybird.beagle.repository.DocumentRepository;
-import de.keybird.beagle.repository.JobRepository;
-import de.keybird.beagle.services.JobService;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)

@@ -29,8 +29,8 @@ import org.springframework.stereotype.Service;
 
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
-import de.keybird.beagle.jobs.xxxx.ArchiveJob;
+import de.keybird.beagle.jobs.LogLevel;
+import de.keybird.beagle.jobs.ArchiveJob;
 import de.keybird.beagle.repository.PageRepository;
 
 // Sync database with filesystem

@@ -16,16 +16,13 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import com.google.common.collect.Lists;
-
-import de.keybird.beagle.jobs.JobVisitor;
-import de.keybird.beagle.jobs.Progress;
 
 public abstract class Job {
 
@@ -95,11 +92,6 @@ public abstract class Job {
         getProgress().setIndeterminate(false);
         getProgress().setProgress(currentProgress);
         getProgress().setTotalProgress(totalProgress);
-//        getEventBus().post(new JobExecutionProgressChangedEvent(jobEntity, oldProgress, getProgress()));
-    }
-
-    public void updateProgress(int currentProgress) {
-        updateProgress(currentProgress, getProgress().getTotalProgress());
     }
 
     public Progress getProgress() {

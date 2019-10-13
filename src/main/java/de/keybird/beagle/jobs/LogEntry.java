@@ -16,11 +16,30 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs;
 
-public enum JobType {
-    Detect,
-    Import,
-    Index,
-    Archive
+import java.util.Date;
+import java.util.Objects;
+
+public class LogEntry {
+    private Date date = new Date();
+    private final LogLevel logLevel;
+    private final String message;
+
+    public LogEntry(LogLevel logLevel, String message) {
+        this.logLevel = Objects.requireNonNull(logLevel);
+        this.message = Objects.requireNonNull(message);
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public LogLevel getLogLevel() {
+        return logLevel;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

@@ -18,7 +18,7 @@
 
 package de.keybird.beagle.jobs.execution;
 
-import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.jobs.Job;
 import de.keybird.beagle.jobs.Progress;
 
 public interface JobExecutionInfo<J extends Job> {

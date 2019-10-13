@@ -40,7 +40,7 @@ import de.keybird.beagle.TestConfig;
 import de.keybird.beagle.WorkingDirectory;
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
-import de.keybird.beagle.jobs.xxxx.DetectJob;
+import de.keybird.beagle.jobs.DetectJob;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.repository.JobRepository;
 

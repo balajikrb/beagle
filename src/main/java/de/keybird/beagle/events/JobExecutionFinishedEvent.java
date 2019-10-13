@@ -21,7 +21,7 @@ package de.keybird.beagle.events;
 import java.util.Objects;
 
 import de.keybird.beagle.jobs.JobResult;
-import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.jobs.Job;
 
 public class JobExecutionFinishedEvent extends JobExecutionEvent {
     private final JobResult jobResult;

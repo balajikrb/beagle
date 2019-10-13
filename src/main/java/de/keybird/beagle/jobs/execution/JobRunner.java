@@ -50,14 +50,14 @@ import de.keybird.beagle.jobs.persistence.ImportJobEntity;
 import de.keybird.beagle.jobs.persistence.IndexJobEntity;
 import de.keybird.beagle.jobs.persistence.JobEntity;
 import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.xxxx.ArchiveJob;
-import de.keybird.beagle.jobs.xxxx.DetectJob;
-import de.keybird.beagle.jobs.xxxx.ImportJob;
-import de.keybird.beagle.jobs.xxxx.IndexJob;
-import de.keybird.beagle.jobs.xxxx.Job;
-import de.keybird.beagle.jobs.xxxx.JobState;
-import de.keybird.beagle.jobs.xxxx.LogEntry;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
+import de.keybird.beagle.jobs.ArchiveJob;
+import de.keybird.beagle.jobs.DetectJob;
+import de.keybird.beagle.jobs.ImportJob;
+import de.keybird.beagle.jobs.IndexJob;
+import de.keybird.beagle.jobs.Job;
+import de.keybird.beagle.jobs.JobState;
+import de.keybird.beagle.jobs.LogEntry;
+import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.repository.JobRepository;
 
 // TODO MVR es wird jetzt zwar geloggt, welche dokumente usw. abgewiesen wurden, aber ein übergeordneter status für die dokumente, pages fehlt noch

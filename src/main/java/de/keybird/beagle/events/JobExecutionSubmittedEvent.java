@@ -18,7 +18,7 @@
 
 package de.keybird.beagle.events;
 
-import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.jobs.Job;
 
 public class JobExecutionSubmittedEvent extends JobExecutionEvent {
 

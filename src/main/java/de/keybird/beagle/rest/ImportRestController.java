@@ -38,8 +38,8 @@ import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentSource;
 import de.keybird.beagle.jobs.JobExecutionFactory;
 import de.keybird.beagle.jobs.JobExecutionManager;
-import de.keybird.beagle.jobs.xxxx.ByteDocumentSource;
-import de.keybird.beagle.jobs.xxxx.DetectJob;
+import de.keybird.beagle.jobs.source.ByteDocumentSource;
+import de.keybird.beagle.jobs.DetectJob;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.rest.model.DocumentDTO;
 

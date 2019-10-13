@@ -21,7 +21,7 @@ package de.keybird.beagle.jobs.persistence;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import de.keybird.beagle.jobs.xxxx.JobType;
+import de.keybird.beagle.jobs.JobType;
 
 @Entity
 @DiscriminatorValue("archive")

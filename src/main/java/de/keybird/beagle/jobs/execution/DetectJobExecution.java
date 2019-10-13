@@ -37,9 +37,9 @@ import com.google.common.hash.Hashing;
 import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentSource;
 import de.keybird.beagle.api.DocumentState;
-import de.keybird.beagle.jobs.xxxx.DetectJob;
-import de.keybird.beagle.jobs.xxxx.DocumentEntry;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
+import de.keybird.beagle.jobs.DetectJob;
+import de.keybird.beagle.jobs.source.DocumentEntry;
+import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.services.PdfManager;
 

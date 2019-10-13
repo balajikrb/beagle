@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import de.keybird.beagle.BeagleTest;
 import de.keybird.beagle.jobs.persistence.DetectJobEntity;
 import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
+import de.keybird.beagle.jobs.LogLevel;
 
 @BeagleTest
 @RunWith(SpringRunner.class)

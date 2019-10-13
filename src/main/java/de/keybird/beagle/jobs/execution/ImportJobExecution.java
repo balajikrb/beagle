@@ -43,8 +43,8 @@ import de.keybird.beagle.api.Document;
 import de.keybird.beagle.api.DocumentState;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
-import de.keybird.beagle.jobs.xxxx.ImportJob;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
+import de.keybird.beagle.jobs.ImportJob;
+import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.repository.DocumentRepository;
 import de.keybird.beagle.services.PdfManager;
 

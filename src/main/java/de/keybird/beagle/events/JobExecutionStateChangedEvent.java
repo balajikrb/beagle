@@ -20,8 +20,8 @@ package de.keybird.beagle.events;
 
 import java.util.Objects;
 
-import de.keybird.beagle.jobs.xxxx.JobState;
-import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.jobs.JobState;
+import de.keybird.beagle.jobs.Job;
 
 public class JobExecutionStateChangedEvent extends JobExecutionEvent {
 

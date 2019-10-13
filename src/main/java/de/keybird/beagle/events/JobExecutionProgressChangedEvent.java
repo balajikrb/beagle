@@ -19,7 +19,7 @@
 package de.keybird.beagle.events;
 
 import de.keybird.beagle.jobs.Progress;
-import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.jobs.Job;
 
 public class JobExecutionProgressChangedEvent extends JobExecutionEvent {
     private final Progress oldProgress;

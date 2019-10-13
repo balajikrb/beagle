@@ -21,8 +21,8 @@ package de.keybird.beagle.api;
 import java.io.IOException;
 import java.util.List;
 
-import de.keybird.beagle.jobs.xxxx.DocumentEntry;
-import de.keybird.beagle.jobs.xxxx.Job;
+import de.keybird.beagle.jobs.source.DocumentEntry;
+import de.keybird.beagle.jobs.Job;
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
 /**

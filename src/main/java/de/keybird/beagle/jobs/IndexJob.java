@@ -16,29 +16,26 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs;
 
-import java.util.Objects;
+import org.springframework.data.domain.Pageable;
 
-import de.keybird.beagle.api.Document;
-import de.keybird.beagle.jobs.JobVisitor;
+public class IndexJob extends Job {
 
-public class ImportJob extends Job {
+    private Pageable page;
 
-    private final Document document;
-
-    public ImportJob(Document theDocument) {
-        this.document = Objects.requireNonNull(theDocument);
+    public IndexJob(Pageable page) {
+        this.page = page;
     }
 
     @Override
     public JobType getType() {
-        return JobType.Import;
+        return JobType.Index;
     }
 
     @Override
     public String getDescription() {
-        return String.format("Importing '%s'", getDocument().getFilename());
+        return "Indexing pages";
     }
 
     @Override
@@ -46,7 +43,7 @@ public class ImportJob extends Job {
         return visitor.visit(this);
     }
 
-    public Document getDocument() {
-        return document;
+    public Pageable getPage() {
+        return page;
     }
 }

@@ -16,7 +16,7 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs.source;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,6 +26,8 @@ import java.util.function.Supplier;
 import com.google.common.collect.Lists;
 
 import de.keybird.beagle.api.DocumentSource;
+import de.keybird.beagle.jobs.Job;
+import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.jobs.execution.JobExecutionContext;
 
 public class ByteDocumentSource implements DocumentSource {

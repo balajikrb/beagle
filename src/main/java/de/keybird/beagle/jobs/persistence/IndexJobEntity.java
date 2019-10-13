@@ -24,7 +24,7 @@ import javax.persistence.Transient;
 
 import org.springframework.data.domain.Pageable;
 
-import de.keybird.beagle.jobs.xxxx.JobType;
+import de.keybird.beagle.jobs.JobType;
 
 @Entity
 @DiscriminatorValue("index")

@@ -28,11 +28,6 @@ import de.keybird.beagle.jobs.execution.DetectJobExecution;
 import de.keybird.beagle.jobs.execution.ImportJobExecution;
 import de.keybird.beagle.jobs.execution.IndexJobExecution;
 import de.keybird.beagle.jobs.execution.JobExecution;
-import de.keybird.beagle.jobs.xxxx.ArchiveJob;
-import de.keybird.beagle.jobs.xxxx.DetectJob;
-import de.keybird.beagle.jobs.xxxx.ImportJob;
-import de.keybird.beagle.jobs.xxxx.IndexJob;
-import de.keybird.beagle.jobs.xxxx.Job;
 
 @Service
 public class JobExecutionFactory implements JobVisitor<JobExecution> {

@@ -16,12 +16,22 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs;
 
-import java.io.IOException;
+public class ArchiveJob extends Job {
 
-public interface DocumentEntry {
-    String getName();
-    byte[] getPayload() throws IOException;
-    void delete() throws IOException;
+    @Override
+    public JobType getType() {
+        return JobType.Archive;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Archiving indexed pages";
+    }
+
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 }

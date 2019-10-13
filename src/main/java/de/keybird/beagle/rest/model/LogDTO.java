@@ -21,7 +21,7 @@ package de.keybird.beagle.rest.model;
 import java.util.Date;
 
 import de.keybird.beagle.jobs.persistence.LogEntity;
-import de.keybird.beagle.jobs.xxxx.LogLevel;
+import de.keybird.beagle.jobs.LogLevel;
 
 public class LogDTO {
     private Long id;

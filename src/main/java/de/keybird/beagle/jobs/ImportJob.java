@@ -16,30 +16,36 @@
  * along with Beagle. If not, see http://www.gnu.org/licenses/.
  */
 
-package de.keybird.beagle.jobs.xxxx;
+package de.keybird.beagle.jobs;
 
-import java.util.Date;
 import java.util.Objects;
 
-public class LogEntry {
-    private Date date = new Date();
-    private final LogLevel logLevel;
-    private final String message;
+import de.keybird.beagle.api.Document;
 
-    public LogEntry(LogLevel logLevel, String message) {
-        this.logLevel = Objects.requireNonNull(logLevel);
-        this.message = Objects.requireNonNull(message);
+public class ImportJob extends Job {
+
+    private final Document document;
+
+    public ImportJob(Document theDocument) {
+        this.document = Objects.requireNonNull(theDocument);
     }
 
-    public Date getDate() {
-        return date;
+    @Override
+    public JobType getType() {
+        return JobType.Import;
     }
 
-    public LogLevel getLogLevel() {
-        return logLevel;
+    @Override
+    public String getDescription() {
+        return String.format("Importing '%s'", getDocument().getFilename());
     }
 
-    public String getMessage() {
-        return message;
+    @Override
+    public <T> T accept(JobVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    public Document getDocument() {
+        return document;
     }
 }

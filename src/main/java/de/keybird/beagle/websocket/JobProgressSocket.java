@@ -30,7 +30,7 @@ import com.google.common.eventbus.Subscribe;
 import de.keybird.beagle.events.JobExecutionEvent;
 import de.keybird.beagle.jobs.JobExecutionManager;
 import de.keybird.beagle.jobs.execution.JobExecutionInfo;
-import de.keybird.beagle.jobs.xxxx.JobState;
+import de.keybird.beagle.jobs.JobState;
 import de.keybird.beagle.rest.JobRestController;
 import de.keybird.beagle.rest.model.JobExecutionDTO;
 
