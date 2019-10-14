@@ -81,10 +81,12 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
     public void execute(JobExecutionContext<IndexJob> context) {
         // Before we do anything, let's initialize the elastic backend
         try {
-            context.logEntry(LogLevel.Info, "Initializing elastic pipeline for attachments");
+            context.logEntry(LogLevel.Info, "Initializing elastic pipeline for attachments ...");
             new AttachmentPipelineInitializer(client).initialize();
+            context.logEntry(LogLevel.Success, "Initializing elastic pipeline for attachments was successful");
         } catch (IOException ex) {
             context.setErrorMessage(ex.getMessage());
+            context.logEntry(LogLevel.Success, "Initializing elastic pipeline for attachments failed. Reason: {}", ex.getMessage(), ex);
             return;
         }
 
