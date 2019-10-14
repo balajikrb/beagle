@@ -50,6 +50,7 @@ PUT _ingest/pipeline/attachment
 ```
 
 Quellen:
+
  * https://stackoverflow.com/questions/34857179/how-to-index-a-pdf-file-in-elasticsearch
  * https://stackoverflow.com/questions/37861279/how-to-index-a-pdf-file-in-elasticsearch-5-0-0-with-ingest-attachment-plugin?rq=1
 
