@@ -38,6 +38,7 @@ import com.google.gson.JsonObject;
 
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
+import de.keybird.beagle.elastic.AttachmentPipelineInitializer;
 import de.keybird.beagle.elastic.BulkResultWrapper;
 import de.keybird.beagle.elastic.FailedItem;
 import de.keybird.beagle.jobs.IndexJob;
@@ -55,7 +56,7 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexJobExecution.class);
 
-    private static final int[] SLEEP_TIME = new int[] { 5000, 5000, 5000, 5000 };
+    private static final int[] SLEEP_TIME = new int[] { 5000, 15000, 30000, 60000 };
 
     @Autowired
     private JestClient client;
@@ -65,6 +66,9 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
 
     @Autowired
     private TransactionOperations transactionTemplate;
+
+    @Autowired
+    private AttachmentPipelineInitializer pipelineInitializer;
 
     @Value("${index.bulkSize}")
     private int bulkSize;
@@ -79,6 +83,14 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
     }
 
     public void execute(JobExecutionContext<IndexJob> context) {
+        // Before we do anything, let's initialize the elastic backend
+        try {
+            initialize(context, 0);
+        } catch (IOException ex) {
+            context.setErrorMessage(ex.getMessage());
+            return;
+        }
+
         final List<Long> importedPages = pageRepository.findByState(PageState.Imported, pageRequest).stream().map(p -> p.getId()).collect(Collectors.toList());
         final int totalSize = importedPages.size() == pageRequest.getPageSize() ? pageRequest.getPageSize() : importedPages.size();
         context.updateProgress(0, totalSize);
@@ -113,6 +125,31 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
             }
         } finally {
             context.updateProgress(totalSize);
+        }
+    }
+
+    private void initialize(JobExecutionContext<IndexJob> context, int retry) throws IOException {
+        try {
+            context.logEntry(LogLevel.Info, "Initializing elastic pipeline for attachments");
+            pipelineInitializer.initialize();
+        } catch (Exception ex) {
+            if (retry == retryCount) {
+                throw ex;
+            }
+            LOG.info("An error occurred while initializing the pipeline for attachments: {}.", ex.getMessage());
+
+            // Wait a bit, before actually retrying
+            try {
+                long sleepTime = getSleepTime(retry);
+                if (sleepTime > 0) {
+                    LOG.info("Waiting {} ms before retrying", sleepTime);
+                    Thread.sleep(sleepTime);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            LOG.info("Retrying now ...");
+            initialize(context, retry + 1);
         }
     }
 
