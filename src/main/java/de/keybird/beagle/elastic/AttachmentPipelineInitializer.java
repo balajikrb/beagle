@@ -19,13 +19,13 @@
 package de.keybird.beagle.elastic;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.opennms.features.jest.client.executors.LimitedRetriesRequestExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonObject;
 
@@ -33,19 +33,18 @@ import io.searchbox.action.Ingest;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 
-@Service
 public class AttachmentPipelineInitializer {
 
     private final Logger LOG = LoggerFactory.getLogger(AttachmentPipelineInitializer.class);
 
-    @Autowired
-    private JestClient jestClient;
+    private final JestClient jestClient;
 
     private final JSONObject config;
 
-    public AttachmentPipelineInitializer() throws IOException {
+    public AttachmentPipelineInitializer(JestClient jestClient) throws IOException {
         final JSONTokener tokener = new JSONTokener(getClass().getResourceAsStream("/elastic/pipeline-attachment-config.json"));
         this.config = new JSONObject(tokener);
+        this.jestClient = Objects.requireNonNull(jestClient);
     }
 
     public void initialize() throws IOException {
@@ -59,7 +58,7 @@ public class AttachmentPipelineInitializer {
 
     public boolean isInitialized() throws IOException {
         final Ingest ingest = new Ingest.PipelineBuilder().build();
-        final JestResult result = jestClient.execute(ingest);
+        final JestResult result = new LimitedRetriesRequestExecutor(5000, 10).execute(jestClient, ingest);
         final JsonObject received = result.getJsonObject();
         if (received.has("attachment")) {
             final JSONTokener tokener = new JSONTokener(received.getAsJsonObject("attachment").toString());
@@ -74,7 +73,7 @@ public class AttachmentPipelineInitializer {
                 .withMethod("PUT")
                 .withName("attachment")
                 .build();
-        final JestResult result = jestClient.execute(ingest);
+        final JestResult result = new LimitedRetriesRequestExecutor(5000, 12).execute(jestClient, ingest);
         if (!result.isSucceeded()) {
             // TODO MVR extract message from json
             throw new IllegalStateException("Pipeline was not properly initialized: " + result.getErrorMessage());

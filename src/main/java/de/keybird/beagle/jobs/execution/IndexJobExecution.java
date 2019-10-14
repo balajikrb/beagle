@@ -19,11 +19,15 @@
 package de.keybird.beagle.jobs.execution;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.opennms.features.jest.client.bulk.BulkRequest;
+import org.opennms.features.jest.client.bulk.BulkResultWrapper;
+import org.opennms.features.jest.client.bulk.BulkWrapper;
+import org.opennms.features.jest.client.bulk.FailedItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +43,11 @@ import com.google.gson.JsonObject;
 import de.keybird.beagle.api.Page;
 import de.keybird.beagle.api.PageState;
 import de.keybird.beagle.elastic.AttachmentPipelineInitializer;
-import de.keybird.beagle.elastic.BulkResultWrapper;
-import de.keybird.beagle.elastic.FailedItem;
 import de.keybird.beagle.jobs.IndexJob;
 import de.keybird.beagle.jobs.LogLevel;
 import de.keybird.beagle.repository.PageRepository;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Bulk;
-import io.searchbox.core.BulkResult;
 import io.searchbox.core.Index;
 
 // Syncs database content with elastic
@@ -56,8 +57,6 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexJobExecution.class);
 
-    private static final int[] SLEEP_TIME = new int[] { 5000, 15000, 30000, 60000 };
-
     @Autowired
     private JestClient client;
 
@@ -66,9 +65,6 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
 
     @Autowired
     private TransactionOperations transactionTemplate;
-
-    @Autowired
-    private AttachmentPipelineInitializer pipelineInitializer;
 
     @Value("${index.bulkSize}")
     private int bulkSize;
@@ -85,7 +81,8 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
     public void execute(JobExecutionContext<IndexJob> context) {
         // Before we do anything, let's initialize the elastic backend
         try {
-            initialize(context, 0);
+            context.logEntry(LogLevel.Info, "Initializing elastic pipeline for attachments");
+            new AttachmentPipelineInitializer(client).initialize();
         } catch (IOException ex) {
             context.setErrorMessage(ex.getMessage());
             return;
@@ -128,38 +125,32 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
         }
     }
 
-    private void initialize(JobExecutionContext<IndexJob> context, int retry) throws IOException {
-        try {
-            context.logEntry(LogLevel.Info, "Initializing elastic pipeline for attachments");
-            pipelineInitializer.initialize();
-        } catch (Exception ex) {
-            if (retry == retryCount) {
-                throw ex;
-            }
-            LOG.info("An error occurred while initializing the pipeline for attachments: {}.", ex.getMessage());
-
-            // Wait a bit, before actually retrying
-            try {
-                long sleepTime = getSleepTime(retry);
-                if (sleepTime > 0) {
-                    LOG.info("Waiting {} ms before retrying", sleepTime);
-                    Thread.sleep(sleepTime);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            LOG.info("Retrying now ...");
-            initialize(context, retry + 1);
-        }
-    }
-
     private void indexBatch(JobExecutionContext<IndexJob> context, List<Page> partition, int offset, int batchSize) {
         context.logEntry(LogLevel.Info, "{}/{}", offset == 0 ? offset : offset + 1, offset + batchSize);
 
         try {
-            final BulkResultWrapper bulkResultWrapper = executeBulk(partition, 0);
-            final List<FailedItem<Page>> failedItems = bulkResultWrapper.isSucceeded() ? Collections.emptyList() : bulkResultWrapper.getFailedItems(partition);
-            final List<Page> successPages = bulkResultWrapper.isSucceeded() ? partition : bulkResultWrapper.getSuccessItems(partition);
+            final BulkRequest<Page> bulkRequest = new BulkRequest<>(client, partition, pages -> {
+                // Convert to actions
+                final List<Index> elasticActions = pages.stream()
+                        .map(eachPage -> {
+                            final byte[] base64bytes = Base64.getEncoder().encode(eachPage.getPayload());
+                            final JsonObject json = new JsonObject();
+                            json.addProperty("data", new String(base64bytes));
+                            json.addProperty("id", eachPage.getId()); // we add the id to ensure it is referencable
+
+                            final Index action = new Index.Builder(json)
+                                    .index("documents")
+                                    .type("pages")
+                                    .setParameter("pipeline", "attachment")
+                                    .build();
+                            return action;
+                        }).collect(Collectors.toList());
+                // TODO MVR add test to verify the pipelaine actually indexes the data
+                return new BulkWrapper(new Bulk.Builder().addAction(elasticActions).setParameter("pipeline", "attachment"));
+            }, retryCount);
+            final BulkResultWrapper bulkResultWrapper = bulkRequest.execute();
+            final List<FailedItem<Page>> failedItems = bulkResultWrapper.isSucceeded() ? new ArrayList<>() : bulkResultWrapper.getFailedItems();
+            final List<Page> successPages = bulkResultWrapper.isSucceeded() ? partition : extractSuccessItems(bulkResultWrapper, partition);
             failedItems.forEach(eachItem -> {
                 Page page = eachItem.getItem();
                 page.setErrorMessage(eachItem.getCause().getMessage());
@@ -183,76 +174,9 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
         }
     }
 
-    private BulkResultWrapper executeBulk(List<Page> pages, int retry) throws IOException {
-        // Convert to actions
-        final List<Index> elasticActions = pages.stream()
-                .map(eachPage -> {
-                    final byte[] base64bytes = Base64.getEncoder().encode(eachPage.getPayload());
-                    final JsonObject json = new JsonObject();
-                    json.addProperty("data", new String(base64bytes));
-                    json.addProperty("id", eachPage.getId()); // we add the id to ensure it is referencable
-
-                    final Index action = new Index.Builder(json)
-                            .index("documents")
-                            .type("pages")
-                            .setParameter("pipeline", "attachment")
-                            .build();
-                    return action;
-                }).collect(Collectors.toList());
-        // TODO MVR write test for this
-        Bulk bulk = new Bulk.Builder().addAction(elasticActions).setParameter("pipeline", "attachment").build();
-        try {
-            BulkResult bulkResult = client.execute(bulk);
-            BulkResultWrapper bulkResultWrapper = new BulkResultWrapper(bulkResult);
-            if (!bulkResultWrapper.isSucceeded()) {
-                if (retry == retryCount) { // Bail
-                    return bulkResultWrapper;
-                }
-                final List<FailedItem<Page>> failedItems = bulkResultWrapper.getFailedItems(pages);
-                final List<Page> failedPages = getFailedPages(failedItems);
-
-                // free some memory before retrying
-                elasticActions.clear();
-                return retry(failedPages, retry + 1, bulkResultWrapper.getErrorMessage());
-            }
-            return bulkResultWrapper;
-        } catch (IOException ex) {
-            if (retry == retryCount) {
-                throw ex;
-            }
-            // free some memory
-            bulk = null;
-            elasticActions.clear();
-            return retry(pages, retry + 1, ex.getMessage());
-        }
-    }
-
-    private BulkResultWrapper retry(List<Page> pages, int retry, String errorMessage) throws IOException {
-        LOG.info("An error occurred while executing the bulk request: {}.", errorMessage);
-        // Wait a bit, before actually retrying
-        try {
-            long sleepTime = getSleepTime(retry);
-            if (sleepTime > 0) {
-                LOG.info("Waiting {} ms before retrying", sleepTime);
-                Thread.sleep(sleepTime);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        LOG.info("Retrying now ...");
-        return executeBulk(pages, retry);
-    }
-
-    private List<Page> getFailedPages(List<FailedItem<Page>> failedItems) {
-        final List<Page> failedPages = failedItems.stream().map(item -> item.getItem()).collect(Collectors.toList());
-        return failedPages;
-    }
-
-    private long getSleepTime(int retry) {
-        if (retry == 0) return 0;
-        if ((retry - 1) > SLEEP_TIME.length - 1) {
-            return SLEEP_TIME[SLEEP_TIME.length - 1];
-        }
-        return SLEEP_TIME[retry - 1];
+    private static List<Page> extractSuccessItems(BulkResultWrapper<Page> resultWrapper, List<Page> allPages) {
+        final List<Page> successPages = Lists.newArrayList(allPages);
+        successPages.removeAll(resultWrapper.getFailedDocuments());
+        return successPages;
     }
 }
