@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.opennms.features.jest.client.executors.LimitedRetriesRequestExecutor;
+import org.opennms.plugins.elasticsearch.rest.executors.LimitedRetriesRequestExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

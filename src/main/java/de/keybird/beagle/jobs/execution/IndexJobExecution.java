@@ -24,10 +24,10 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.opennms.features.jest.client.bulk.BulkRequest;
-import org.opennms.features.jest.client.bulk.BulkResultWrapper;
-import org.opennms.features.jest.client.bulk.BulkWrapper;
-import org.opennms.features.jest.client.bulk.FailedItem;
+import org.opennms.plugins.elasticsearch.rest.bulk.BulkRequest;
+import org.opennms.plugins.elasticsearch.rest.bulk.BulkResultWrapper;
+import org.opennms.plugins.elasticsearch.rest.bulk.BulkWrapper;
+import org.opennms.plugins.elasticsearch.rest.bulk.FailedItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

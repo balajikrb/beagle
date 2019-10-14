@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.opennms.features.jest</groupId>
 			<artifactId>org.opennms.features.jest.client</artifactId>
-			<version>25.0.0-SNAPSHOT</version> <!-- TODO MVR use repository of opennms and released version -->
+			<version>25.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
@@ -262,4 +262,13 @@
 			</build>
 		</profile>
 	</profiles>
+	<repositories>
+		<repository>
+			<snapshots><enabled>false</enabled></snapshots>
+			<releases><enabled>true</enabled></releases>
+			<id>opennms-repo</id>
+			<name>OpenNMS Repository</name>
+			<url>http://maven.opennms.org/content/groups/opennms.org-release</url>
+		</repository>
+	</repositories>
 </project>
