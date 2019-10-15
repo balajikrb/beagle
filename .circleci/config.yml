@@ -45,7 +45,7 @@ jobs:
       # TODO MVR find version automatically from pom.xml
       - run: |
             docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-            export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_SHA1}
+            export DOCKERHUB_TAG=${CIRCLE_BRANCH//\//-}-${CIRCLE_SHA1}
             case "${CIRCLE_BRANCH}" in
                 master)
                   echo "Building docker image with tag ${DOCKERHUB_TAG} and latest."
