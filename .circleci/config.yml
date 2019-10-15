@@ -76,7 +76,7 @@ jobs:
 
       # Startup application
       - run: |
-          export DOCKERHUB_TAG=${CIRCLE_BRANCH/\//-}-${CIRCLE_SHA1}
+          export DOCKERHUB_TAG=${CIRCLE_BRANCH//\//-}-${CIRCLE_SHA1}
 
           # Override settings for e2e testing
           cp .circleci/docker-compose.override.yml ./
