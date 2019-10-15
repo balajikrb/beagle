@@ -14,22 +14,23 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: beagle-repository-{{ checksum "pom.xml" }}
+          keys:
+            - beagle-repository-{{ checksum "pom.xml" }}
+            - beagle-repository-
 
-      - run: mvn dependency:go-offline
+      - run:
+          name: Remove Beagle artifacts from Maven Repository
+          command: rm -rf ~/.m2/repository/de/keybird
+
+      - run: mvn validate
+      - run: mvn test-compile
+      - run: mvn verify
+      - run: mvn package -DskipTests
 
       - save_cache:
           paths:
             - ~/.m2
           key: beagle-repository-{{ checksum "pom.xml" }}
-
-      - run: mvn validate
-
-      - run: mvn test-compile
-
-      - run: mvn verify
-
-      - run: mvn package -DskipTests
 
       - store_test_results:
           path: target/surefire-reports
