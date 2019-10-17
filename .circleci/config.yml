@@ -69,6 +69,8 @@ jobs:
     steps:
       - checkout
 
+      - run: mkdir -p ~/.m2/repository
+
       - restore_cache:
           keys:
             - beagle-repository-e2e-v2-{{ checksum "pom.xml" }}
