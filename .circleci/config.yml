@@ -15,8 +15,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - beagle-repository-{{ checksum "pom.xml" }}
-            - beagle-repository-
+            - beagle-repository-v2-{{ checksum "pom.xml" }}
+            - beagle-repository-v2
 
       - run:
           name: Remove Beagle artifacts from Maven Repository
@@ -30,7 +30,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: beagle-repository-{{ checksum "pom.xml" }}
+          key: beagle-repository-v2-{{ checksum "pom.xml" }}
 
       - store_test_results:
           path: target/surefire-reports
@@ -70,7 +70,9 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: beagle-repository-{{ checksum "pom.xml" }}
+          keys:
+            - beagle-repository-v2-{{ checksum "pom.xml" }}
+            - beagle-repository-v2
 
       # enable docker in docker
       - setup_remote_docker
