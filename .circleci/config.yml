@@ -71,8 +71,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - beagle-repository-v2-{{ checksum "pom.xml" }}
-            - beagle-repository-v2
+            - beagle-repository-e2e-v2-{{ checksum "pom.xml" }}
+            - beagle-repository-e2e-v2
 
       # enable docker in docker
       - setup_remote_docker
@@ -110,6 +110,12 @@ jobs:
             docker cp source:/repo/target/screenshots target/e2e || exit 0
             docker cp source:/repo/target/surefire-reports target/surefire-reports || exit 0
           when: always
+
+      # When e2e tests are running additional dependencies are downloaded, so we save them here
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: beagle-repository-e2e-v2-{{ checksum "pom.xml" }}
 
       # Finally collect artifacts
       - store_test_results:
