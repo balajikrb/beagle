@@ -69,12 +69,10 @@ jobs:
     steps:
       - checkout
 
-      - run: mkdir -p ~/.m2/repository
-
       - restore_cache:
           keys:
-            - beagle-repository-e2e-v2-{{ checksum "pom.xml" }}
-            - beagle-repository-e2e-v2
+            - beagle-repository-v2-{{ checksum "pom.xml" }}
+            - beagle-repository-v2
 
       # enable docker in docker
       - setup_remote_docker
@@ -103,7 +101,7 @@ jobs:
 
       # Run e2e tests
       - run: |
-          docker run --network container:beagle -v ~/.m2/repository:/root/.m2/repository --volumes-from source -w /repo keybird/beagle-e2e:latest .circleci/e2e.sh
+          docker run --network container:beagle --volumes-from source -w /repo keybird/beagle-e2e:latest .circleci/e2e.sh
 
       # Copy test results back
       - run:
