@@ -27,6 +27,15 @@ describe('Beagle Tests', function() {
         element(by.name("loginBtn")).click();
     };
 
+    describe('Login', function() {
+        it('is required', function() {
+            browser.get(browser.baseUrl + "#!/jobs");
+
+            expect(element(by.xpath("//h2")).getText()).toContain("Project Beagle");
+            expect(element(by.id("session_expired")).getText()).toContain("session expired");
+        });
+    });
+
     describe('login page', function() {
 
         beforeEach(function() {

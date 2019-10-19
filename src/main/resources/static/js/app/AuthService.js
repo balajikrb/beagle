@@ -21,6 +21,7 @@ angular.module('beagleApp')
     .factory('AuthService',
         ['$rootScope', '$http', '$state', function($rootScope, $http, $state) {
             return {
+                authenticating: false,
                 authenticated: false,
                 profile: {},
 
@@ -30,10 +31,12 @@ angular.module('beagleApp')
                     if (credentials) {
                         headers['authorization'] = "Basic " + btoa(credentials.email + ":" + credentials.password)
                     }
+                    self.authenticating = true;
 
                     $http.get('user', {headers : headers})
                         .then(
                             function(response) {
+                                self.authenticating = false;
                                 if (response.data && response.data.id) {
                                     self.profile = response.data;
                                     self.authenticated = true;
@@ -49,16 +52,15 @@ angular.module('beagleApp')
                                     self.profile = {};
                                     self.authenticated = false;
                                 }
-                                callback && callback();
+                                if (callback) {
+                                    callback();
+                                }
                             },
                             function() {
+                                self.authenticating = false;
                                 self.authenticated = false;
-                                callback && callback();
-                                // there is no callback, but authentication failed, this probably means we tried instantiating
-                                // the application, but don't have authorization. Forward to login page
-                                // TODO MVR there must be a more elegant way of doing authorization, thatn what we are currently doing
-                                if (!callback) {
-                                    $state.go("login");
+                                if (callback) {
+                                    callback();
                                 }
                             }
                         );
