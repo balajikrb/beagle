@@ -2,10 +2,10 @@
     <div class="container pt-5">
         <div class="login-form alert-secondary rounded">
             <h2>Project Beagle <small class="badge badge-secondary">Beta</small></h2>
-            <div class="alert alert-danger" ng-show="error" id="error">
+            <div class="alert alert-danger" ng-if="error" id="error">
                 There was a problem logging in. Please try again.
             </div>
-            <div class="alert alert-danger" ng-show="!error && session_expired">
+            <div class="alert alert-danger" ng-if="!error && session_expired" id="session_expired">
                 Your session expired. Please login.
             </div>
             <form class="form-horizontal" name="loginForm" role="form" ng-submit="login()" novalidate>

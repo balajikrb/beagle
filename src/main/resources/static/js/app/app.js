@@ -78,13 +78,18 @@ app.config(['$stateProvider', '$urlRouterProvider', '$httpProvider',
         $urlRouterProvider.otherwise('/login');
     }]);
 
-app.factory('InterceptorService',['$q', '$rootScope', function($q, $rootScope) {
+app.factory('InterceptorService',['$q', '$rootScope', '$injector', function($q, $rootScope, $injector) {
     return {
         responseError: function (rejection) {
-            console.log("Rejected", rejection);
             if (rejection.status === 401) {
-                console.error('Login Required', rejection, rejection.headers);
-                $rootScope.$emit('loginRequired');
+                // When a login request is ongoing and a 401 is returned, it is simply ignored
+                var AuthService = $injector.get("AuthService"); // Otherwise we have loop
+                if (AuthService.authenticating === true && (rejection.config.url.startsWith("user") || rejection.config.url.startsWith("/user"))) {
+                    // Login in progress. Do not interfere.
+                } else {
+                    console.error('Login Required', rejection, rejection.headers);
+                    $rootScope.$emit('loginRequired');
+                }
             }
             if (rejection.status === 403) {
                 $rootScope.$emit('permissionDenied');
@@ -96,7 +101,6 @@ app.factory('InterceptorService',['$q', '$rootScope', function($q, $rootScope) {
 
 app.run(['$rootScope', '$state', 'AuthService', function($rootScope, $state, AuthService) {
     $rootScope.$on('loginRequired', function() {
-        console.log("Login Required");
         $state.go("login", {session_expired: true}); // TODO MVR add ?session_expired or something like this
     });
 
