@@ -71,6 +71,26 @@ describe('Beagle Tests', function() {
         });
     });
 
+    describe('User details', function() {
+        var verifyUserDetails = function() {
+            var xpathExpression = "//a[@class='nav-link dropdown-toggle']";
+            expect(element(by.xpath(xpathExpression)).getText()).toContain("Test User");
+            expect(element(by.xpath(xpathExpression + "/img")).getAttribute("src")).toContain("/img/avatars/avatar3.jpg");
+        };
+
+        it('are properly loaded', function() {
+            doLogin();
+            verifyUserDetails();
+        });
+
+        it('are properly loaded on page relod', function() {
+            doLogin();
+            verifyUserDetails();
+            browser.refresh();
+            verifyUserDetails();
+        })
+    });
+
     describe('profile page', function() {
         it('should load', function() {
             doLogin();
