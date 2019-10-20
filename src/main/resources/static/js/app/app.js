@@ -101,10 +101,23 @@ app.factory('InterceptorService',['$q', '$rootScope', '$injector', function($q, 
 
 app.run(['$rootScope', '$state', 'AuthService', function($rootScope, $state, AuthService) {
     $rootScope.$on('loginRequired', function() {
-        $state.go("login", {session_expired: true}); // TODO MVR add ?session_expired or something like this
+        $state.go("login", { session_expired: true });
     });
 
     $rootScope.$on('permissionDenied', function() {
         console.log("Permission denied. Not yet implemented");
+    });
+
+    $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)  {
+        // In case the user is not authenticated (probably triggered by a page reload) and tries to access not the login page
+        // the user profile is attempted to load. If this fails, it means the cookie is no longer valid and the user needs to login
+        // However the user will then be redirected by the 401 interceptor instead
+        if (AuthService.authenticating !== true && AuthService.isAuthenticated() === false && toState.name !== 'login') {
+            AuthService.loadProfile({}, function() {
+                if (!AuthService.isAuthenticated()) {
+                    event.preventDefault();
+                }
+            });
+        }
     });
 }]);
