@@ -26,14 +26,27 @@ angular.module('beagleApp')
                 profile: {},
 
                 authenticate : function(credentials, callback) {
-                    var self = this;
-                    var headers = {};
+                    var config = {};
                     if (credentials) {
-                        headers['authorization'] = "Basic " + btoa(credentials.email + ":" + credentials.password)
+                        config.headers = { authorization : "Basic " + btoa(credentials.email + ":" + credentials.password) };
                     }
-                    self.authenticating = true;
-
-                    $http.get('user', {headers : headers})
+                    this.authenticating = true;
+                    this.loadProfile(config, callback);
+                },
+                logout: function() {
+                    var self = this;
+                    var handleLogout = function() {
+                        self.authenticated = false;
+                        $state.go("login");
+                    };
+                    $http.post('logout', {}).then(handleLogout);
+                },
+                isAuthenticated: function() {
+                    return this.authenticated === true;
+                },
+                loadProfile: function(config, callback) {
+                    var self = this;
+                    $http.get('user', config)
                         .then(
                             function(response) {
                                 self.authenticating = false;
@@ -64,17 +77,6 @@ angular.module('beagleApp')
                                 }
                             }
                         );
-                },
-                logout: function() {
-                    var self = this;
-                    var handleLogout = function() {
-                        self.authenticated = false;
-                        $state.go("login");
-                    };
-                    $http.post('logout', {}).then(handleLogout);
-                },
-                isAuthenticated: function() {
-                    return this.authenticated === true;
                 }
             };
         }]
