@@ -21,6 +21,7 @@ package de.keybird.beagle.rest;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -86,21 +87,21 @@ public class PageRestController {
     @RequestMapping(value = "{id}", method = RequestMethod.GET)
     @Transactional
     public ResponseEntity getPayload(@PathVariable("id") long pageId) {
-        final Page page = pageRepository.findOne(pageId);
+        final Optional<Page> page = pageRepository.findById(pageId);
         if (page == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(page.getPayload());
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(page.get().getPayload());
     }
 
     @RequestMapping(value = "{id}/thumbnail", method = RequestMethod.GET)
     @Transactional
     public ResponseEntity getThumbnail(@PathVariable("id") long pageId) {
-        final Page page = pageRepository.findOne(pageId);
+        final Optional<Page> page = pageRepository.findById(pageId);
         if (page == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(page.getThumbnail());
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(page.get().getThumbnail());
     }
 
     // TODO MVR we should not propagate the exception to the user,
@@ -138,9 +139,9 @@ public class PageRestController {
                 if (jsonElement != null) {
                     final long internalId = jsonElement.getAsLong();
                     // TODO MVR We should identify a page by its checksum instead
-                    final Page page = pageRepository.findOne(internalId);
+                    final Optional<Page> page = pageRepository.findById(internalId);
                     if (page != null) {
-                        pages.add(new PageDTO(page));
+                        pages.add(new PageDTO(page.get()));
                     }
                 }
             }
