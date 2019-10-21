@@ -19,6 +19,7 @@
 package de.keybird.beagle.rest;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -89,15 +90,15 @@ public class ImportRestController {
 
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteDocument(@PathVariable("id") long documentId) {
-        final Document document = documentRepository.findOne(documentId);
+        final Optional<Document> document = documentRepository.findById(documentId);
         if (document == null) {
             return ResponseEntity.notFound().build();
         }
-        // TODO MVR this is ugly, but for now we kee it
+        // TODO MVR this is ugly, but for now we keep it
         if (jobExecutionManager.hasRunningJobs()) {
             throw new IllegalStateException("Cannot delete documents while jobs are running");
         }
-        documentRepository.delete(document);
+        documentRepository.delete(document.get());
         return ResponseUtils.noContent();
     }
 }
