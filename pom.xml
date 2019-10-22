@@ -89,7 +89,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+            		<groupId>io.rest-assured</groupId>
+		    	<artifactId>json-path</artifactId>
+		    	<version>4.1.2</version>
+		    	<scope>test</scope>
+        	</dependency>
 		<!--
 			According to the official documentation this dependency is never included in production builds.
 			See https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html#using-boot-devtools
