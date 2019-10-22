@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -94,9 +95,9 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
             for (List<Long> partition : partitions) {
                 // Initialize all pages of transaction
                 List<Page> pagesToImport = transactionTemplate.execute(status -> partition.stream().map(id -> {
-                    final Page page = pageRepository.findOne(id);
-                    page.getPayload();
-                    return page;
+                    final Optional<Page> page = pageRepository.findById(id);
+                    page.get().getPayload();
+                    return page.get();
                 }).collect(Collectors.toList()));
 
                 // Perform Indexing
@@ -104,7 +105,7 @@ public class IndexJobExecution implements JobExecution<IndexJob> {
 
                 // Flush the data
                 transactionTemplate.execute(status -> {
-                    pageRepository.save(pagesToImport);
+                    pageRepository.saveAll(pagesToImport);
                     return null;
                 });
 
